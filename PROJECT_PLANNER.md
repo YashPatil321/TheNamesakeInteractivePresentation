@@ -106,7 +106,7 @@ People want to belong so badly they'll hide parts of themselves to fit in. The i
 
 **What will the audience participate in:**
 - **Ride the timeline.** Visitors move a train along a track, using arrow keys, a clicker, a swipe, or a click on any station. There are 15 stations from 1961 to 2000.
-- **Station tickets.** Every stop opens a ticket-style card with a **Story** tab (what happens) and a **4 I's** tab (our oppression analysis with a real-world connection). Four key stations also have a **Scene** tab with our acted video.
+- **Station tickets.** Every stop opens a ticket-style card with a **Story** tab (what happens) and a **4 I's** tab (our oppression analysis with a real-world connection). Seven key stations also have a **Scene** tab with our acted video.
 - **Gogol ⇄ Nikhil switch.** It stays locked until 1986. At that station a "PETITION GRANTED" stamp slams onto the screen and the switch unlocks. Flipping it changes the "inner voice" line on each card between Gogol's view and Nikhil's view.
 - **The track shows his identity.** The rails glow orange while he's Gogol and blue while he's Nikhil. At the ending, two rails braid together to show both.
 - **Rewind to 1961.** A button at his birth rewinds the train to the train crash, just as the book reveals the crash as a flashback.
@@ -139,7 +139,7 @@ The website also has built-in sound effects: a train whistle, wheel clacks, the 
 | Name | Role(s) / Responsibilities |
 |---|---|
 | **Yash Patil** | **Web developer:** runs the timeline website, adds our videos, edits station text, publishes it on GitHub Pages, and runs the site during the presentation |
-| **Shiven Swami** | **Director / video editor:** films and edits the 4 short scene videos (the train crash, kindergarten, the truth in the car, the finale) |
+| **Shiven Swami** | **Director / video editor:** films and edits the 7 short scene videos (train crash, kindergarten, "I'm Nikhil," the truth in the car, the Ratliffs' dinner, the phone call, the finale) |
 | **Jonah Luo** | **Script & analysis lead:** writes the scene scripts, checks every quote and adds page numbers, and makes sure the 4 I's analysis on each station matches the book |
 | **Drew Dupart** | **Research & design lead:** finds and cites the historical and current-event sources, handles props and costumes, and runs the class polls during the presentation |
 | **Everyone** | Acting in the scenes, testing the website, and presenting |

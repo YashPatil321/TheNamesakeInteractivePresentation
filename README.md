@@ -1,6 +1,6 @@
 # The Namesake Line
 
-An interactive, animated timeline of Jhumpa Lahiri's *The Namesake*. A steam train rides through Gogol's life from 1961 to 2000 and stops at 15 stations. Each stop opens a ticket with the story, a 4 I's analysis, and a slot for an acted scene video at 4 key stations.
+An interactive, animated timeline of Jhumpa Lahiri's *The Namesake*. A steam train rides through Gogol's life from 1961 to 2000 and stops at 15 stations. Each stop opens a ticket with the story, a 4 I's analysis, and a slot for an acted scene video at 7 key stations.
 
 **Group:** Shiven Swami, Yash Patil, Jonah Luo, Drew Dupart
 

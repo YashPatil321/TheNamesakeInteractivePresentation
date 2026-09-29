@@ -1,7 +1,7 @@
 # The Namesake: Video Plan (Short Version)
 
-**4 scenes · about 30–45 seconds each · filmed in one afternoon at one house**
-**Total time: about 1 hour of filming and 1–1½ hours of editing**
+**7 scenes spread across the whole story · 20–45 seconds each · filmed in one afternoon at one house**
+**Total time: about 1½–2 hours of filming and 2 hours of editing**
 
 The website already shows the year, title and story for every scene, so the videos don't need title cards, narration or fancy transitions. Just act the moment.
 
@@ -9,23 +9,28 @@ The website already shows the year, title and story for every scene, so the vide
 |---|---|---|---|---|
 | 1 | The Night Train (1961) | `crash.mp4` | Dark room + 2 chairs | ~40 sec |
 | 2 | Two Names at School (1973) | `kindergarten.mp4` | Any desk | ~30 sec |
-| 3 | The Truth in the Car (1987) | `truth.mp4` | Parked car | ~45 sec |
-| 4 | The Man Who Gave You His Name (2000) | `finale.mp4` | Bedroom | ~30 sec |
+| 3 | "I'm Nikhil" (1986) | `nikhil.mp4` | Any dim room | ~25 sec |
+| 4 | The Truth in the Car (1987) | `truth.mp4` | Parked car | ~45 sec |
+| 5 | Dinner with the Ratliffs (1990s) | `ratliffs.mp4` | Dinner table | ~30 sec |
+| 6 | The Phone Call (1990s) | `phonecall.mp4` | Any room + mirror | ~25 sec |
+| 7 | The Man Who Gave You His Name (2000) | `finale.mp4` | Bedroom | ~30 sec |
 
 Put the finished files in the `videos/` folder with those exact names and they appear on the website automatically.
 
 ## Cast
 | Role | Scenes | Who |
 |---|---|---|
-| Gogol | 2, 3, 4 | ________ |
-| Ashoke (the dad) | 1, 2, 3 | ________ |
-| Ghosh + Principal (tiny parts) | 1, 2 | ________ |
+| Gogol / Nikhil | 2–7 | ________ |
+| Ashoke (the dad) | 1, 2, 4 | ________ |
+| Ghosh, Principal, Kim (tiny parts) | 1, 2, 3 | ________ |
+| Maxine + dinner guest | 5 | ________ |
 | Camera | all | ________ |
 
-## Props (just 4 things)
+## Props
 - A paperback book with a paper cover labeled **"Nikolai Gogol"**
 - A flashlight
 - A sticky note or name tag reading **GOGOL**
+- A razor (don't actually use it!), dinner plates
 - A phone playing train sounds (YouTube: "train interior sound")
 
 ---
@@ -44,7 +49,13 @@ Put the finished files in the `videos/` folder with those exact names and they a
 2. **PRINCIPAL** (at a desk, shrugs): "Gogol it is." Writes it down.
 3. Close-up: the **GOGOL** name tag.
 
-## Scene 3: The Truth in the Car (1987) · ~45 sec · *the most important one*
+## Scene 3: "I'm Nikhil" (1986) · ~25 sec
+**Setup:** dim room, colored light or party music. Use a cool blue filter.
+1. **KIM:** "Hey, what's your name?"
+2. **GOGOL** hesitates, then says: "…Nikhil." Kim smiles.
+3. Close-up: a hand crosses out **GOGOL** on the name tag and writes **NIKHIL**.
+
+## Scene 4: The Truth in the Car (1987) · ~45 sec · *the most important one*
 **Setup:** a parked car, **engine off**. Film in the evening, or with a phone light on the dashboard. Film it in one take from the back seat, or two takes from the passenger side.
 
 1. **ASHOKE** (staring ahead): "When I was young, I was in a train crash. They found me because I was holding a page of Gogol."
@@ -54,7 +65,19 @@ Put the finished files in the `videos/` folder with those exact names and they a
 
 *The last two lines are quoted from the book (Ch. 5). The rest is our own dialogue.*
 
-## Scene 4: The Man Who Gave You His Name (2000) · ~30 sec · *no dialogue*
+## Scene 5: Dinner with the Ratliffs (1990s) · ~30 sec
+**Setup:** a dinner table with plates. Nikhil sits with Maxine and a guest.
+1. Everyone is laughing. Nikhil looks relaxed and happy.
+2. **GUEST:** "You must never get sick when you go to India!"
+3. **NIKHIL** (smile fading): "I'm from Massachusetts." Awkward silence. Hold on his face.
+
+## Scene 6: The Phone Call (1990s) · ~25 sec · *no dialogue*
+**Setup:** any room, then a bathroom mirror. Use a grey, cold filter.
+1. His phone rings. He answers, listens, and slowly sits down.
+2. He folds his father's shirts into a box.
+3. At the mirror he raises a razor to his hair. **Cut before it touches.**
+
+## Scene 7: The Man Who Gave You His Name (2000) · ~30 sec · *no dialogue*
 1. **Gogol** finds the book on a shelf and sits on the bed.
 2. **Close-up:** he opens the cover. Handwritten inside: *"The man who gave you his name, from the man who gave you your name."*
 3. He turns the page and starts reading. Fade out.
@@ -63,14 +86,14 @@ Put the finished files in the `videos/` folder with those exact names and they a
 
 ---
 
-## Filming order (about 1 hour)
-1. **Bedroom (15 min):** Scene 4. Write the inscription in the book first.
-2. **Desk (10 min):** Scene 2
-3. **Dark room (15 min):** Scene 1
-4. **Car (20 min):** Scene 3, saved for last so it's darker
+## Filming order (about 1½–2 hours)
+1. **Bedroom + mirror (25 min):** Scenes 7 and 6. Write the inscription in the book first.
+2. **Desk + dinner table (25 min):** Scenes 2 and 5
+3. **Dark room (25 min):** Scenes 1 and 3
+4. **Car (20 min):** Scene 4, saved for last so it's darker
 
-## Editing (CapCut, ~20 min per video)
-- Trim the start and end, pick the best take, and add the black & white filter to Scene 1 and a crash sound effect.
+## Editing (CapCut, ~15–20 min per video)
+- Trim the start and end, pick the best take, and add the black & white filter to Scene 1, blue to Scene 3, grey to Scene 6, and a crash sound effect.
 - Export as **MP4, 720p**.
 
 ## Tips
