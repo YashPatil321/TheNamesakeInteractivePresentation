@@ -583,7 +583,7 @@ export function startLine(root) {
   function travelTo(i, opts = {}) {
     i = clamp(i, 0, STATIONS.length - 1);
     if (st.crashT >= 0) return;
-    if (i === st.cur && !st.moving) { showCard(); return; }
+    if (i === st.cur && !st.moving && st.trainX === i * SP) { showCard(); return; } // already parked here
     const dist = Math.abs(i * SP - st.trainX) / SP;
     st.from = st.trainX; st.to = i * SP; st.t0 = performance.now(); st.target = i; st.moving = true;
     st.dur = reduced ? 300 : clamp(900 + dist * 520, 1300, 4200) * (opts.rewind ? .55 : 1);

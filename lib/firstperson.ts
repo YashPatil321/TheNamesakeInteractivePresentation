@@ -186,7 +186,7 @@ export function startFirstPerson(container: HTMLElement, kind: FpKind, opts: FpO
     const dot = mk(kit.dotTexture(), 1);
     const hg = Array.isArray(s.hit) ? new THREE.BoxGeometry(...s.hit) : new THREE.SphereGeometry(s.hit, 12, 8);
     const hm = new THREE.Mesh(hg, hitMat); hm.position.copy(s.hitPos ?? s.pos); hm.userData.i = i; hitGroup.add(hm);
-    s.glow?.forEach((m) => { m.userData.baseEI = m.emissiveIntensity; if (m.emissive.getHex() === 0) m.emissive.setHex(0xffb35c); m.userData.hoverEI = 0; });
+    s.glow?.forEach((m) => { m.userData.baseEI = m.emissive.getHex() === 0 ? 0 : m.emissiveIntensity; if (m.emissive.getHex() === 0) { m.emissive.setHex(0xffb35c); m.emissiveIntensity = 0; } m.userData.hoverEI = 0; });
     return { g, halo, ring, ring2, dot, hm, hov: 0, pop: 0 };
   });
   const hitMeshes = markers.map((m) => m.hm);
