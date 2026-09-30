@@ -7,6 +7,9 @@ An interactive, animated timeline of Jhumpa Lahiri's *The Namesake*. A steam tra
 Built with Next.js (App Router, TypeScript). Every page is static, so there's no server or database to set up.
 
 ## Deploy to Vercel (about 2 minutes)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fyashpatil321%2Fthenamesakeinteractivepresentation&project-name=the-namesake-line)
+
+Or set it up by hand:
 1. Go to [vercel.com/new](https://vercel.com/new) and sign in with GitHub.
 2. Import `yashpatil321/thenamesakeinteractivepresentation`. Vercel detects Next.js by itself, so leave every setting on its default.
 3. Click **Deploy**. You get a `*.vercel.app` link, and every push redeploys it.
