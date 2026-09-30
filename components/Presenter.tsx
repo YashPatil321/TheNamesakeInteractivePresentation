@@ -111,7 +111,7 @@ export default function Presenter() {
       )}
 
       <main className="pr-grid">
-        <section className="pr-now" style={{ ['--c' as string]: NAME_COLORS[s.name] }}>
+        <section className="pr-now" key={i} style={{ ['--c' as string]: NAME_COLORS[s.name] }}>
           <div className="pr-kicker">Station {String(i + 1).padStart(2, '0')} / {STATIONS.length}{line?.moving ? ' · riding…' : ''}</div>
           <div className="pr-year">{s.year}</div>
           <h2>{s.title}</h2>

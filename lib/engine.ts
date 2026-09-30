@@ -130,7 +130,12 @@ export function startLine(root) {
     S = clamp(Math.min(H / 900, W / 1100), .5, 1.15);
     if (narrow) S = clamp(W / 700, .5, .8);
     groundY = narrow ? H * .36 : H * .83;
-    anchor = narrow ? W * .56 : clamp(W * .66, 520, W - 260);
+    // Park the loco in the free space right of the ticket card: the rear car (~440*S behind the loco centre)
+    // clears the card, and the nose + headlight (~115*S ahead) keep a margin for camera lag on long rides.
+    // When both can't fit, the loco and its station sign win over the rear car.
+    const cardR = Math.min(40, Math.max(16, W * .03)) + Math.min(470, W - 32);
+    const lo = cardR + 440 * S + 24, hi = W - 115 * S - Math.max(120, W * .12);
+    anchor = narrow ? W * .56 : (lo <= hi ? clamp(W * .62, lo, hi) : Math.max(hi, cardR + 280 * S));
     if (world) world.resize();
   }
   
@@ -803,21 +808,26 @@ export function startLine(root) {
         <ol class="shotlist">${(s.shots || []).map((x) => `<li>${esc(x)}</li>`).join('')}</ol>`;
     }
     const oldBody = ticket.querySelector('.t-body'), keepScroll = !fresh && oldBody && ticket.dataset.i === String(i) ? oldBody.scrollTop : 0;
-    ticket.dataset.i = i;
+    // tab motion: the ink underline slides from the previous tab and the panel slides in from that side
+    const tabIx = tabs.findIndex(([k]) => k === st.tab), prevIx = tabs.findIndex(([k]) => k === ticket.dataset.tab);
+    const tabMoved = !fresh && ticket.dataset.i === String(i) && prevIx >= 0 && prevIx !== tabIx;
+    ticket.dataset.i = i; ticket.dataset.tab = st.tab;
     const prevDis = i === 0 ? 'disabled' : '', nextDis = i === STATIONS.length - 1 ? 'disabled' : '';
     ticket.innerHTML = `
       <div class="t-head"><span>Station <b>${String(i + 1).padStart(2, '0')}</b> / ${STATIONS.length}</span><span>${s.flashback ? 'Flashback' : (s.name === 'none' ? '' : 'Passenger: <b>' + (s.name === 'both' ? 'Gogol + Nikhil' : s.name === 'nikhil' ? 'Nikhil' : 'Gogol') + '</b>')}</span></div>
-      <div class="stamp" aria-hidden="true"><span>${esc(s.code)}<small>${esc(s.year)}</small></span></div>
       <div class="t-body">
-        <div class="t-year">${esc(s.year)}</div>
-        <h2 class="t-title">${esc(s.title)}</h2>
-        <div class="t-place">${esc(s.place)}</div>
-        <div class="tabs" role="tablist">${tabs.map(([k, l]) => `<button class="tab" role="tab" data-tab="${k}" aria-selected="${st.tab === k}">${l}${k === 'scene' ? '<i class="dot"></i>' : ''}</button>`).join('')}</div>
-        <div class="panel">${panel}</div>
+        <header class="t-hero">
+          <div class="t-year">${esc(s.year)}</div>
+          <h2 class="t-title">${esc(s.title)}</h2>
+          <div class="t-place">${esc(s.place)}</div>
+          <div class="stamp" aria-hidden="true"><span>${esc(s.code)}<small>${esc(s.year)}</small></span></div>
+        </header>
+        <div class="tabs${tabMoved ? ' slide' : ''}" role="tablist" style="--n:${tabs.length};--i:${tabIx};--from:${tabMoved ? prevIx : tabIx}">${tabs.map(([k, l]) => `<button class="tab" role="tab" data-tab="${k}" aria-selected="${st.tab === k}">${l}${k === 'scene' ? '<i class="dot"></i>' : ''}</button>`).join('')}<i class="tab-ink" aria-hidden="true"></i></div>
+        <div class="panel${tabMoved ? ' enter' : ''}" role="tabpanel" style="--dir:${tabMoved ? Math.sign(tabIx - prevIx) : 0}">${panel}</div>
       </div>
       <div class="t-foot">
         <button class="btn ghost" data-go="${i - 1}" ${prevDis}>← Back</button>
-        <span class="hint">→ / space to ride on</span>
+        <span class="hint"><kbd>→</kbd> or <kbd>Space</kbd> to ride on</span>
         <button class="btn" data-go="${i + 1}" ${nextDis}>Next stop →</button>
       </div>`;
     ticket.classList.toggle('fresh', !!fresh);
@@ -894,8 +904,9 @@ export function startLine(root) {
   function renderPassport() {
     const tries = STATIONS.filter((s) => s.try && st.done[s.try]).length;
     $('#ppSub').textContent = `Holder: ${st.visitor || 'Passenger'} · ${st.visited.size} of ${STATIONS.length} stations`;
+    let k = 0; // stamps thud in one after another (--k orders the visited ones)
     $('#ppGrid').innerHTML = STATIONS.map((s, i) => st.visited.has(i)
-      ? `<button class="pp-stamp got" data-i="${i}" style="--c:${PP_COLORS[s.name]};--r:${(i * 37) % 23 - 11}deg" title="${esc(s.title)}"><b>${esc(s.year)}</b>${esc(s.code)}${s.try && st.done[s.try] ? ' <span class="star">★</span>' : ''}</button>`
+      ? `<button class="pp-stamp got" data-i="${i}" style="--c:${PP_COLORS[s.name]};--r:${(i * 37) % 23 - 11}deg;--k:${k++}" title="${esc(s.title)}"><span class="pp-ink"><b>${esc(s.year)}</b>${esc(s.code)}${s.try && st.done[s.try] ? ' <span class="star">★</span>' : ''}</span></button>`
       : `<button class="pp-stamp" data-i="${i}" title="Not visited yet"><b>?</b>STN ${String(i + 1).padStart(2, '0')}</button>`).join('');
     const fps = STATIONS.filter((s) => s.fp && st.done['fp-' + s.fp]).length, fpTotal = STATIONS.filter((s) => s.fp).length;
     $('#ppFoot').textContent = `★ Hands-on moments: ${tries} of ${TRY_COUNT} · First-person views: ${fps} of ${fpTotal} · ` + (st.visited.size === STATIONS.length ? 'The ending is unlocked.' : 'Visit every station to unlock the ending.');
@@ -1077,12 +1088,14 @@ export function startLine(root) {
   function closeQuiz() { quiz.hidden = true; if ($('#finale').hidden) showCard(false); publish(); }
   function renderQuiz() {
     const done = qi >= QUIZ.length;
+    // the card flips over for every new question (and for the score)
+    const qCard = quiz.querySelector('.quiz-card'); qCard.classList.remove('flip'); void qCard.offsetWidth; qCard.classList.add('flip');
     $('#quizStep').textContent = done ? 'Final score' : `Question ${qi + 1} of ${QUIZ.length}`;
-    $('#quizPunches').innerHTML = QUIZ.map((_, k) => `<i class="${k < qi ? (qRes[k] ? 'hit' : 'miss') : ''}"></i>`).join('');
+    $('#quizPunches').innerHTML = QUIZ.map((_, k) => `<i class="${k < qi ? (qRes[k] ? 'hit' : 'miss') + ' set' : k === qi ? 'now' : ''}"></i>`).join('');
     if (done) {
       st.quizBest = Math.max(qScore, st.quizBest || 0); save();
       const line = qScore === QUIZ.length ? 'Perfect ride. Every ticket punched.' : qScore >= QUIZ.length - 2 ? 'Nice riding. You were paying attention.' : 'Ride the line again and look closer.';
-      $('#quizBody').innerHTML = `<h2 id="quizQ" class="quiz-q quiz-score">${qScore} / ${QUIZ.length}</h2><p>${line}${st.visitor ? ` Well done, ${esc(st.visitor)}.` : ''}</p>
+      $('#quizBody').innerHTML = `<div class="quiz-result"><span class="quiz-kicker">Tickets punched</span><h2 id="quizQ" class="quiz-q quiz-score">${qScore}<small>/ ${QUIZ.length}</small></h2><p>${line}${st.visitor ? ` Well done, ${esc(st.visitor)}.` : ''}</p></div>
         <div class="quiz-acts"><button class="btn ghost" data-q="again">Try again</button><button class="btn hot" data-q="close">Back to the train</button></div>`;
       if (qScore === QUIZ.length) snd.chime();
       $('#quizBody').querySelector('.btn.hot').focus();
