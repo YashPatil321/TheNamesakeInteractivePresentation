@@ -8,12 +8,13 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import type { Station } from './stations';
 import { NAME_COLORS } from './stations';
-import { GAP, clamp, lerp, smooth, damp, canvasTex, starTexture, type Shared } from './world3d/kit';
+import { GAP, clamp, lerp, smooth, damp, type Shared } from './world3d/kit';
 import { buildTrain, TRAIN_BACK, TRAIN_FRONT, LIVERIES } from './world3d/train';
 import { addLandmarks } from './world3d/landmarks';
 import { disposeLoaders } from './world3d/assets';
 import { buildScenery, SIGN_DX, SIGN_Y, SIGN_Z, LAMP_DX, LAMP_Z, LAMP_Y } from './world3d/scenery';
 import { Puffs, Glows, Weather, Birds } from './world3d/fx';
+import { createCrash } from './world3d/crash';
 
 export interface WorldFrame {
   now: number; // performance.now()
@@ -142,8 +143,6 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
   scene.add(sun, sun.target);
   const lampLight = new THREE.PointLight(0xffc98a, 0, 34, 2);
   scene.add(lampLight);
-  const lantern = new THREE.SpotLight(0xffd08a, 0, 60, 0.34, 0.6, 1.4);
-  scene.add(lantern, lantern.target);
 
   /* ---------- world ---------- */
   const scenery = buildScenery(scene, stations, shared);
@@ -154,27 +153,8 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
   const weather = new Weather(scene);
   const birds = new Birds(scene, shared.uTime);
 
-  // the crumpled page from "The Overcoat" and its glint
-  const pageTex = canvasTex(256, 320, (c) => {
-    const g = c.createLinearGradient(0, 0, 256, 320); g.addColorStop(0, '#f3ead3'); g.addColorStop(0.55, '#e4d8b9'); g.addColorStop(1, '#f0e6cc');
-    c.fillStyle = g; c.fillRect(0, 0, 256, 320);
-    c.fillStyle = '#4a4538'; c.font = 'bold 22px Georgia, serif'; c.textAlign = 'center'; c.fillText('THE OVERCOAT', 128, 42);
-    c.fillStyle = 'rgba(60,56,48,.55)';
-    for (let k = 0; k < 14; k++) c.fillRect(26, 70 + k * 16, k % 4 === 3 ? 120 : 204, 5);
-    c.strokeStyle = 'rgba(0,0,0,.12)'; c.lineWidth = 2; c.beginPath(); c.moveTo(0, 120); c.lineTo(256, 180); c.moveTo(90, 0); c.lineTo(150, 320); c.stroke();
-  });
-  const pageMat = new THREE.MeshStandardMaterial({ map: pageTex, emissiveMap: pageTex, emissive: '#ffffff', emissiveIntensity: 0, roughness: 0.8, side: THREE.DoubleSide });
-  const page = new THREE.Mesh(new THREE.PlaneGeometry(0.95, 1.2, 4, 4), pageMat);
-  {
-    const p = page.geometry.attributes.position as THREE.BufferAttribute;
-    for (let i = 0; i < p.count; i++) p.setZ(i, Math.sin(p.getX(i) * 6 + p.getY(i) * 3) * 0.05);
-    page.geometry.computeVertexNormals();
-  }
-  page.rotation.set(-Math.PI / 2 + 0.55, 0, 0.4); page.visible = false; page.castShadow = false;
-  scene.add(page);
-  const glintTex = starTexture();
-  const glint = new THREE.Sprite(new THREE.SpriteMaterial({ map: glintTex, color: new THREE.Color(3, 2.8, 2.4), blending: THREE.AdditiveBlending, depthWrite: false, transparent: true }));
-  glint.visible = false; glint.renderOrder = 6; scene.add(glint);
+  // the 1961 crash sequence (lib/world3d/crash.ts): wreck choreography, sparks, debris, rescuers, the page
+  const crash = createCrash(scene, train, { reduced, uScale: glows.mat.uniforms.uScale, puffs, lampLight });
 
   /* ---------- post ---------- */
   const rt = new THREE.WebGLRenderTarget(4, 4, { type: THREE.HalfFloatType, samples: 4 });
@@ -204,7 +184,7 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
     snow: 0, rain: 0, prevCur: -1, prevMoving: false, flareT0: -1e9, flareStation: -1,
     signT0: new Float64Array(N).fill(-1e9), highlightOn: -1,
     lens: '', lensCol: new THREE.Color(NAME_COLORS.gogol), visitedMask: -1, curMask: -1,
-    emit: 0, stackEmit: 0, prevDerail: 0, glintT0: -1e9, glintDone: false,
+    emit: 0, stackEmit: 0,
     // adaptive quality
     q: qParam === 'low' ? 4 : /^[0-5]$/.test(qParam) ? +qParam : 0, qLocked: qParam === 'high' || qParam === 'low' || /^[0-5]$/.test(qParam), slow: 0, frames: 0, ema: 16,
     measureT: 0, layout: { cardRight: 0, cardTop: 0, hud: 64, rail: 90 },
@@ -307,7 +287,7 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
     landmarks.update({ now, dark, trainX: tx });
     const day = 1 - dark;
     const ct = f.crashT;
-    const dk = ct >= 0 ? clamp((ct - 1.3) / 0.6, 0, 1) * (1 - clamp((ct - 6.5) / 1.2, 0, 1)) : 0;
+    const dk = crash.dark(ct);
     const ls = 1 - 0.95 * dk;
 
     S.snow += ((stations[ns].snow ? 1 : 0) - S.snow) * damp(1.3, dt);
@@ -343,7 +323,9 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
 
     /* train */
     const derail = clamp(f.derail, 0, 1);
-    train.update(tx, derail, now);
+    const crashOn = crash.on(ct, derail);
+    train.update(tx + crash.runX(ct), crashOn ? 0 : derail, now);
+    crash.update(ct, derail, tx, now, dt);
     if (S.lens !== f.lens) { S.lens = f.lens; drawPlate(f.lens); }
     S.lensCol.lerp(lensCols[f.lens] || lensCols.gogol, damp(4, dt));
     // the train's paint follows Gogol's life (lib/world3d/train.ts LIVERIES)
@@ -351,9 +333,9 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
     train.mats.body.color.lerp(liveryCol, damp(2.5, dt));
     train.mats.lens.color.copy(S.lensCol); train.mats.lens.emissive.copy(S.lensCol);
     train.mats.lens.emissiveIntensity = (0.35 + 0.9 * dark) * ls;
-    train.mats.glass.emissiveIntensity = (0.55 + 2.0 * dark) * (1 - derail * 0.9) * ls;
+    train.mats.glass.emissiveIntensity = (0.55 + 2.0 * dark) * (crashOn ? 0.1 + 0.9 * crash.lights : 1) * ls;
     train.mats.plate.emissiveIntensity = (0.1 + 0.3 * dark) * ls;
-    const headOn = derail < 0.2 ? 1 : 0;
+    const headOn = crashOn ? crash.lights : 1;
     train.headlight.intensity = (40 + 1100 * dark) * headOn * ls;
     train.mats.lamp.color.setRGB(6, 5.2, 3.6).multiplyScalar(headOn * (0.35 + 0.65 * dark) + 0.05);
 
@@ -428,18 +410,7 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
           -0.8 - Math.random() * 0.8 - (moving ? 1.5 : 0), (moving ? 3.2 : 1.6) + rr * 1.2, (Math.random() - 0.5) * 0.7,
           moving ? 1.1 : 0.8, moving ? 5 + rr * 3 : 3.5 + rr * 2, moving ? 2.4 + rr : 3.6 + rr * 1.5, moving ? 0.6 : 0.42, 0.95 + rr * 0.05);
       }
-    } else if (ct >= 0 && ct < 7) {
-      // the wreck hisses
-      S.emit += 5 * dt;
-      while (S.emit >= 1) { S.emit -= 1; puffs.spawn(tx + 1 + Math.random() * 2, 3.2, -0.4, -0.3, 1.2 + Math.random(), 0.6, 1.4, 5, 4, 0.35, 0.8); }
     }
-    if (S.prevDerail <= 0 && derail > 0) {
-      for (let k = 0; k < 40; k++) {
-        const x = tx - 22 + Math.random() * 27;
-        puffs.spawn(x, 0.8 + Math.random() * 2, (Math.random() - 0.5) * 5, (Math.random() - 0.5) * 3, 1 + Math.random() * 2, (Math.random() - 0.5) * 4, 2, 6, 3 + Math.random() * 2, 0.55, 0.62);
-      }
-    }
-    S.prevDerail = derail;
     if (scenery.stacks.length && !reduced) {
       S.stackEmit += dt * 2.2;
       while (S.stackEmit >= 1) {
@@ -451,40 +422,11 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
     puffs.mat.uniforms.uLit.value.copy(cBot).lerp(WHITE, 0.55).multiplyScalar((0.35 + 0.7 * day) * ls);
     puffs.mat.uniforms.uAmb.value.copy(cTop).lerp(WHITE, 0.2).multiplyScalar((0.35 + 0.45 * day) * ls);
 
-    /* headlight halo + crash lantern */
+    /* headlight halo */
     const hp = train.loco.localToWorld(v2.copy(train.headPos).setX(train.headPos.x + 0.1));
     const hb = headOn * (0.3 + 2.2 * dark) * ls;
     glows.set(scenery.lampCount, hp.x, hp.y, hp.z, 0.45 * hb, 0.4 * hb, 0.3 * hb, 1.6);
     const inCrash = ct >= 0;
-    const pageShown = derail > 0.5 && ns === 0 && p < 0.2;
-    page.visible = pageShown;
-    if (pageShown) page.position.set(tx - 11.4, 0.42, 3.0);
-    if (inCrash && dk > 0) {
-      const sweep = clamp((ct - 2) / 2.6, 0, 1), es = ease(sweep);
-      const bob = reduced ? 0 : Math.sin(now / 280) * 0.1;
-      const lx = lerp(tx - 36, tx - 15.5, ease(clamp((ct - 1.6) / 3.2, 0, 1))), ly = 2.3 + bob, lz = lerp(6.5, 5.2, es);
-      lantern.position.set(lx, ly, lz);
-      lantern.target.position.set(lerp(tx - 40, tx - 11.4, es), 0.3, lerp(-1.5, 3.0, es));
-      lantern.intensity = 380 * dk;
-      glows.set(scenery.lampCount + 1, lx, ly, lz, 2.4 * dk, 1.7 * dk, 0.9 * dk, 1.5 + Math.sin(now / 90) * 0.1);
-      const lit = clamp((sweep - 0.6) / 0.4, 0, 1);
-      pageMat.emissiveIntensity = 0.03 + 1.3 * lit * dk;
-      if (sweep >= 0.85 && !S.glintDone) { S.glintDone = true; S.glintT0 = now; }
-    } else {
-      lantern.intensity = 0;
-      glows.set(scenery.lampCount + 1, 0, -50, 0, 0, 0, 0, 0);
-      pageMat.emissiveIntensity = 0.05 + 0.25 * dark;
-      if (!inCrash) S.glintDone = false;
-    }
-    const ga = (now - S.glintT0) / 900;
-    if (ga >= 0 && ga < 1 && pageShown) {
-      glint.visible = true;
-      glint.position.set(page.position.x + 0.15, page.position.y + 0.35, page.position.z + 0.2);
-      const k = Math.sin(ga * Math.PI);
-      glint.scale.setScalar(2.4 * k + 0.01);
-      (glint.material as THREE.SpriteMaterial).rotation = ga * 1.4;
-      (glint.material as THREE.SpriteMaterial).opacity = k;
-    } else glint.visible = false;
     glows.commit();
 
     /* camera */
@@ -516,14 +458,13 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
     let np = 0;
     const wreck = derail > 0 || inCrash;
     const xa = tx + TRAIN_BACK - (wreck ? 3 : 0.3), xb = tx + TRAIN_FRONT + (wreck ? 2 : 0.3);
-    const za = wreck ? -5.5 : -1.3, zb = wreck ? 4.5 : 1.3, yb = wreck ? 6.5 : 5.6;
+    const za = wreck ? -5.5 : -1.3, zb = wreck ? 7.5 : 1.3, yb = wreck ? 6.5 : 5.6;
     for (const x of [xa, xb]) for (const y of [0.3, yb]) for (const z of [za, zb]) pts[np++].set(x, y, z);
     const signIdx = Math.abs(p - ns) < 0.3 && (!f.moving || ns === f.target) ? ns : -1;
     if (signIdx >= 0) {
       const sx = signIdx * GAP + SIGN_DX;
       for (const x of [sx - 2.8, sx + 2.8]) for (const y of [SIGN_Y - 1.5, SIGN_Y + 1.6]) pts[np++].set(x, y, SIGN_Z);
     }
-    if (inCrash && dk > 0) pts[np++].set(tx - 34, 2.5, 6);
     let mnx = 1e9, mxx = -1e9, mny = 1e9, mxy = -1e9, mnz = 1e9, mxz = -1e9;
     for (let k = 0; k < np; k++) { const q = pts[k]; mnx = Math.min(mnx, q.x); mxx = Math.max(mxx, q.x); mny = Math.min(mny, q.y); mxy = Math.max(mxy, q.y); mnz = Math.min(mnz, q.z); mxz = Math.max(mxz, q.z); }
     v1.set((mnx + mxx) / 2, (mny + mxy) / 2, (mnz + mxz) / 2);
@@ -561,6 +502,7 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
     camera.up.set(0, 1, 0);
     camera.lookAt(v2);
     camera.fov = S.fov; camera.aspect = aspect; camera.near = 0.3; camera.far = 1400;
+    crash.late(camera, f.shake, now);
     camera.setViewOffset(W, H, W / 2 - ppx, H / 2 - ppy, W, H);
     camera.updateMatrixWorld();
     sky.position.copy(camera.position);
@@ -627,7 +569,7 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
     train.geos.forEach((g) => g.dispose());
     landmarks.dispose(); disposeLoaders();
     scenery.dispose(); puffs.dispose(); glows.dispose(); weather.dispose(); birds.dispose();
-    pageTex.dispose(); glintTex.dispose(); envTex.dispose();
+    crash.dispose(); envTex.dispose();
     bloom.dispose(); output.dispose(); composer.dispose(); rt.dispose();
     renderer.dispose();
   }

@@ -79,6 +79,81 @@ export function startLine(root) {
       const g = c.createGain(); this.env(g, t, .01, .6, 1.4); o.connect(g).connect(c.destination); o.start(t); o.stop(t + 1.6);
       this.noiseBurst(400, .5, .5, 1.6); this.noiseBurst(3000, .8, .2, .5, .05);
     },
+    /** a gain envelope wired to the output: attack, hold, exponential release */
+    _g(peak, a, hold, rel, delay = 0) {
+      const c = this.ctx, t = c.currentTime + delay, g = c.createGain();
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.setValueAtTime(peak, t + a + hold); g.gain.exponentialRampToValueAtTime(0.0001, t + a + hold + rel);
+      g.connect(c.destination); return g;
+    },
+    _noise(t, dur, filterType, freq, q, dest) {
+      const c = this.ctx, s = c.createBufferSource(); s.buffer = this.noise; s.loop = true;
+      const f = c.createBiquadFilter(); f.type = filterType; f.frequency.value = freq; f.Q.value = q;
+      s.connect(f).connect(dest); s.start(t, Math.random()); s.stop(t + dur); return f;
+    },
+    /** brakes locking: a shrieking, wavering metal squeal */
+    screech() {
+      if (!this.ok()) return; const c = this.ctx, t = c.currentTime;
+      const g = this._g(.05, .06, .25, .5);
+      const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.setValueAtTime(3400, t); bp.frequency.linearRampToValueAtTime(2300, t + .8); bp.Q.value = 4; bp.connect(g);
+      [2890, 3420, 4170].forEach((f, i) => {
+        const o = c.createOscillator(); o.type = 'sawtooth'; o.frequency.setValueAtTime(f, t); o.frequency.linearRampToValueAtTime(f * .8, t + .85);
+        const l = c.createOscillator(), lg = c.createGain(); l.frequency.value = 11 + i * 4; lg.gain.value = f * .025; l.connect(lg).connect(o.frequency);
+        o.connect(bp); o.start(t); o.stop(t + .9); l.start(t); l.stop(t + .9);
+      });
+      const ng = this._g(.06, .04, .3, .5); this._noise(t, 1, 'bandpass', 4200, 5, ng);
+    },
+    /** the impact: sub-bass hit, a long rumble, crunching metal, a struck-iron clang */
+    crash() {
+      if (!this.ok()) return; const c = this.ctx, t = c.currentTime;
+      const o = c.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(75, t); o.frequency.exponentialRampToValueAtTime(24, t + 2.6);
+      const g = this._g(.55, .01, .1, 2.6); o.connect(g); o.start(t); o.stop(t + 2.9);
+      const rg = this._g(.42, .02, .6, 2.4); this._noise(t, 3.2, 'lowpass', 320, .7, rg);
+      for (let k = 0; k < 11; k++) this.noiseBurst(260 + Math.random() * 1400, 1.3, .12 + Math.random() * .12, .08 + Math.random() * .16, .02 + Math.random() * 1.0);
+      [311, 523, 797, 1231, 1873].forEach((f, i) => { const oo = c.createOscillator(); oo.type = 'sine'; oo.frequency.value = f * (1 + (Math.random() - .5) * .02); const gg = this._g(.035 / (1 + i * .3), .005, 0, 1.8 - i * .2, .03); oo.connect(gg); oo.start(t); oo.stop(t + 2.2); });
+    },
+    /** the cars landing, one after another, at full speed */
+    crunch() {
+      if (!this.ok()) return; const c = this.ctx;
+      [0, .38, .85, 1.2].forEach((d, i) => {
+        const t = c.currentTime + d, o = c.createOscillator(); o.frequency.setValueAtTime(95 - i * 10, t); o.frequency.exponentialRampToValueAtTime(32, t + .45);
+        const g = this._g(.4 - i * .07, .006, 0, .5, d); o.connect(g); o.start(t); o.stop(t + .6);
+        this.noiseBurst(500 + Math.random() * 500, .8, .22 - i * .03, .35, d);
+        for (let k = 0; k < 4; k++) this.noiseBurst(900 + Math.random() * 2400, 2, .05, .06 + Math.random() * .1, d + Math.random() * .3);
+      });
+      // a long groan of bending steel
+      const t = c.currentTime + .3, o = c.createOscillator(); o.type = 'sawtooth'; o.frequency.setValueAtTime(62, t); o.frequency.linearRampToValueAtTime(41, t + 2.2);
+      const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 420; const g = this._g(.05, .3, .8, 1.2, .3); o.connect(lp).connect(g); o.start(t); o.stop(t + 2.6);
+    },
+    glass() {
+      if (!this.ok()) return;
+      for (let k = 0; k < 16; k++) this.noiseBurst(4500 + Math.random() * 5000, 9, .025 + Math.random() * .04, .04 + Math.random() * .14, Math.random() * 1.1);
+      const c = this.ctx;
+      for (let k = 0; k < 5; k++) { const d = Math.random() * 1.2, t = c.currentTime + d, o = c.createOscillator(); o.frequency.value = 2600 + Math.random() * 3200; const g = this._g(.012, .002, 0, .25, d); o.connect(g); o.start(t); o.stop(t + .35); }
+    },
+    /** the quiet after: steam hissing away, a low wind, and crickets */
+    aftermath(dur) {
+      if (!this.ok()) return; const c = this.ctx, t = c.currentTime;
+      const hg = this._g(.03, .3, .5, 4); this._noise(t, 5, 'highpass', 2600, .5, hg);
+      const wg = this._g(.035, 1.2, Math.max(.1, dur - 2.5), 1.2); this._noise(t, dur + .2, 'lowpass', 380, .6, wg);
+      [4350, 4720].forEach((f, j) => {
+        const o = c.createOscillator(); o.frequency.value = f; const g = c.createGain(); g.gain.value = 0; o.connect(g).connect(c.destination);
+        let tt = t + .8 + j * .37;
+        while (tt < t + dur - .3) {
+          for (let p = 0; p < 3; p++) { const a = tt + p * .055; g.gain.setValueAtTime(0, a); g.gain.linearRampToValueAtTime(.009, a + .008); g.gain.linearRampToValueAtTime(0, a + .03); }
+          tt += .75 + Math.random() * .5 + j * .15;
+        }
+        o.start(t); o.stop(t + dur);
+      });
+    },
+    /** the lantern finds the page: three soft, low notes */
+    find() {
+      if (!this.ok()) return; const c = this.ctx, t = c.currentTime;
+      [[220, 0], [329.6, .55], [277.2, 1.3]].forEach(([f, d]) => {
+        const o = c.createOscillator(); o.type = 'triangle'; o.frequency.value = f;
+        const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900;
+        const g = this._g(.045, .35, .4, 2.6, d); o.connect(lp).connect(g); o.start(t + d); o.stop(t + d + 3.5);
+      });
+    },
     thump() { if (!this.ok()) return; const c = this.ctx, t = c.currentTime; const o = c.createOscillator(); o.frequency.setValueAtTime(90, t); o.frequency.exponentialRampToValueAtTime(40, t + .2);
       const g = c.createGain(); this.env(g, t, .005, .5, .25); o.connect(g).connect(c.destination); o.start(t); o.stop(t + .4); this.noiseBurst(800, 1, .2, .12); },
     chime() { if (!this.ok()) return; const c = this.ctx, t = c.currentTime;
@@ -613,26 +688,42 @@ export function startLine(root) {
     showCard(true);
   }
   
-  /* crash sequence */
+  /* crash sequence — cue times match lib/world3d/crash.ts CRASH (the 3D side stages the shots on the same clock) */
+  const CR = { SCREECH: 2.25, IMPACT: 2.55, SLOW1: 3.5, WIDE: 3.5, GLASS: 3.9, AFTER: 5.3, CAP1: 5.6, FIND: 8.5, CAP2: 8.65, CAPOFF: 10.9, SKIP: 10.6, END: 12.0 };
   function startCrash() {
-    st.crashT = 0; st.crashDone = true; hideCard();
+    st.crashT = reduced ? 2.05 : 0; st.crashDone = true; st.derail = 0; hideCard();
     snd.whistle();
   }
   function crashTick(dt) {
     const before = st.crashT; st.crashT += dt;
     const t = st.crashT;
-    if (t < 1.1) st.shake = Math.max(st.shake, t / 1.1 * .6);
-    if (before < 1.1 && t >= 1.1) {
-      snd.boom(); st.shake = 1.4;
-      const f = $('#flash'); f.style.transition = 'none'; f.style.opacity = '1'; requestAnimationFrame(() => { f.style.transition = 'opacity 1.4s'; f.style.opacity = '0'; });
+    const x = (m) => before < m && t >= m;
+    if (t < CR.IMPACT) { st.speed = lerp(.8, 1.2, clamp(t / CR.IMPACT, 0, 1)); st.shake = Math.max(st.shake, t > CR.SCREECH ? .5 : .08); } // racing: clacks accelerate
+    else st.speed = 0;
+    if (x(CR.SCREECH)) snd.screech();
+    if (x(CR.IMPACT)) {
+      snd.crash(); st.shake = 1.4;
+      const f = $('#flash'); f.style.transition = 'none'; f.style.opacity = reduced ? '.25' : '.55'; requestAnimationFrame(() => { f.style.transition = 'opacity .9s'; f.style.opacity = '0'; });
     }
-    if (t >= 1.1) st.derail = clamp((t - 1.1) / .5, 0, 1);
+    if (t >= CR.IMPACT && t < CR.SLOW1) st.shake = Math.max(st.shake, 1.2); // held through the slow motion
+    if (x(CR.WIDE)) { snd.crunch(); st.shake = .9; }
+    if (x(CR.GLASS)) snd.glass();
+    if (t >= CR.IMPACT) st.derail = clamp((t - CR.IMPACT) / 1.5, 0, 1);
+    if (x(CR.AFTER)) snd.aftermath(CR.END - CR.AFTER + 1.5);
+    if (x(CR.FIND)) snd.find();
     const cap = $('#crashCap');
-    if (before < 2.2 && t >= 2.2) { cap.textContent = 'October 1961. The train derails in the dark.'; cap.classList.add('on'); }
-    if (before < 4.2 && t >= 4.2) { cap.textContent = 'A rescuer\'s lantern catches a page from "The Overcoat."'; }
-    if (before < 6.4 && t >= 6.4) cap.classList.remove('on');
-    if (t > 7.6) { st.crashT = -1; showCard(true); }
+    if (x(CR.CAP1)) { cap.textContent = 'October 1961. The train derails in the dark.'; cap.classList.add('on'); }
+    if (x(CR.CAP2)) { cap.textContent = 'A rescuer\'s lantern catches a page from "The Overcoat."'; }
+    if (x(CR.CAPOFF)) cap.classList.remove('on');
+    if (t > CR.END) { st.crashT = -1; st.derail = 1; showCard(true); }
   }
+  /** Esc / Enter / Space / → (a presenter's clicker) jumps to the held shot of the page. */
+  function skipCrash() {
+    if (st.crashT < 0 || st.crashT >= CR.SKIP) return;
+    st.crashT = CR.SKIP; st.derail = 1; st.speed = 0; st.shake = 0;
+    const cap = $('#crashCap'); cap.textContent = 'A rescuer\'s lantern catches a page from "The Overcoat."'; cap.classList.add('on');
+  }
+  on(window, 'keydown', (e) => { if (st.crashT >= 0 && ['Escape', 'Enter', ' ', 'ArrowRight', 'PageDown'].includes(e.key)) { e.preventDefault(); skipCrash(); } });
   function replayCrash() { st.crashDone = false; st.derail = 0; hideCard(); setTimeout(startCrash, 400); }
   
   /* =========================================================
