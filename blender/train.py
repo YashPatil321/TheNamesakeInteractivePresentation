@@ -339,6 +339,11 @@ box(-2.0, 2.5, -1.18, -1.6, 4.45, 1.18, 'Livery', bev=0.03)
 box(-3.9, 2.5, -1.18, -2.0, 2.95, 1.18, 'Livery', bev=0.02)
 box(-3.9, 3.95, -1.18, -2.0, 4.45, 1.18, 'Livery', bev=0.02)
 box(-3.9, 2.95, -1.12, -2.0, 3.95, 1.12, 'Glass', bev=0)
+# the crew, silhouetted in the cab windows
+for s, cx in ((1, -2.55), (-1, -3.3)):
+    sphere((cx, 3.62, s * 1.135), 0.15, 'Shadow', scale=(1, 1.1, 0.2), u=10, v=6)
+    sphere((cx, 3.1, s * 1.135), 1.0, 'Shadow', scale=(0.3, 0.36, 0.03), u=12, v=6)
+    box(cx - 0.17, 3.6, s * 1.11, cx + 0.19, 3.66, s * 1.145, 'Shadow', bev=0)  # cap brim
 for s in (-1, 1):
     # brass window beading
     box(-3.93, 3.93, s * 1.17, -1.97, 3.98, s * 1.2, 'Brass', bev=0.008)
@@ -443,10 +448,10 @@ def gangway(sx):
     box(sx * 4.42, 1.6, -0.6, sx * 4.46, 3.42, 0.6, 'Iron', bev=0.01)
 
 
-def lining(x0, y0, x1, y1, z, w=0.024):
+def lining(x0, y0, x1, y1, z, w=0.034):
     for s in (-1, 1):
         for (a, b, c, d) in ((x0, y0, x1, y0 + w), (x0, y1 - w, x1, y1), (x0, y0, x0 + w, y1), (x1 - w, y0, x1, y1)):
-            box(a, b, s * z, c, d, s * (z + 0.012), 'Trim', bev=0)
+            box(a, b, s * z, c, d, s * (z + 0.016), 'Trim', bev=0)
 
 
 # ============================================================ passenger coach
@@ -597,8 +602,8 @@ def wheel(name, spokes, spoke_w, hub_r, seg, driver):
     return U.finish(sharp=0.8)
 
 
-wd = wheel('WheelDriver', 16, 0.085, 0.2, 40, True)
-ws = wheel('WheelSmall', 10, 0.13, 0.26, 26, False)
+wd = wheel('WheelDriver', 16, 0.085, 0.2, 36, True)
+ws = wheel('WheelSmall', 10, 0.13, 0.26, 22, False)
 
 # ============================================================ coupling rod (centred on the middle crank pin)
 U = Unit('CouplingRod')
@@ -679,8 +684,12 @@ if PREV:
         'side': ((-9, -26, 3.2), (-9, 0, 2.4), 50),
         'rear': ((-26, -7, 5), (-17, 0, 2.2), 45),
         'front': ((9.5, -2.2, 3.0), (3, 0, 2.6), 45),
+        'wheels': ((0.5, -6.5, 1.6), (-1.2, 0, 1.4), 40),
     }
+    only = os.environ.get('TRAIN_VIEWS')
     for vname, (loc, tgt, lens) in views.items():
+        if only and vname not in only.split(','):
+            continue
         cam.location = loc
         d = Vector(tgt) - Vector(loc)
         cam.rotation_euler = d.to_track_quat('-Z', 'Y').to_euler()
