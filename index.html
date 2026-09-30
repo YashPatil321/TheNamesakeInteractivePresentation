@@ -320,6 +320,90 @@ kbd { font-family: var(--mono); background: rgba(29,27,38,.1); border: 1px solid
 .fin-actions .btn { border-color: var(--paper); }
 .fin-actions .btn.ghost { color: var(--paper); }
 
+/* ---------- Hands-on moments ("Try it") ---------- */
+.try { margin: 14px 0; padding: 14px; border-radius: 6px; background: rgba(29,27,38,.05); border: 1px solid rgba(29,27,38,.2); }
+.try-label { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 10px;
+  font-family: var(--mono); font-size: var(--t-xs); letter-spacing: .14em; text-transform: uppercase; color: var(--stamp); }
+.try-label .done { color: #2f7d4f; }
+.try-msg { margin-top: 10px; font-size: var(--t-sm); min-height: 1.4em; }
+.try-note { display: block; margin-top: 6px; font-family: var(--mono); font-size: .66rem; color: var(--ink-soft); letter-spacing: .06em; }
+.btn.sm { padding: 6px 12px; font-size: .8rem; }
+.shake { animation: shake .4s; }
+@keyframes shake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+.shoes { display: flex; gap: 14px; justify-content: center; align-items: flex-end; padding: 6px 0 2px; }
+.shoes svg { width: 96px; height: 46px; transition: filter 1s, transform .5s; }
+.shoes.warm svg { filter: drop-shadow(0 0 6px rgba(242,120,40,.9)) drop-shadow(0 0 16px rgba(242,163,58,.6)); }
+.shoes.warm svg:first-child { transform: translateY(-3px) rotate(-4deg); }
+
+.cert { position: relative; background: #f7f2e2; padding: 12px 14px; font-family: var(--mono); font-size: var(--t-sm);
+  box-shadow: inset 0 0 0 4px #f7f2e2, inset 0 0 0 5px #bfb392, 0 2px 6px rgba(0,0,0,.12); }
+.cert-h { text-align: center; font-weight: 700; letter-spacing: .08em; font-size: .72rem; text-transform: uppercase; margin-bottom: 10px; }
+.cert label { display: block; font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); }
+.cert input { width: 100%; box-sizing: border-box; border: 0; border-bottom: 1px solid var(--ink); background: transparent; color: #1f2a5a;
+  font-family: "Caveat", "Segoe Print", cursive; font-size: 1.7rem; padding: 0 4px; }
+.cert-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.cert-days { font-size: .7rem; color: var(--ink-soft); margin-top: 8px; }
+.cert .filed { position: absolute; right: 14px; top: 34px; padding: 2px 8px; border: 3px double var(--stamp); color: var(--stamp);
+  font-weight: 700; letter-spacing: .14em; mix-blend-mode: multiply; animation: filedIn .45s cubic-bezier(.3,1.6,.5,1) both; }
+@keyframes filedIn { from { transform: rotate(-30deg) scale(2.4); opacity: 0; } to { transform: rotate(-12deg) scale(1); opacity: 1; } }
+
+.plate { position: relative; width: 230px; height: 230px; margin: 2px auto; border-radius: 50%;
+  background: radial-gradient(circle, #f6f1e4 54%, #d6ccb3 55%, #efe8d6 61%, #c8bc9b 100%); box-shadow: 0 10px 22px rgba(0,0,0,.2); }
+.plate button { position: absolute; width: 70px; height: 70px; border: 0; border-radius: 50%; background: transparent; padding: 0;
+  font-size: 2rem; line-height: 1; display: grid; place-items: center; transition: transform .2s, filter .2s; }
+.plate button small { display: block; font-family: var(--mono); font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); }
+.plate button:hover { transform: scale(1.12); }
+.plate button.picked { transform: scale(1.18); filter: drop-shadow(0 0 8px var(--accent)); }
+.plate .earth { left: 22px; top: 44px; } .plate .pen { right: 22px; top: 44px; } .plate .money { left: 80px; bottom: 16px; }
+.plate .baby { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); font-size: 2.1rem; pointer-events: none; }
+.plate.cry .baby { animation: wail .25s 6; }
+@keyframes wail { 50% { transform: translate(-50%, -50%) rotate(10deg) scale(1.15); } }
+
+.rub { position: relative; width: 100%; aspect-ratio: 2 / 1; border-radius: 3px; overflow: hidden; cursor: crosshair; touch-action: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,.2); }
+.rub canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+.giftbook { display: flex; align-items: center; gap: 16px; }
+.hardcover { flex: none; width: 76px; height: 104px; border: 0; border-radius: 2px 6px 6px 2px; padding: 6px; display: grid; place-content: center;
+  background: linear-gradient(135deg, #7a2030, #4a1220); color: #f3d9a0; font-family: var(--display); font-size: .78rem; line-height: 1.1; text-align: center;
+  box-shadow: 4px 4px 0 #d8cfb8, 6px 7px 12px rgba(0,0,0,.3); transition: transform .7s cubic-bezier(.5,-0.3,.3,1.3), opacity .7s; }
+.hardcover:hover:not([disabled]) { transform: translateY(-4px) rotate(-3deg); }
+.hardcover[disabled] { cursor: default; transform: rotate(90deg) scale(.8); opacity: .65; }
+
+.phone { display: flex; align-items: center; gap: 16px; }
+.phone svg { flex: none; width: 64px; height: 64px; }
+.phone.ringing svg { animation: ringing .1s linear infinite alternate; }
+@keyframes ringing { from { transform: rotate(-10deg); } to { transform: rotate(10deg); } }
+.phone .lines p { margin: 0 0 6px; opacity: 0; transform: translateY(4px); transition: opacity .9s, transform .9s; }
+.phone .lines p.on { opacity: 1; transform: none; }
+
+/* ---------- Passport ---------- */
+.passport { display: grid; place-items: center; background: rgba(5,8,18,.82); backdrop-filter: blur(4px); padding: 26px 16px; }
+.pp-card { width: min(640px, 100%); max-height: calc(100% - 20px); overflow-y: auto; box-sizing: border-box; background: var(--paper); color: var(--ink);
+  border-radius: 6px; padding: 20px 22px; box-shadow: 0 0 0 10px #1c2a4d, 0 30px 70px rgba(0,0,0,.7);
+  background-image: repeating-linear-gradient(0deg, rgba(0,0,0,.018) 0 2px, transparent 2px 4px); }
+.pp-card h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: var(--t-xl); line-height: 1.05; }
+.pp-sub { margin: 4px 0 16px; font-family: var(--mono); font-size: var(--t-xs); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); }
+.pp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.pp-stamp { aspect-ratio: 1; border-radius: 50%; border: 2px dashed rgba(29,27,38,.25); background: none; padding: 6px; display: grid; place-content: center;
+  text-align: center; font-family: var(--mono); font-size: .6rem; letter-spacing: .08em; color: rgba(29,27,38,.4); transition: background .2s; }
+.pp-stamp b { display: block; font-family: var(--display); font-weight: 400; font-size: 1.05rem; letter-spacing: 0; line-height: 1.1; }
+.pp-stamp:hover { background: rgba(29,27,38,.06); }
+.pp-stamp.got { border: 3px double var(--c); color: var(--c); transform: rotate(var(--r)); mix-blend-mode: multiply; }
+.pp-stamp .star { color: var(--stamp); }
+.pp-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; font-size: var(--t-sm); }
+#passBtn b { font-weight: 700; }
+#passBtn .pp-ico { display: none; }
+@media (max-width: 760px) { #passBtn .pp-ico { display: inline; } }
+#passBtn.pulse { animation: pulse .9s; }
+@keyframes pulse { 40% { transform: scale(1.2); border-color: var(--accent); color: var(--accent); } }
+
+/* depth: the ticket tilts toward the pointer */
+.card-wrap { perspective: 1400px; }
+.ticket:not(.away) { transform: rotateX(var(--ty, 0deg)) rotateY(var(--tx, 0deg)); }
+.scramble.v { color: var(--paper); }
+
 /* ---------- Presenter mode ---------- */
 body.present .hud .chip-btn:not(#presentBtn), body.present .rail { opacity: 0; pointer-events: none; }
 body.present .ticket { box-shadow: 0 40px 80px -20px rgba(0,0,0,.9); }
@@ -330,6 +414,7 @@ body.present .ticket { box-shadow: 0 40px 80px -20px rgba(0,0,0,.9); }
   .brand .loc { display: none; }
   .hud { padding-inline: 12px; }
   .hud-right .chip-btn.opt-hide { display: none; }
+  #passBtn .pp-word { display: none; }
   .card-wrap { left: 10px; right: 10px; width: auto; top: calc(40% + 8px); bottom: 70px; max-height: none; }
   .t-head { padding: 8px 16px; }
   .t-body { padding: 10px 16px 6px; }
@@ -372,6 +457,7 @@ body.present .ticket { box-shadow: 0 40px 80px -20px rgba(0,0,0,.9); }
       <button class="chip-btn opt-hide" id="analysisBtn" aria-pressed="false" title="Highlight the 4 I's across the timeline (A)">4 I's</button>
       <button class="chip-btn" id="soundBtn" aria-pressed="true" title="Sound (M)">Sound</button>
       <button class="chip-btn opt-hide" id="presentBtn" aria-pressed="false" title="Presenter mode (P)">Present</button>
+      <button class="chip-btn" id="passBtn" title="Your passport (V)"><span class="pp-word">Passport </span><span class="pp-ico" aria-hidden="true">✦ </span><b id="passN">0</b>/15</button>
       <button class="chip-btn" id="helpBtn" title="Controls (?)">?</button>
     </div>
   </header>
@@ -405,9 +491,19 @@ body.present .ticket { box-shadow: 0 40px 80px -20px rgba(0,0,0,.9); }
         <dt><kbd>P</kbd></dt><dd>Presenter mode</dd>
         <dt><kbd>F</kbd></dt><dd>Fullscreen</dd>
         <dt><kbd>M</kbd></dt><dd>Sound on / off</dd>
+        <dt><kbd>V</kbd></dt><dd>Open your passport</dd>
       </dl>
-      <p style="margin:0 0 14px;font-size:.9rem">Click the stations on the track or the stops along the bottom to jump anywhere. Keep an eye out for a letter drifting across the sky.</p>
+      <p style="margin:0 0 14px;font-size:.9rem">Click the stations on the track or the stops along the bottom to jump anywhere. Six stations have a hands-on "Try it" moment, and every stop stamps your passport. Keep an eye out for a letter drifting across the sky.</p>
       <button class="btn" id="helpClose">Back to the train</button>
+    </div>
+  </div>
+
+  <div class="overlay passport" id="passport" hidden>
+    <div class="pp-card" role="dialog" aria-labelledby="ppTitle">
+      <h2 id="ppTitle">Passenger passport</h2>
+      <div class="pp-sub" id="ppSub"></div>
+      <div class="pp-grid" id="ppGrid"></div>
+      <div class="pp-foot"><span id="ppFoot"></span><button class="btn" id="ppClose">Back to the train</button></div>
     </div>
   </div>
 
@@ -469,7 +565,7 @@ const STATIONS = [
     analysis: { tag: 'MIRROR', text: 'Four years after the crash, the Immigration and Nationality Act of 1965 ends the U.S. quotas that had kept most Asian immigrants out. It opens the door for educated professionals like Ashoke.', world: 'Historical connection: the Hart-Celler Act (1965). Look up History.com or the Migration Policy Institute for a citation.' },
     video: 'videos/crash.mp4', shots: ['Two rows of chairs as the train compartment', 'Flashlight swinging past the window for passing lights', 'Blackout, then a flashlight finds the page in his hand'] },
 
-  { year: '1967', title: 'The Shoes', place: 'Calcutta, India', code: 'CAL', region: 'india', name: 'none', flashback: true,
+  { year: '1967', title: 'The Shoes', place: 'Calcutta, India', code: 'CAL', region: 'india', name: 'none', flashback: true, try: 'shoes',
     sky: ['#2a1640', '#c86b4a'],
     story: [
       'Ashima, 19, is told a suitor is coming to meet her. While the families talk, she slips her feet into his shoes, which he left by the door. They are still warm.',
@@ -478,7 +574,7 @@ const STATIONS = [
     detail: 'In Cambridge she is alone most of the day in a small apartment, far from everyone she has ever known.',
     analysis: { tag: 'MIRROR', text: 'Ashima arrives with no family or community around her and is expected to adjust on her own. Isolation is the first cost of immigrating.', world: 'Many immigrant spouses describe the first years as the loneliest of their lives.' } },
 
-  { year: '1968', title: 'A Name in a Hurry', place: 'Cambridge, Massachusetts', code: 'CAM', region: 'town', name: 'gogol',
+  { year: '1968', title: 'A Name in a Hurry', place: 'Cambridge, Massachusetts', code: 'CAM', region: 'town', name: 'gogol', try: 'cert',
     sky: ['#10223d', '#e59a5c'],
     story: [
       'Pregnant and homesick, Ashima makes a snack from Rice Krispies, Planters peanuts, onion, salt, lemon and green chili. It is the closest she can get to the street food of Calcutta.',
@@ -488,7 +584,7 @@ const STATIONS = [
     special: 'rewind',
     analysis: { tag: 'INSTITUTIONAL', text: 'An American hospital rule overrides a Bengali tradition. Because a form needs a name now, a private pet name becomes his legal one.', world: 'Official forms still often fail to fit naming traditions: missing middle names, reversed family-name order, character limits.' } },
 
-  { year: '1968', title: 'The Rice Ceremony', place: 'Cambridge, Massachusetts', code: 'CAM', region: 'town', name: 'gogol',
+  { year: '1968', title: 'The Rice Ceremony', place: 'Cambridge, Massachusetts', code: 'CAM', region: 'town', name: 'gogol', try: 'rice',
     sky: ['#1d2b52', '#f1b56b'],
     story: [
       'At six months old, Gogol has his annaprasan, the first time he is fed rice. Bengali friends in Cambridge play the role of the family back in India.',
@@ -508,7 +604,7 @@ const STATIONS = [
     analysis: { tag: 'INSTITUTIONAL', text: 'A school official, not the family, ends up deciding what the child is called.', world: 'Students with non-English names are still renamed or given nicknames by teachers who find their names "hard."' },
     video: 'videos/kindergarten.mp4', shots: ['Small backpack, parents crouched to his height', 'He shakes his head: "I\'m Gogol."', 'The principal shrugs and writes GOGOL'] },
 
-  { year: '1970s', title: 'Pemberton Road', place: 'Suburban Massachusetts', code: 'PEM', region: 'suburb', name: 'gogol',
+  { year: '1970s', title: 'Pemberton Road', place: 'Suburban Massachusetts', code: 'PEM', region: 'suburb', name: 'gogol', try: 'rub',
     sky: ['#27447a', '#9cc3e0'],
     story: [
       'The Gangulis buy a house in a college town. Sonia is born. Weekends fill with Bengali parties, and Christmas gets celebrated for the kids.',
@@ -517,7 +613,7 @@ const STATIONS = [
     voice: { gogol: 'Our street looks like every other street. Why doesn\'t our name?', nikhil: 'Someday I\'ll have a name that fits the mailbox.' },
     analysis: { tag: 'INTERPERSONAL', text: 'Neighbors target the family through their name, and a child learns that his difference is visible and unwelcome.', world: 'In 1987 a group calling itself the "Dotbusters" terrorized Indian Americans in Jersey City. Research it for a citation.' } },
 
-  { year: '1982', title: 'The Gift', place: 'Pemberton Road', code: 'PEM', region: 'suburb', name: 'gogol',
+  { year: '1982', title: 'The Gift', place: 'Pemberton Road', code: 'PEM', region: 'suburb', name: 'gogol', try: 'gift',
     sky: ['#2a1d45', '#e08a6a'],
     story: [
       'For Gogol\'s 14th birthday his father gives him a hardcover: The Short Stories of Nikolai Gogol. Gogol thanks him and puts it on a shelf, unread.',
@@ -567,7 +663,7 @@ const STATIONS = [
     poll: { q: 'Gogol feels more at home with Maxine\'s family than his own. Does that make sense to you?', options: ['I get it', 'Not at all'], actual: 'It lasts until his father dies. Then Maxine\'s world suddenly feels like it has no place for his grief.' },
     analysis: { tag: 'IDEOLOGICAL', text: 'The "perpetual foreigner" belief: that an American with brown skin must really be from somewhere else.', world: '"Where are you really from?" is one of the most common experiences Asian Americans report.' } },
 
-  { year: '1990s', title: 'The Phone Call', place: 'Cleveland, Ohio', code: 'CLE', region: 'cleveland', name: 'nikhil', rain: true,
+  { year: '1990s', title: 'The Phone Call', place: 'Cleveland, Ohio', code: 'CLE', region: 'cleveland', name: 'nikhil', rain: true, try: 'phone',
     sky: ['#15171f', '#3d4250'],
     story: [
       'Ashoke, working temporarily in Ohio, dies suddenly of a heart attack. Gogol flies to Cleveland alone to identify his father and empty his apartment.',
@@ -633,7 +729,14 @@ const st = {
   cur: START, trainX: START * SP, camX: 0, moving: false, from: 0, to: 0, t0: 0, dur: 1, target: START,
   visited: new Set(), lens: 'gogol', lensUnlocked: false, tab: 'story', crashT: -1, crashDone: false, derail: 0,
   gray: 0, shake: 0, speed: 0, polls: {}, revealed: {}, visitor: '', started: false, analysis: false, letterClicks: 0,
+  done: {}, certWaits: 0, certDraft: '',
 };
+/* pointer parallax: -1..1, eased toward the target each frame */
+const par = { x: 0, y: 0, tx: 0, ty: 0 };
+window.addEventListener('pointermove', (e) => {
+  if (e.pointerType !== 'mouse' || reduced) return;
+  par.tx = e.clientX / window.innerWidth * 2 - 1; par.ty = e.clientY / window.innerHeight * 2 - 1;
+});
 
 /* =========================================================
    SOUND — tiny synth, no audio files needed
@@ -676,6 +779,20 @@ const snd = {
     const g = c.createGain(); this.env(g, t, .005, .5, .25); o.connect(g).connect(c.destination); o.start(t); o.stop(t + .4); this.noiseBurst(800, 1, .2, .12); },
   chime() { if (!this.ok()) return; const c = this.ctx, t = c.currentTime;
     [659, 988, 1319].forEach((f, i) => { const o = c.createOscillator(); o.type = 'sine'; o.frequency.value = f; const g = c.createGain(); this.env(g, t + i * .12, .01, .06, 1.6); o.connect(g).connect(c.destination); o.start(t + i * .12); o.stop(t + i * .12 + 1.8); }); },
+  ring() {
+    if (!this.ok()) return; const c = this.ctx, t = c.currentTime;
+    [0, .5].forEach((off) => {
+      const g = c.createGain(); g.gain.setValueAtTime(0.0001, t + off); g.gain.exponentialRampToValueAtTime(.05, t + off + .02);
+      g.gain.setValueAtTime(.05, t + off + .36); g.gain.exponentialRampToValueAtTime(0.0001, t + off + .42); g.connect(c.destination);
+      [440, 480].forEach((f) => { const o = c.createOscillator(); o.frequency.value = f; o.connect(g); o.start(t + off); o.stop(t + off + .45); });
+    });
+  },
+  cry() {
+    if (!this.ok()) return; const c = this.ctx, t = c.currentTime;
+    const o = c.createOscillator(); o.type = 'sawtooth'; o.frequency.setValueAtTime(420, t); o.frequency.linearRampToValueAtTime(640, t + .25); o.frequency.linearRampToValueAtTime(380, t + 1.1);
+    const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1400;
+    const g = c.createGain(); this.env(g, t, .05, .06, 1.1); o.connect(lp).connect(g).connect(c.destination); o.start(t); o.stop(t + 1.3);
+  },
   tick(now, speed) {
     if (!this.ctx) return;
     if (this.rumbleGain) this.rumbleGain.gain.setTargetAtTime(this.on ? clamp(speed, 0, 1) * .25 : 0, this.ctx.currentTime, .15);
@@ -824,12 +941,12 @@ function draw(now) {
 
   // stars
   if (dark > .3) for (const s of stars) {
-    const x = ((s.x * W * 1.5 - st.camX * .04) % (W * 1.5) + W * 1.5) % (W * 1.5) - W * .25;
+    const x = ((s.x * W * 1.5 - st.camX * .04 - par.x * 6) % (W * 1.5) + W * 1.5) % (W * 1.5) - W * .25;
     ctx.fillStyle = `rgba(255,255,240,${(dark - .3) * (.5 + .5 * Math.sin(now / 900 + s.p))})`;
     ctx.fillRect(x, s.y * groundY, s.r, s.r);
   }
   // moon / sun
-  const mx = W * .82 - (st.camX * .02) % 60, my = groundY * .22;
+  const mx = W * .82 - (st.camX * .02) % 60 - par.x * 10, my = groundY * .22 - par.y * 6;
   ctx.fillStyle = dark > .45 ? `rgba(250,244,220,${dark})` : `rgba(255,230,170,${.75 - dark})`;
   ctx.beginPath(); ctx.arc(mx, my, 26 * S + 10, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = rgb(bot, .12); ctx.beginPath(); ctx.arc(mx, my, 70 * S + 20, 0, Math.PI * 2); ctx.fill();
@@ -837,7 +954,7 @@ function draw(now) {
   // far skyline (parallax)
   const farCol = rgb(mix(bot, [8, 10, 20], .72));
   const base = groundY - 18 * S;
-  const offFar = anchor * (1 - F_FAR);
+  const offFar = anchor * (1 - F_FAR) - par.x * 16;
   const i0 = clamp(Math.floor(p), 0, STATIONS.length - 1), i1 = clamp(i0 + 1, 0, STATIONS.length - 1), ft = clamp(p - i0, 0, 1);
   for (const [i, a] of [[i0, 1 - ft], [i1, ft]]) {
     if (a < .01 || (i === i1 && i1 === i0)) continue;
@@ -849,7 +966,7 @@ function draw(now) {
   // mid hills
   const midCol = rgb(mix(bot, [6, 8, 16], .84));
   ctx.fillStyle = midCol; ctx.beginPath(); ctx.moveTo(-30, groundY);
-  for (let x = -30; x <= W + 30; x += 12) { const wx = x + st.camX * .75; ctx.lineTo(x, groundY - 14 * S - (Math.sin(wx / 210) * 10 + Math.sin(wx / 83) * 5 + 10) * S); }
+  for (let x = -30; x <= W + 30; x += 12) { const wx = x + st.camX * .75 + par.x * 8; ctx.lineTo(x, groundY - 14 * S - (Math.sin(wx / 210) * 10 + Math.sin(wx / 83) * 5 + 10) * S); }
   ctx.lineTo(W + 30, groundY); ctx.fill();
 
   // ground
@@ -1103,6 +1220,7 @@ function frame(now) {
   // crash timeline
   if (st.crashT >= 0) crashTick(dt / 1000);
   st.shake = Math.max(0, st.shake - dt / 900);
+  par.x = lerp(par.x, par.tx, .06); par.y = lerp(par.y, par.ty, .06);
   snd.tick(now, st.speed);
   draw(now);
   requestAnimationFrame(frame);
@@ -1130,6 +1248,7 @@ function arrive() {
   const firstVisit = !st.visited.has(i);
   st.visited.add(i);
   updateHud(); markRail(i);
+  if (firstVisit) updatePass(true);
   if (i === 0 && !st.crashDone) { startCrash(); return; }
   if (s.special === 'decree' && firstVisit) { doDecree(); }
   if (i >= NIKHIL_AT && !st.lensUnlocked) unlockLens();
@@ -1190,6 +1309,127 @@ function specialHTML(i, s) {
   }
   return '';
 }
+/* =========================================================
+   HANDS-ON MOMENTS — a small "Try it" at six stations
+   ========================================================= */
+const TRY_COUNT = STATIONS.filter((s) => s.try).length;
+const SHOE = '<svg viewBox="0 0 96 46" aria-hidden="true"><path d="M4 32c0-9 4-16 11-17l21-2c7 0 11 4 17 8 8 5 21 6 31 8 6 1 8 4 8 8v3H4z" fill="#2a1d18"/><path d="M4 38h88v5H4z" fill="#120c0a"/><path d="M42 17l6 6M48 15l6 6M54 14l5 5" stroke="#a8865f" stroke-width="1.5"/><path d="M12 22c6-3 14-4 22-3" stroke="#4a3830" stroke-width="2" fill="none"/></svg>';
+const PHONE = '<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="8" y="26" width="48" height="32" rx="6" fill="#1d1b26"/><path d="M4 22c0-8 12-14 28-14s28 6 28 14l-2 6-12-2v-6H18v6L6 28z" fill="#1d1b26"/><circle cx="32" cy="42" r="10" fill="#ece4cf"/><circle cx="32" cy="42" r="3" fill="#1d1b26"/></svg>';
+const RICE_ITEMS = { earth: ['🌱', 'Earth', 'a landowner'], pen: ['🖊️', 'Pen', 'a scholar'], money: ['💵', 'Dollar', 'a businessman'] };
+const PHONE_LINES = [
+  'It is his mother. Her voice is wrong.',
+  'Ashoke had gone to the hospital in Cleveland, feeling unwell.',
+  'It was a heart attack. He is gone.',
+  'Gogol books the first flight to Cleveland, alone.',
+];
+const CERT_DAYS = ['Day 1. No letter from Calcutta yet.', 'Day 2. Still nothing. The nurses keep asking for a name.', 'Day 3. The letter is lost somewhere between Calcutta and Cambridge. You have to write something.'];
+
+function tryHTML(i, s) {
+  if (!s.try) return '';
+  const d = st.done[s.try];
+  const head = (label) => `<div class="try-label"><span>Try it · ${label}</span>${d ? '<span class="done">✓ Stamped</span>' : ''}</div>`;
+  switch (s.try) {
+    case 'shoes': return `<div class="try">${head('Be Ashima')}
+      <div class="shoes ${d ? 'warm' : ''}">${SHOE}${SHOE}</div>
+      ${d ? '' : '<div class="actions" style="justify-content:center;margin:8px 0 0"><button class="btn sm" data-try="shoes">Slip your feet in</button></div>'}
+      <div class="try-msg">${d ? 'Still warm. She has never spoken to him, but she has already stood where he stood.' : 'The suitor left his shoes by the door. Nobody is watching.'}</div></div>`;
+    case 'cert': {
+      const w = st.certWaits;
+      return `<div class="try">${head('You\'re the parents')}
+      <div class="cert" id="cert">
+        <div class="cert-h">Certificate of Live Birth · Cambridge, Mass.</div>
+        <label for="certName">Name of child</label>
+        <input id="certName" maxlength="20" autocomplete="off" placeholder="write a name" value="${esc(d || st.certDraft)}" ${d ? 'readonly' : ''}>
+        ${d ? '<span class="filed">FILED</span>' : `<div class="cert-row"><button class="btn sm ghost" data-try="wait" ${w >= CERT_DAYS.length ? 'disabled' : ''}>Wait for Grandma's letter</button><button class="btn sm" data-try="sign">Sign it</button></div>`}
+        <div class="cert-days">${w ? CERT_DAYS[Math.min(w, CERT_DAYS.length) - 1] : 'The hospital won\'t discharge the baby until this line is filled in.'}</div>
+      </div>
+      <div class="try-msg" id="certMsg">${d ? `You named him <b>${esc(d)}</b>. Ashoke, out of time, wrote <b>Gogol</b>: a pet name that was never meant to go on a form.` : ''}</div></div>`;
+    }
+    case 'rice': {
+      const pick = RICE_ITEMS[d];
+      return `<div class="try">${head('Offer the plate')}
+      <div class="plate" id="plate"><span class="baby">${d ? '😭' : '👶'}</span>
+        ${Object.entries(RICE_ITEMS).map(([k, [e, l]]) => `<button class="${k}${d === k ? ' picked' : ''}" data-rice="${k}" aria-label="${l}">${e}<small>${l}</small></button>`).join('')}</div>
+      <div class="try-msg">${pick ? `You pushed the ${pick[1].toLowerCase()} toward him. It stands for ${pick[2]}. But Gogol refuses all three and cries. Nobody gets to decide his future for him.` : 'Which one will Gogol reach for? Tap it.'}</div></div>`;
+    }
+    case 'rub': return `<div class="try">${head('Grave rubbing')}
+      <div class="rub"><canvas id="rubBase" width="480" height="240"></canvas><canvas id="rubTop" width="480" height="240" ${d ? 'hidden' : ''}></canvas></div>
+      <div class="try-msg">${d ? 'Old names that nobody uses anymore. Gogol is drawn to them: they are as unusual as his own.' : 'Drag across the paper to rub the gravestone.'}<span class="try-note">Our stone is illustrative, not from the book.</span></div></div>`;
+    case 'gift': return `<div class="try">${head('Open the present')}
+      <div class="giftbook"><button class="hardcover" data-try="gift" ${d ? 'disabled' : ''}>The Short Stories of Nikolai Gogol</button>
+      <div class="try-msg" style="margin:0">${d ? 'Onto the shelf it goes. It stays there, unread, for eighteen years.' : 'Click the book. Will fourteen-year-old Gogol read it?'}</div></div></div>`;
+    case 'phone': return `<div class="try">${head('Pick up')}
+      <div class="phone ${d ? '' : 'ringing'}">${PHONE}
+      ${d ? `<div class="lines">${PHONE_LINES.map((l) => `<p class="on">${esc(l)}</p>`).join('')}</div>` : '<button class="btn hot sm" data-try="phone">Answer the phone</button>'}</div></div>`;
+  }
+  return '';
+}
+
+function markTry(quiet) {
+  const n = STATIONS.filter((s) => s.try && st.done[s.try]).length;
+  if (!quiet) snd.chime();
+  toast(`Hands-on moment ${n} of ${TRY_COUNT} stamped in your passport.`);
+  updatePass(true);
+}
+
+function doTry(kind, btn) {
+  if (kind === 'shoes') { st.done.shoes = true; snd.thump(); markTry(); renderCard(false); }
+  else if (kind === 'wait') { st.certWaits = Math.min(st.certWaits + 1, CERT_DAYS.length); snd.noiseBurst(5000, 1, .05, .2); renderCard(false); }
+  else if (kind === 'sign') {
+    const inp = $('#certName'); if (!inp || st.done.cert) return;
+    const v = inp.value.trim();
+    if (!v) { const c = $('#cert'); c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake'); $('#certMsg').textContent = 'The clerk won\'t accept a blank line.'; snd.noiseBurst(300, 2, .15, .1); return; }
+    st.done.cert = v; snd.thump(); markTry(true); renderCard(false);
+  }
+  else if (kind === 'gift') {
+    if (st.done.gift) return;
+    btn.classList.add('shake'); snd.thump();
+    setTimeout(() => { st.done.gift = true; markTry(true); renderCard(false); }, 500);
+  }
+  else if (kind === 'phone') {
+    ringStop(); st.done.phone = true; markTry(true); renderCard(false);
+    const lines = ticket.querySelectorAll('.phone .lines p');
+    lines.forEach((p, k) => { p.classList.remove('on'); setTimeout(() => p.classList.add('on'), 400 + k * 1400); });
+  }
+}
+
+let ringIv = null, rings = 0;
+function ringStart() { if (ringIv) return; rings = 0; snd.ring(); ringIv = setInterval(() => { if (++rings >= 6) ringStop(); else snd.ring(); }, 2400); }
+function ringStop() { clearInterval(ringIv); ringIv = null; }
+
+function setupRub() {
+  const base = $('#rubBase'), top = $('#rubTop'); if (!base) return;
+  const b = base.getContext('2d'), w = base.width, h = base.height, r = rng(7);
+  b.fillStyle = '#35333b'; b.fillRect(0, 0, w, h);
+  for (let k = 0; k < 2600; k++) { b.fillStyle = `rgba(${r() < .5 ? '255,255,255' : '0,0,0'},${r() * .12})`; b.fillRect(r() * w, r() * h, 2, 2); }
+  b.strokeStyle = 'rgba(236,228,207,.7)'; b.lineWidth = 3; b.beginPath(); b.moveTo(34, h - 12); b.lineTo(34, 82);
+  b.ellipse(w / 2, 82, w / 2 - 34, 66, 0, Math.PI, 0); b.lineTo(w - 34, h - 12); b.stroke();
+  b.fillStyle = 'rgba(236,228,207,.92)'; b.textAlign = 'center'; b.textBaseline = 'middle';
+  b.font = '700 16px "Courier Prime", monospace'; b.fillText('HERE LIES', w / 2, 62);
+  b.font = '38px "Rozha One", Georgia, serif'; b.fillText('HOPESTILL WARD', w / 2, 112);
+  b.font = '700 18px "Courier Prime", monospace'; b.fillText('1739 · 1802', w / 2, 156);
+  b.font = 'italic 17px Spectral, Georgia, serif'; b.fillText('Remember me as you pass by', w / 2, 196);
+  if (st.done.rub) return;
+  const t = top.getContext('2d');
+  t.fillStyle = '#efe8d6'; t.fillRect(0, 0, w, h);
+  t.fillStyle = 'rgba(29,27,38,.05)'; for (let y = 0; y < h; y += 4) t.fillRect(0, y, w, 1);
+  t.globalCompositeOperation = 'destination-out'; t.fillStyle = '#000';
+  let down = false, n = 0, lastS = 0;
+  const rub = (e) => {
+    const rc = top.getBoundingClientRect(), x = (e.clientX - rc.left) / rc.width * w, y = (e.clientY - rc.top) / rc.height * h;
+    for (let k = 0; k < 22; k++) { const a = Math.random() * Math.PI * 2, dd = Math.random() * 20; t.globalAlpha = .2 + Math.random() * .5; t.fillRect(x + Math.cos(a) * dd * 1.4, y + Math.sin(a) * dd * .7, 5, 2); }
+    const now = performance.now(); if (now - lastS > 90) { snd.noiseBurst(2600, 1.5, .03, .05); lastS = now; }
+    if (++n === 200) {
+      st.done.rub = true; top.style.transition = 'opacity 1.2s'; top.style.opacity = '0';
+      setTimeout(() => { markTry(); if (st.cur === 5 && !ticket.classList.contains('away')) renderCard(false); }, 1200);
+    }
+  };
+  top.addEventListener('pointerdown', (e) => { down = true; try { top.setPointerCapture(e.pointerId); } catch (_) {} rub(e); });
+  top.addEventListener('pointermove', (e) => { if (down) rub(e); });
+  top.addEventListener('pointerup', () => { down = false; });
+  top.addEventListener('pointercancel', () => { down = false; });
+}
+
 function renderCard(fresh) {
   const i = st.cur, s = STATIONS[i];
   const hasVideo = !!s.video;
@@ -1201,7 +1441,7 @@ function renderCard(fresh) {
     panel = s.story.map((p) => `<p>${esc(p)}</p>`).join('') +
       (s.quote ? `<blockquote class="quote">${esc(s.quote.text)}<cite>${esc(s.quote.cite)}</cite></blockquote>` : '') +
       (s.detail ? `<p style="font-size:.95rem;color:var(--ink-soft)">${esc(s.detail)}</p>` : '') +
-      voiceHTML(s) + pollHTML(i, s) + specialHTML(i, s);
+      tryHTML(i, s) + voiceHTML(s) + pollHTML(i, s) + specialHTML(i, s);
   } else if (st.tab === 'analysis') {
     panel = `<div class="analysis"><div class="tagrow"><span class="tag ${a.tag}">${TAG_NAMES[a.tag]}</span></div>
       <h4>In the book</h4><p>${esc(a.text)}</p><h4>Real world</h4><p>${esc(a.world)}</p></div>` + specialHTML(i, s);
@@ -1212,6 +1452,8 @@ function renderCard(fresh) {
       </div>
       <ol class="shotlist">${(s.shots || []).map((x) => `<li>${esc(x)}</li>`).join('')}</ol>`;
   }
+  const oldBody = ticket.querySelector('.t-body'), keepScroll = !fresh && oldBody && ticket.dataset.i === String(i) ? oldBody.scrollTop : 0;
+  ticket.dataset.i = i;
   const prevDis = i === 0 ? 'disabled' : '', nextDis = i === STATIONS.length - 1 ? 'disabled' : '';
   ticket.innerHTML = `
     <div class="t-head"><span>Station <b>${String(i + 1).padStart(2, '0')}</b> / ${STATIONS.length}</span><span>${s.flashback ? 'Flashback' : (s.name === 'none' ? '' : 'Passenger: <b>' + (s.name === 'both' ? 'Gogol + Nikhil' : s.name === 'nikhil' ? 'Nikhil' : 'Gogol') + '</b>')}</span></div>
@@ -1229,6 +1471,9 @@ function renderCard(fresh) {
       <button class="btn" data-go="${i + 1}" ${nextDis}>Next stop →</button>
     </div>`;
   ticket.classList.toggle('fresh', !!fresh);
+  ticket.querySelector('.t-body').scrollTop = keepScroll;
+  setupRub();
+  if (s.try === 'phone' && !st.done.phone && st.tab === 'story') ringStart(); else ringStop();
   const vid = $('#vid');
   if (vid) {
     const clap = $('#clap');
@@ -1238,11 +1483,25 @@ function renderCard(fresh) {
   }
 }
 function showCard(fresh) { renderCard(fresh); requestAnimationFrame(() => ticket.classList.remove('away')); }
-function hideCard() { ticket.classList.add('away'); const v = $('#vid'); if (v) v.pause(); }
+function hideCard() { ringStop(); ticket.classList.add('away'); const v = $('#vid'); if (v) v.pause(); }
 
+ticket.addEventListener('input', (e) => { if (e.target.id === 'certName') st.certDraft = e.target.value; });
+ticket.addEventListener('pointermove', (e) => {
+  if (e.pointerType !== 'mouse' || reduced) return;
+  const r = ticket.getBoundingClientRect();
+  ticket.style.setProperty('--tx', ((e.clientX - r.left) / r.width - .5) * 5 + 'deg');
+  ticket.style.setProperty('--ty', -((e.clientY - r.top) / r.height - .5) * 4 + 'deg');
+});
+ticket.addEventListener('pointerleave', () => { ticket.style.setProperty('--tx', '0deg'); ticket.style.setProperty('--ty', '0deg'); });
 ticket.addEventListener('click', (e) => {
   const t = e.target.closest('button'); if (!t || t.disabled) return;
   if (t.dataset.tab) { st.tab = t.dataset.tab; renderCard(false); return; }
+  if (t.dataset.try) { doTry(t.dataset.try, t); return; }
+  if (t.dataset.rice) {
+    const first = !st.done.rice; st.done.rice = t.dataset.rice;
+    snd.cry(); if (first) markTry(true); else updatePass(false);
+    renderCard(false); $('#plate').classList.add('cry'); return;
+  }
   if (t.dataset.go != null) { travelTo(+t.dataset.go); return; }
   if (t.dataset.vote != null) {
     const i = st.cur, s = STATIONS[i]; st.polls[i] = st.polls[i] || s.poll.options.map(() => 0); st.polls[i][+t.dataset.vote]++;
@@ -1266,7 +1525,32 @@ function markRail(target) {
   rail.querySelectorAll('.stop').forEach((b, i) => { b.classList.toggle('current', i === target); b.classList.toggle('visited', st.visited.has(i)); });
   const cur = rail.children[target]; if (cur) cur.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', inline: 'center', block: 'nearest' });
 }
-function updateHud() { const s = STATIONS[st.cur]; $('#locText').textContent = `${s.place} · ${s.year}`; }
+function updateHud() { const s = STATIONS[st.cur]; $('#locText').textContent = `${s.place} · ${s.year}`; updatePass(false); }
+
+/* passport: one stamp per station, a star for each hands-on moment */
+const PP_COLORS = { none: '#5a6072', gogol: '#c0691a', nikhil: '#2b6fc4', both: '#7a4fc0' };
+const passport = $('#passport');
+function updatePass(pulse) {
+  $('#passN').textContent = st.visited.size;
+  $('#passBtn').lastChild.textContent = '/' + STATIONS.length;
+  if (pulse) { const b = $('#passBtn'); b.classList.remove('pulse'); void b.offsetWidth; b.classList.add('pulse'); }
+  if (!passport.hidden) renderPassport();
+}
+function renderPassport() {
+  const tries = STATIONS.filter((s) => s.try && st.done[s.try]).length;
+  $('#ppSub').textContent = `Holder: ${st.visitor || 'Passenger'} · ${st.visited.size} of ${STATIONS.length} stations`;
+  $('#ppGrid').innerHTML = STATIONS.map((s, i) => st.visited.has(i)
+    ? `<button class="pp-stamp got" data-i="${i}" style="--c:${PP_COLORS[s.name]};--r:${(i * 37) % 23 - 11}deg" title="${esc(s.title)}"><b>${esc(s.year)}</b>${esc(s.code)}${s.try && st.done[s.try] ? ' <span class="star">★</span>' : ''}</button>`
+    : `<button class="pp-stamp" data-i="${i}" title="Not visited yet"><b>?</b>STN ${String(i + 1).padStart(2, '0')}</button>`).join('');
+  $('#ppFoot').textContent = `★ Hands-on moments: ${tries} of ${TRY_COUNT} · ` + (st.visited.size === STATIONS.length ? 'The ending is unlocked.' : 'Visit every station to unlock the ending.');
+}
+function openPassport() { renderPassport(); passport.hidden = false; $('#ppClose').focus(); }
+$('#passBtn').addEventListener('click', openPassport);
+$('#ppClose').addEventListener('click', () => { passport.hidden = true; });
+passport.addEventListener('click', (e) => {
+  if (e.target === passport) { passport.hidden = true; return; }
+  const b = e.target.closest('.pp-stamp'); if (b) { passport.hidden = true; travelTo(+b.dataset.i); }
+});
 
 function setLens(l, quiet) {
   st.lens = l; document.body.classList.remove('lens-gogol', 'lens-nikhil', 'lens-both'); document.body.classList.add('lens-' + l);
@@ -1330,9 +1614,10 @@ cv.addEventListener('touchend', (e) => { if (tsx == null) return; const dx = e.c
 
 /* keyboard */
 document.addEventListener('keydown', (e) => {
-  if (e.target.tagName === 'INPUT') { if (e.key === 'Enter') board(); return; }
+  if (e.target.tagName === 'INPUT') { if (e.key === 'Enter') { if (e.target.id === 'certName') doTry('sign'); else board(); } return; }
   if (!st.started) { if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); board(); } return; }
   if (!help.hidden) { if (e.key === 'Escape' || e.key === '?') help.hidden = true; return; }
+  if (!passport.hidden) { if (e.key === 'Escape' || e.key === 'v' || e.key === 'V') passport.hidden = true; return; }
   if (!$('#finale').hidden) { if (e.key === 'Escape' || e.key === 'ArrowLeft') closeFinale(); return; }
   const k = e.key;
   if (k === 'ArrowRight' || k === 'PageDown' || (k === ' ' && e.target.tagName !== 'BUTTON')) { e.preventDefault(); travelTo((st.moving ? st.target : st.cur) + 1); }
@@ -1342,6 +1627,7 @@ document.addEventListener('keydown', (e) => {
   else if (k === 'p' || k === 'P') togglePresent();
   else if (k === 'f' || k === 'F') fullscreen();
   else if (k === 'a' || k === 'A') toggleAnalysis();
+  else if (k === 'v' || k === 'V') openPassport();
   else if (k === '?' || k === 'h' || k === 'H') help.hidden = false;
   else if (k === 'Home') travelTo(0);
   else if (k === 'End') travelTo(STATIONS.length - 1);
@@ -1352,13 +1638,15 @@ document.addEventListener('keydown', (e) => {
    INTRO + FINALE
    ========================================================= */
 const scr = $('#scramble');
-let scrWord = 0; const WORDS = ['GOGOL', 'NIKHIL'];
+let scrWord = 0;
 function scramble() {
   if (st.started) return;
-  scrWord = 1 - scrWord; const target = WORDS[scrWord], chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'; let f = 0;
+  // cycles GOGOL → NIKHIL → the visitor's own name, once they type one
+  const mine = nameIn.value.trim().toUpperCase().slice(0, 14), words = ['GOGOL', 'NIKHIL'].concat(mine ? [mine] : []);
+  scrWord = (scrWord + 1) % words.length; const target = words[scrWord], chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'; let f = 0;
   const iv = setInterval(() => {
     f++; scr.textContent = target.split('').map((c, k) => (k < f / 2 ? c : chars[Math.floor(Math.random() * 26)])).join('');
-    if (f >= target.length * 2) { clearInterval(iv); scr.textContent = target; scr.classList.toggle('n', scrWord === 1); }
+    if (f >= target.length * 2) { clearInterval(iv); scr.textContent = target; scr.classList.toggle('n', scrWord === 1); scr.classList.toggle('v', scrWord === 2); }
   }, 45);
   setTimeout(scramble, 2600);
 }

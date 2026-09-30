@@ -18,6 +18,7 @@ Double-click `index.html`. No install needed. For the class presentation, turn o
 | `P` | Presenter mode (hides extra buttons) |
 | `F` | Fullscreen |
 | `M` | Sound on/off |
+| `V` | Open the passport |
 
 Link straight to a station with `#s5`, `#s9`, and so on.
 
@@ -29,6 +30,9 @@ Link straight to a station with `#s5`, `#s9`, and so on.
 - **The lost letter**: the envelope that never arrived drifts across the sky. Click it.
 - **Class polls** at 1973, 1986 and the 1990s: tap once per raised hand, then reveal what Gogol did.
 - **Locked finale**: visit every station, then the book opens and the inscription writes itself, personalized with the visitor's name.
+- **Try it moments** at six stations: slip into the suitor's still-warm shoes (1967), fill in the birth certificate while the letter never comes (1968), offer baby Gogol the earth, pen or dollar at his rice ceremony (1968), rub a gravestone by dragging across the paper (1970s), try to open the Gogol book he shelves for 18 years (1982), and answer the phone call from Cleveland (1990s).
+- **Passenger passport**: every station you visit stamps a passport (the button top right). A star marks each Try it moment you finished. Click any stamp to ride there.
+- **Depth**: the scenery shifts with the mouse and the ticket tilts toward the pointer. The intro cycles GOGOL → NIKHIL → the visitor's own name.
 - Sound is made in the browser (whistle, wheel clacks, crash). Scenery changes by place: Calcutta, Cambridge, the suburbs, Yale, New York, the lake, Cleveland.
 
 ## Editing
