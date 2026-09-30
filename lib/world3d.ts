@@ -9,7 +9,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import type { Station } from './stations';
 import { NAME_COLORS } from './stations';
 import { GAP, clamp, lerp, smooth, damp, canvasTex, starTexture, type Shared } from './world3d/kit';
-import { buildTrain, TRAIN_BACK, TRAIN_FRONT } from './world3d/train';
+import { buildTrain, TRAIN_BACK, TRAIN_FRONT, LIVERIES } from './world3d/train';
 import { buildScenery, SIGN_DX, SIGN_Y, SIGN_Z, LAMP_DX, LAMP_Z, LAMP_Y } from './world3d/scenery';
 import { Puffs, Glows, Weather, Birds } from './world3d/fx';
 
@@ -186,6 +186,7 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
   const hex3 = (h: string) => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
   const skyTop = stations.map((s) => hex3(s.sky[0])), skyBot = stations.map((s) => hex3(s.sky[1]));
   const nameCol = stations.map((s) => new THREE.Color(NAME_COLORS[s.name]));
+  const liveryCol = new THREE.Color();
   const lensCols = { gogol: new THREE.Color(NAME_COLORS.gogol), nikhil: new THREE.Color(NAME_COLORS.nikhil), both: new THREE.Color(NAME_COLORS.both) };
   const cTop = new THREE.Color(), cBot = new THREE.Color(), cTmp = new THREE.Color(), cTmp2 = new THREE.Color();
   const WHITE = new THREE.Color(1, 1, 1), MOON = new THREE.Color(0.55, 0.66, 1.0), SUNC = new THREE.Color(1.0, 0.9, 0.76), WARM = new THREE.Color(1.0, 0.72, 0.42);
@@ -341,6 +342,9 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
     train.update(tx, derail, now);
     if (S.lens !== f.lens) { S.lens = f.lens; drawPlate(f.lens); }
     S.lensCol.lerp(lensCols[f.lens] || lensCols.gogol, damp(4, dt));
+    // the train's paint follows Gogol's life (lib/world3d/train.ts LIVERIES)
+    liveryCol.set(LIVERIES[Math.max(0, Math.min(LIVERIES.length - 1, Math.round(f.p)))]);
+    train.mats.body.color.lerp(liveryCol, damp(2.5, dt));
     train.mats.lens.color.copy(S.lensCol); train.mats.lens.emissive.copy(S.lensCol);
     train.mats.lens.emissiveIntensity = (0.35 + 0.9 * dark) * ls;
     train.mats.glass.emissiveIntensity = (0.55 + 2.0 * dark) * (1 - derail * 0.9) * ls;

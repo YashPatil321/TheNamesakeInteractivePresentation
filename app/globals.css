@@ -8,7 +8,7 @@
   --paper-hi: #f6f0e1;
   --paper-2: #ddd2b6;
   --ink: #1d1b26;
-  --ink-soft: #4b4658;
+  --ink-soft: #3b3748;
   --gogol: #f2a33a;
   --nikhil: #5eaaff;
   --stamp: #b8382a;
@@ -135,7 +135,7 @@ kbd { display: inline-block; min-width: 1.5em; box-sizing: border-box; text-alig
 .card-wrap { position: absolute; z-index: 15; left: clamp(16px, 3vw, 40px); top: 76px;
   width: min(470px, calc(100% - 32px)); max-height: calc(100% - 180px); display: flex;
   perspective: 1600px; perspective-origin: 30% 40%;
-  filter: drop-shadow(0 1px 1px rgba(0,0,0,.3)) drop-shadow(0 26px 28px rgba(2,4,12,.5)); }
+  filter: drop-shadow(0 18px 22px rgba(2,4,12,.45)); }
 .ticket { --perf: 46px; --perf-b: 64px; --notch: 9px;
   position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column;
   color: var(--ink); border-radius: 12px;
@@ -159,12 +159,13 @@ kbd { display: inline-block; min-width: 1.5em; box-sizing: border-box; text-alig
     radial-gradient(circle var(--notch) at 100% calc(100% - var(--perf-b)), #0000 95%, #000);
   mask-composite: intersect;
   transform-origin: 30% 100%;
-  /* the tilt toward the pointer lives on `transform`; the 3D entrance/exit on translate/rotate/scale */
-  transform: rotateX(var(--ty, 0deg)) rotateY(var(--tx, 0deg));
-  transition: opacity .45s var(--ease-out), translate 1s var(--spring), rotate 1s var(--spring), scale 1s var(--spring), transform .6s var(--ease-out);
-  will-change: transform, translate, rotate; }
+  /* 3D entrance/exit on translate/rotate/scale; at rest the card is perfectly flat so text stays sharp */
+  transform: none;
+  -webkit-font-smoothing: subpixel-antialiased; text-rendering: optimizeLegibility;
+  transition: opacity .45s var(--ease-out), translate 1s var(--spring), rotate 1s var(--spring), scale 1s var(--spring); }
 .ticket.away { opacity: 0; translate: -60px 90px -260px; rotate: 1 -.45 .1 24deg; scale: .92; pointer-events: none;
-  transition: opacity .3s var(--ease-in) .06s, translate .42s var(--ease-in), rotate .42s var(--ease-in), scale .42s var(--ease-in), transform .4s; }
+  transition: opacity .3s var(--ease-in) .06s, translate .42s var(--ease-in), rotate .42s var(--ease-in), scale .42s var(--ease-in);
+  will-change: translate, rotate, opacity; }
 
 .t-head { position: relative; flex: none; height: var(--perf); box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 24px;
   font-family: var(--mono); font-size: var(--t-xs); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
@@ -212,7 +213,7 @@ kbd { display: inline-block; min-width: 1.5em; box-sizing: border-box; text-alig
 
 /* tabs with a sliding ink underline */
 .tabs { --tw: 104px; position: relative; display: grid; grid-template-columns: repeat(var(--n, 2), var(--tw)); margin: 18px 0 16px; border-bottom: 1px solid var(--rule); }
-.tab { position: relative; background: none; border: 0; padding: 10px 0 11px; font-family: var(--mono); font-size: var(--t-xs); letter-spacing: .14em;
+.tab { position: relative; background: none; border: 0; padding: 10px 0 11px; font-family: var(--mono); font-size: .8rem; font-weight: 700; letter-spacing: .12em;
   text-transform: uppercase; color: var(--ink-soft); transition: color .25s; }
 .tab:hover { color: var(--ink); }
 .tab[aria-selected="true"] { color: var(--ink); font-weight: 700; }
@@ -228,7 +229,7 @@ kbd { display: inline-block; min-width: 1.5em; box-sizing: border-box; text-alig
 .panel.enter { animation: panelIn .5s var(--ease-out); }
 @keyframes panelIn { from { opacity: 0; transform: translateX(calc(var(--dir, 1) * 26px)); } }
 
-.panel p { margin: 0 0 14px; max-width: 62ch; }
+.panel p { margin: 0 0 14px; max-width: 62ch; font-size: 1.075rem; line-height: 1.6; color: #16141d; }
 .quote { position: relative; margin: 18px 0; padding: 14px 18px 14px 46px; background: rgba(29,27,38,.05); border-radius: 10px;
   box-shadow: inset 3px 0 0 var(--accent); font-style: italic; font-size: 1.08rem; line-height: 1.5; }
 .quote::before { content: "\201C"; position: absolute; left: 13px; top: 6px; font-family: var(--display); font-style: normal; font-size: 2.8rem; line-height: 1; color: var(--accent); opacity: .85; }

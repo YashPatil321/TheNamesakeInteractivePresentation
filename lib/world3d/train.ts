@@ -12,9 +12,15 @@ type Mats = {
   paint: THREE.MeshStandardMaterial; iron: THREE.MeshStandardMaterial; brass: THREE.MeshStandardMaterial;
   glass: THREE.MeshStandardMaterial; lens: THREE.MeshStandardMaterial; wheel: THREE.MeshStandardMaterial;
   lamp: THREE.MeshBasicMaterial; plate: THREE.MeshStandardMaterial;
+  /** body panels painted white/grey in vertex colors; .color is the era livery (see LIVERIES) */
+  body: THREE.MeshStandardMaterial;
 };
 
-const MAROON = '#6b1e2a', MAROON_D = '#4a1520', CREAM = '#e6d7ae', ROOF = '#262833', IRON = '#23252d', SMOKE = '#17181d', RED = '#8e2323';
+// Body panels are drawn in neutral tones and tinted by mats.body.color, so the train can change livery by era.
+const BODY = '#ffffff', BODY_D = '#a4a4a4';
+/** Livery per station, following Gogol's life: Indian Railways maroon, New England green, Nikhil blue, 90s steel, plum at the end. */
+export const LIVERIES = ['#7a2230', '#7a2230', '#2f5e44', '#2f5e44', '#2f5e44', '#2f5e44', '#2f5e44', '#2f5e44', '#284c8a', '#284c8a', '#4d6784', '#4d6784', '#4d6784', '#4d6784', '#5d3574'];
+const MAROON = BODY, MAROON_D = BODY_D, CREAM = '#e6d7ae', ROOF = '#262833', IRON = '#23252d', SMOKE = '#17181d', RED = '#8e2323';
 
 function wheelGeometry() {
   const parts: THREE.BufferGeometry[] = [];
@@ -91,6 +97,7 @@ export function buildTrain(scene: THREE.Scene): TrainParts {
     lens: new THREE.MeshStandardMaterial({ color: '#f2a33a', emissive: '#f2a33a', emissiveIntensity: 0.6, roughness: 0.4 }),
     wheel: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.45, metalness: 0.6 }),
     lamp: new THREE.MeshBasicMaterial({ color: new THREE.Color(6, 5.2, 3.6) }),
+    body: new THREE.MeshStandardMaterial({ vertexColors: true, color: LIVERIES[0], roughness: 0.38, metalness: 0.15 }),
     plate: new THREE.MeshStandardMaterial({ map: plate.tex, emissiveMap: plate.tex, emissive: '#ffffff', emissiveIntensity: 0.25, roughness: 0.35, metalness: 0.3 }),
   };
   const geos: THREE.BufferGeometry[] = [];
@@ -167,51 +174,64 @@ export function buildTrain(scene: THREE.Scene): TrainParts {
   const pl1 = new THREE.Mesh(plateGeo, mats.plate); pl1.position.set(-2.95, 1.98, 1.195); loco.add(pl1);
   const pl2 = new THREE.Mesh(plateGeo, mats.plate); pl2.position.set(-2.95, 1.98, -1.195); pl2.rotation.y = Math.PI; loco.add(pl2);
 
-  mesh(merge(paintL), mats.paint, loco);
+  mesh(merge(paintL), mats.body, loco);
   mesh(merge(ironL), mats.iron, loco);
   mesh(merge(brassL), mats.brass, loco);
   mesh(merge(glassL), mats.glass, loco, false);
   mesh(merge(lensL), mats.lens, loco, false);
 
-  /* ---------------- carriages ---------------- */
-  const carPaint: THREE.BufferGeometry[] = [], carIron: THREE.BufferGeometry[] = [], carBrass: THREE.BufferGeometry[] = [], carGlass: THREE.BufferGeometry[] = [], carLens: THREE.BufferGeometry[] = [];
-  carIron.push(paint(boxMM(-4.0, 1.05, -0.9, 4.0, 1.42, 0.9), IRON));
-  for (const bx of [-2.85, 2.85]) {
-    carIron.push(paint(boxMM(bx - 1.0, SML_Y - 0.12, -0.86, bx + 1.0, SML_Y + 0.14, 0.86), '#1b1c22'));
-    carIron.push(paint(boxMM(bx - 0.25, SML_Y + 0.1, -0.6, bx + 0.25, 1.1, 0.6), '#1b1c22'));
-  }
-  carPaint.push(paint(boxMM(-4.2, 1.4, -1.16, 4.2, 1.95, 1.16), MAROON_D));
-  carPaint.push(paint(boxMM(-4.2, 1.95, -1.16, 4.2, 2.52, 1.16), MAROON));
-  carPaint.push(paint(boxMM(-4.2, 3.2, -1.16, 4.2, 3.55, 1.16), MAROON));
+  /* ---------------- carriages: a passenger coach and a baggage/mail van ---------------- */
+  type Lists = { body: THREE.BufferGeometry[]; iron: THREE.BufferGeometry[]; brass: THREE.BufferGeometry[]; glass: THREE.BufferGeometry[]; lens: THREE.BufferGeometry[]; trim: THREE.BufferGeometry[] };
+  const lists = (): Lists => ({ body: [], iron: [], brass: [], glass: [], lens: [], trim: [] });
+  const underframe = (L: Lists) => {
+    L.iron.push(paint(boxMM(-4.0, 1.05, -0.9, 4.0, 1.42, 0.9), IRON));
+    for (const bx of [-2.85, 2.85]) {
+      L.iron.push(paint(boxMM(bx - 1.0, SML_Y - 0.12, -0.86, bx + 1.0, SML_Y + 0.14, 0.86), '#1b1c22'));
+      L.iron.push(paint(boxMM(bx - 0.25, SML_Y + 0.1, -0.6, bx + 0.25, 1.1, 0.6), '#1b1c22'));
+    }
+    for (const sx of [-1, 1]) L.iron.push(paint(boxMM(sx * 4.2 - 0.18, 1.55, -0.72, sx * 4.2 + 0.18, 3.35, 0.72), '#14151a'));
+  };
+  // coach: six big lit windows with passengers, cream waist band, arched roof with a clerestory
+  const coach = lists(); underframe(coach);
+  coach.body.push(paint(boxMM(-4.2, 1.4, -1.16, 4.2, 1.95, 1.16), BODY_D));
+  coach.body.push(paint(boxMM(-4.2, 1.95, -1.16, 4.2, 2.52, 1.16), BODY));
+  coach.body.push(paint(boxMM(-4.2, 3.2, -1.16, 4.2, 3.55, 1.16), BODY));
   const winX: number[] = [];
   for (let k = 0; k < 6; k++) winX.push(-3.35 + k * 1.34);
-  // window piers
   const edges = [-4.2, ...winX.flatMap((x) => [x - 0.42, x + 0.42]), 4.2];
-  for (let k = 0; k < edges.length; k += 2) carPaint.push(paint(boxMM(edges[k], 2.52, -1.16, edges[k + 1], 3.2, 1.16), MAROON));
-  carGlass.push(boxMM(-4.1, 2.52, -1.1, 4.1, 3.2, 1.1));
-  // passengers' silhouettes in some windows
-  const rs = [0, 2, 3, 5];
-  for (const k of rs) for (const s of [-1, 1]) {
-    carPaint.push(paint(place(new THREE.SphereGeometry(0.15, 10, 8), winX[k] + (k % 2 ? 0.1 : -0.1), 2.93, s * 1.11, 0, 0, 0, 1, 1, 0.25), '#140e0e'));
-    carPaint.push(paint(place(new THREE.CylinderGeometry(0.13, 0.26, 0.4, 10), winX[k] + (k % 2 ? 0.1 : -0.1), 2.66, s * 1.11, 0, 0, 0, 1, 1, 0.25), '#140e0e'));
+  for (let k = 0; k < edges.length; k += 2) coach.body.push(paint(boxMM(edges[k], 2.52, -1.16, edges[k + 1], 3.2, 1.16), BODY));
+  coach.glass.push(boxMM(-4.1, 2.52, -1.1, 4.1, 3.2, 1.1));
+  for (const k of [0, 2, 3, 5]) for (const sd of [-1, 1]) {
+    coach.trim.push(paint(place(new THREE.SphereGeometry(0.15, 10, 8), winX[k] + (k % 2 ? 0.1 : -0.1), 2.93, sd * 1.11, 0, 0, 0, 1, 1, 0.25), '#140e0e'));
+    coach.trim.push(paint(place(new THREE.CylinderGeometry(0.13, 0.26, 0.4, 10), winX[k] + (k % 2 ? 0.1 : -0.1), 2.66, sd * 1.11, 0, 0, 0, 1, 1, 0.25), '#140e0e'));
   }
-  carBrass.push(boxMM(-4.2, 2.36, -1.175, 4.2, 2.43, 1.175));
-  carBrass.push(boxMM(-4.2, 3.14, -1.175, 4.2, 3.19, 1.175));
-  carLens.push(boxMM(-4.2, 1.95, -1.18, 4.2, 2.05, 1.18));
-  {
-    carPaint.push(paint(halfRoof(8.7, 0, 3.55, 1.3, 0.42), ROOF));
-    carIron.push(paint(boxMM(-2.5, 3.9, -0.18, 2.5, 4.05, 0.18), '#2c2e37'));
-  }
-  for (const s of [-1, 1]) carIron.push(paint(boxMM(s * 4.2 - 0.18, 1.55, -0.72, s * 4.2 + 0.18, 3.35, 0.72), '#14151a'));
-  const carPaintG = merge(carPaint), carIronG = merge(carIron), carBrassG = merge(carBrass), carGlassG = merge(carGlass), carLensG = merge(carLens);
-  geos.push(carPaintG, carIronG, carBrassG, carGlassG, carLensG);
+  coach.trim.push(paint(boxMM(-4.2, 2.3, -1.17, 4.2, 2.45, 1.17), CREAM));
+  coach.brass.push(boxMM(-4.2, 3.14, -1.175, 4.2, 3.19, 1.175));
+  coach.lens.push(boxMM(-4.2, 1.95, -1.18, 4.2, 2.05, 1.18));
+  coach.trim.push(paint(halfRoof(8.7, 0, 3.55, 1.3, 0.42), ROOF));
+  coach.trim.push(paint(boxMM(-2.5, 3.9, -0.4, 2.5, 4.2, 0.4), '#2c2e37'));
+  coach.glass.push(boxMM(-2.3, 3.97, -0.41, 2.3, 4.1, 0.41));
+  // van: taller flat-sided body, planked, double sliding doors, two small end windows, flat roof with vents, red tail lamps
+  const van = lists(); underframe(van);
+  van.body.push(paint(boxMM(-4.2, 1.4, -1.16, 4.2, 3.7, 1.16), BODY_D));
+  for (let k = 0; k < 14; k++) van.trim.push(paint(boxMM(-4.1 + k * 0.6, 1.5, -1.175, -4.08 + k * 0.6, 3.6, 1.175), '#1c1c20'));
+  for (const dx of [-0.95, 0.05]) van.body.push(paint(boxMM(dx, 1.55, -1.19, dx + 0.9, 3.35, 1.19), BODY));
+  for (const dx of [-0.95, 0.05]) van.brass.push(boxMM(dx + 0.05, 2.35, -1.2, dx + 0.12, 2.6, 1.2));
+  van.iron.push(paint(boxMM(-1.1, 3.38, -1.21, 1.1, 3.46, 1.21), IRON));
+  for (const wx of [-3.4, 3.4]) van.glass.push(boxMM(wx - 0.35, 2.7, -1.18, wx + 0.35, 3.2, 1.18));
+  van.trim.push(paint(boxMM(-4.3, 3.7, -1.25, 4.3, 3.86, 1.25), ROOF));
+  for (const vx of [-2.6, 0, 2.6]) van.iron.push(paint(place(new THREE.CylinderGeometry(0.16, 0.2, 0.28, 10), vx, 4.0, 0), '#2c2e37'));
+  van.lens.push(boxMM(-4.2, 1.95, -1.18, 4.2, 2.05, 1.18));
+  van.trim.push(paint(boxMM(-2.3, 2.75, -1.2, -1.2, 3.1, 1.2), CREAM)); // mail badge panel
+  const tail = new THREE.MeshBasicMaterial({ color: new THREE.Color(4, 0.5, 0.3) });
   const cars: THREE.Group[] = [];
-  for (const cx of CAR_X) {
+  CAR_X.forEach((cx, idx) => {
+    const L = idx === 0 ? coach : van;
     const g = new THREE.Group(); g.position.x = cx; root.add(g); cars.push(g);
-    for (const [geo, m, sh] of [[carPaintG, mats.paint, true], [carIronG, mats.iron, true], [carBrassG, mats.brass, true], [carGlassG, mats.glass, false], [carLensG, mats.lens, false]] as const) {
-      const o = new THREE.Mesh(geo, m); o.castShadow = sh; o.receiveShadow = true; g.add(o);
-    }
-  }
+    const sets = [[L.body, mats.body, true], [L.trim, mats.paint, true], [L.iron, mats.iron, true], [L.brass, mats.brass, true], [L.glass, mats.glass, false], [L.lens, mats.lens, false]] as const;
+    for (const [list, m, sh] of sets) { if (!list.length) continue; mesh(merge([...list]), m, g, sh); }
+    if (idx === 1) for (const sd of [-0.8, 0.8]) { const t = new THREE.Mesh(new THREE.SphereGeometry(0.11, 10, 8), tail); geos.push(t.geometry); t.position.set(-4.4, 3.3, sd); g.add(t); }
+  });
   // couplings
   const coupG = boxMM(-0.5, 1.15, -0.12, 0.5, 1.35, 0.12); geos.push(coupG);
   const coup1 = new THREE.Mesh(coupG, mats.iron); coup1.position.x = -4.75; loco.add(coup1);
