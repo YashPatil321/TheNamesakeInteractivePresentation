@@ -409,8 +409,11 @@ export function buildScenery(scene: THREE.Scene, stations: Station[], sh: Shared
     const tall = (x: number) => 0.3 + 0.7 * Math.pow(clamp(1 - Math.abs(x - xs) / (GAP / 2), 0, 1), 0.6); // skylines taper at band edges
     switch (s.region) {
       case 'india': {
+        // Blender landmark sets (lib/world3d/cities/india.ts) cover xs-66 .. xs+40; procedural filler only beyond that
+        const lm = (x: number) => i === 0 || (x > xs - 66 && x < xs + 40); // station 0 is rural: no town blocks at all
         const walls = ['#c98f5a', '#d9b27c', '#b86f4b', '#e0c9a0', '#a8765a', '#c7a0a8', '#d6a66e'];
         rowX(x0, x1, (x) => {
+          if (lm(x)) return 6;
           const w = 4 + r() * 4, d = 4 + r() * 3, h = 3 + r() * 4, z = -17 - r() * 8;
           if (r() < 0.2) { put('temple', x + w / 2, z - 3, r() * 0.5, 4 + r() * 2, 8 + r() * 5, 4 + r() * 2, '#b7835a'); return w + 5; }
           put('box', x + w / 2, z, 0, w, h, d, pick(walls));
@@ -418,27 +421,14 @@ export function buildScenery(scene: THREE.Scene, stations: Station[], sh: Shared
           if (r() < 0.5) put('palm', x + w + 0.8, z + 3 + r() * 3, r() * 6, 1.0, 0.9 + r() * 0.5, 1.0, '#ffffff');
           return w + 1 + r() * 3;
         });
-        rowX(x0, x1, (x) => { const w = 5 + r() * 7, h = 5 + r() * 9; put('box', x, -40 - r() * 25, 0, w, h, 6 + r() * 4, pick(walls)); if (r() < 0.3) put('dome', x, -45, 0, w * 0.6, w * 0.5, w * 0.6, '#e8dcc4', h); return w + 2 + r() * 6; });
-        rowX(x0, x1, (x) => { if (!nearClear(x)) put('palm', x, -11.5 - r() * 3, r() * 6, 1.1, 1 + r() * 0.5, 1.1, '#ffffff'); return 5 + r() * 8; });
-        for (let k = 0; k < 7; k++) put('palm', x0 + r() * (x1 - x0), -70 - r() * 30, r() * 6, 1.6, 2 + r(), 1.6, '#cfd8c8');
+        rowX(x0, x1, (x) => { if (lm(x)) return 6; const w = 5 + r() * 7, h = 5 + r() * 9; put('box', x, -40 - r() * 25, 0, w, h, 6 + r() * 4, pick(walls)); if (r() < 0.3) put('dome', x, -45, 0, w * 0.6, w * 0.5, w * 0.6, '#e8dcc4', h); return w + 2 + r() * 6; });
+        rowX(x0, x1, (x) => { if (!nearClear(x) && (i === 0 || !lm(x))) put('palm', x, -11.5 - r() * 3, r() * 6, 1.1, 1 + r() * 0.5, 1.1, '#ffffff'); return 5 + r() * 8; });
+        if (i === 0) for (let k = 0; k < 7; k++) put('palm', x0 + r() * (x1 - x0), -70 - r() * 30, r() * 6, 1.6, 2 + r(), 1.6, '#cfd8c8');
         break;
       }
-      case 'town': {
-        const walls = ['#8a4a36', '#9c5a40', '#7a4032', '#a0664a', '#b07a5a'];
-        rowX(x0, x1, (x) => {
-          const w = 5 + r() * 3, d = 5 + r() * 2, h = 4 + r() * 3;
-          house(x + w / 2, -18 - r() * 6, w, d, h, pick(walls), pick(['#3b3336', '#4a3a36', '#3a3f4a']), 1.8 + r() * 1.2, r() < 0.7);
-          if (r() < 0.4) tree(x + w + 1.5, -14 - r() * 3, 1.1 + r() * 0.5);
-          return w + 1.5 + r() * 3;
-        });
-        // church
-        const cx = x0 + (x1 - x0) * (0.2 + r() * 0.6);
-        put('box', cx, -34, 0, 7, 7, 12, '#b8ad9c'); put('roof', cx, -34, Math.PI / 2, 12.4, 3.5, 7.6, '#4a4f5a', 7);
-        put('box', cx, -26.5, 0, 3.2, 12, 3.2, '#b8ad9c'); put('cone', cx, -26.5, 0, 3.6, 9, 3.6, '#5a5f6a', 12);
-        rowX(x0, x1, (x) => { const w = 6 + r() * 6; put('box', x, -48 - r() * 20, 0, w, 5 + r() * 7, 6, pick(walls)); return w + 1 + r() * 4; });
-        rowX(x0, x1, (x) => { if (!nearClear(x)) tree(x, -12 - r() * 2, 0.9 + r() * 0.4); return 7 + r() * 9; });
+      case 'town':
+        // filled by the Blender landmark set in lib/world3d/cities/town.ts (no procedural filler)
         break;
-      }
       case 'suburb': {
         const walls = ['#e9e4d8', '#c9d6e0', '#e6d3a8', '#b8c9b0', '#d9b8a8', '#f0ece2'];
         rowX(x0, x1, (x) => {
@@ -454,23 +444,9 @@ export function buildScenery(scene: THREE.Scene, stations: Station[], sh: Shared
         if (s.snow) for (let k = 0; k < 8; k++) pine(x0 + r() * (x1 - x0), -30 - r() * 20, 1.3 + r() * 0.6);
         break;
       }
-      case 'campus': {
-        const stoneC = ['#8f8574', '#9d9380', '#7f7768', '#a39a88'];
-        rowX(x0, x1, (x) => {
-          if (r() < 0.35) {
-            const tw = 4 + r() * 1.5, th = 11 + r() * 5, z = -24 - r() * 6, c = pick(stoneC);
-            put('block', x + tw / 2, z, 0, tw, th, tw, c); put('spire', x + tw / 2, z, 0, tw, tw * 2.4, tw, '#5e5a54', th);
-            return tw + 3;
-          }
-          const w = 10 + r() * 6, h = 7 + r() * 3, z = -22 - r() * 6, c = pick(stoneC);
-          put('box', x + w / 2, z, 0, w, h, 8, c); put('crenel', x + w / 2, z, 0, w, 8, 8, c, h);
-          put('roof', x + w / 2, z, 0, w * 0.96, 2.2, 7.6, '#4a4a50', h);
-          return w + 2 + r() * 3;
-        });
-        rowX(x0, x1, (x) => { const th = (14 + r() * 8) * tall(x), tw = 5, z = -60 - r() * 20; put('block', x, z, 0, tw, th, tw, pick(stoneC)); put('spire', x, z, 0, tw, tw * 2.6, tw, '#5e5a54', th); return 16 + r() * 14; });
-        rowX(x0, x1, (x) => { if (!nearClear(x)) tree(x, -13 - r() * 2, 1.2 + r() * 0.5); return 6 + r() * 7; });
+      case 'campus':
+        // filled by the Blender landmark set in lib/world3d/cities/campus.ts (no procedural filler)
         break;
-      }
       case 'nyc': {
         const cols = ['#5d6470', '#7b8290', '#4a4f5a', '#8c8a84', '#a09482', '#3c4250', '#6b6660'];
         rowX(x0, x1, (x) => {
