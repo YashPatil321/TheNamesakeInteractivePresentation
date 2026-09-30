@@ -4,8 +4,6 @@ import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import type { Station } from './stations';
 import { NAME_COLORS } from './stations';
 import { GAP, clamp, lerp, smooth, damp, canvasTex, starTexture, type Shared } from './world3d/kit';
@@ -14,6 +12,8 @@ import { addLandmarks } from './world3d/landmarks';
 import { disposeLoaders } from './world3d/assets';
 import { buildScenery, SIGN_DX, SIGN_Y, SIGN_Z, LAMP_DX, LAMP_Z, LAMP_Y } from './world3d/scenery';
 import { Puffs, Glows, Weather, Birds } from './world3d/fx';
+import { makeSky, makeRidges, SkyEnv } from './world3d/sky';
+import { makeGradePass } from './world3d/post';
 
 export interface WorldFrame {
   now: number; // performance.now()
@@ -50,35 +50,6 @@ export interface WorldOptions {
   fonts: () => { display: string; mono: string };
 }
 
-const SKY_V = `varying vec3 vDir; void main(){ vDir = position; vec4 p = projectionMatrix * modelViewMatrix * vec4(position, 1.0); gl_Position = p.xyww; }`;
-const SKY_F = `uniform vec3 uTop, uBot, uSunDir, uDisc, uHalo; uniform float uStars, uTime, uLight, uSize, uMoon;
-  varying vec3 vDir;
-  float h21(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
-  void main(){
-    vec3 d = normalize(vDir);
-    float h = d.y;
-    float t = smoothstep(-0.03, 0.6, h);
-    vec3 col = mix(uBot, uTop, pow(t, 0.8));
-    col += uBot * 0.18 * exp(-abs(h) * 22.0);
-    float cs = dot(d, uSunDir);
-    float ang = acos(clamp(cs, -1.0, 1.0));
-    col += uHalo * (pow(max(cs, 0.0), 350.0) * 0.8 + pow(max(cs, 0.0), 22.0) * 0.22 + pow(max(cs, 0.0), 4.0) * 0.05);
-    if (uStars > 0.01 && h > 0.0) {
-      vec2 sp = vec2(atan(d.x, d.z) * 95.0, asin(h) * 95.0);
-      vec2 id = floor(sp), f = fract(sp) - 0.5;
-      float r = h21(id);
-      vec2 o = vec2(h21(id + 3.7), h21(id + 9.1)) - 0.5;
-      float s = step(0.965, r) * smoothstep(0.12, 0.0, length(f - o * 0.6));
-      s *= 0.55 + 0.45 * sin(uTime * (1.5 + r * 3.0) + r * 40.0);
-      col += vec3(1.0, 0.97, 0.9) * s * uStars * smoothstep(0.02, 0.2, h) * (0.6 + 1.4 * fract(r * 91.0));
-    }
-    float disc = 1.0 - smoothstep(uSize * 0.92, uSize, ang);
-    vec3 dc = uDisc;
-    if (uMoon > 0.5) { vec3 q = normalize(d - uSunDir * cs); dc *= 0.82 + 0.18 * sin(q.x * 190.0 + q.y * 70.0) * sin(q.y * 150.0 - q.z * 60.0); }
-    col = mix(col, dc, disc);
-    gl_FragColor = vec4(col * uLight, 1.0);
-  }`;
-
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 /** Returns null when WebGL is unavailable; the engine then keeps the 2D canvas. */
@@ -109,27 +80,16 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
   scene.fog = new THREE.Fog(0x101522, 70, 460);
   const camera = new THREE.PerspectiveCamera(34, 16 / 9, 0.3, 1400);
 
-  // neutral image-based light for metals/paint; its strength follows the time of day
-  const pmrem = new THREE.PMREMGenerator(renderer);
-  const room = new RoomEnvironment();
-  const envTex = pmrem.fromScene(room, 0.04).texture;
-  scene.environment = envTex;
-  room.traverse((o) => { const m = o as THREE.Mesh; if (m.geometry) m.geometry.dispose(); if (m.material) (m.material as THREE.Material).dispose(); });
-  pmrem.dispose();
+  // image-based light baked from the current sky (re-baked, throttled, as the time of day changes)
+  const skyEnv = new SkyEnv(renderer);
 
   const shared: Shared = { uTime: { value: 0 }, uNight: { value: 0 }, uWind: { value: 1 } };
 
   /* ---------- sky ---------- */
-  const skyMat = new THREE.ShaderMaterial({
-    uniforms: {
-      uTop: { value: new THREE.Color() }, uBot: { value: new THREE.Color() }, uSunDir: { value: new THREE.Vector3(0.3, 0.4, -1).normalize() },
-      uDisc: { value: new THREE.Color() }, uHalo: { value: new THREE.Color() }, uStars: { value: 0 }, uTime: { value: 0 }, uLight: { value: 1 }, uSize: { value: 0.03 }, uMoon: { value: 1 },
-    },
-    vertexShader: SKY_V, fragmentShader: SKY_F, side: THREE.BackSide, depthWrite: false, fog: false,
-  });
-  const sky = new THREE.Mesh(new THREE.SphereGeometry(900, 32, 16), skyMat);
-  sky.renderOrder = -10; sky.frustumCulled = false;
+  const { mesh: sky, mat: skyMat } = makeSky();
   scene.add(sky);
+  const ridges = makeRidges(stations, -4 * GAP, 19 * GAP);
+  scene.add(ridges.mesh);
 
   /* ---------- lights ---------- */
   const hemi = new THREE.HemisphereLight(0xffffff, 0x3a3226, 1);
@@ -138,7 +98,7 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
   Object.assign(sun.shadow.camera, { left: -38, right: 38, top: 30, bottom: -30, near: 5, far: 220 });
-  sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.035; sun.shadow.radius = 3;
+  sun.shadow.bias = -0.0005; sun.shadow.normalBias = 0.04; sun.shadow.radius = 4;
   scene.add(sun, sun.target);
   const lampLight = new THREE.PointLight(0xffc98a, 0, 34, 2);
   scene.add(lampLight);
@@ -180,10 +140,11 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
   const rt = new THREE.WebGLRenderTarget(4, 4, { type: THREE.HalfFloatType, samples: 4 });
   const composer = new EffectComposer(renderer, rt);
   composer.addPass(new RenderPass(scene, camera));
-  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.6, 0.55, 0.88);
+  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.6, 0.55, 0.9);
   composer.addPass(bloom);
-  const output = new OutputPass();
-  composer.addPass(output);
+  // tone mapping + sRGB + film grade in one pass (replaces OutputPass)
+  const grade = makeGradePass();
+  composer.addPass(grade.pass);
 
   /* ---------- precomputed colors ---------- */
   const hex3 = (h: string) => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
@@ -194,6 +155,9 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
   const cTop = new THREE.Color(), cBot = new THREE.Color(), cTmp = new THREE.Color(), cTmp2 = new THREE.Color();
   const WHITE = new THREE.Color(1, 1, 1), MOON = new THREE.Color(0.55, 0.66, 1.0), SUNC = new THREE.Color(1.0, 0.9, 0.76), WARM = new THREE.Color(1.0, 0.72, 0.42);
   const GROUND_HEMI = new THREE.Color('#3a3226');
+  const cEnvSun = new THREE.Color(), cEnvGround = new THREE.Color(), cWarmSky = new THREE.Color(), envSunDir = new THREE.Vector3();
+  const SH_Z = new THREE.Vector3(34, 62, 46).normalize(), SH_X = new THREE.Vector3().crossVectors(new THREE.Vector3(0, 1, 0), SH_Z).normalize(), SH_Y = new THREE.Vector3().crossVectors(SH_Z, SH_X);
+  const CLOUD_BASE = [0.4, 0.4, 0.46, 0.38, 0.4, 0.36, 0.44, 0.4, 0.5, 0.4, 0.46, 0.62, 0.48, 0.42, 0.5];
 
   /* ---------- state ---------- */
   const S = {
@@ -241,6 +205,10 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
     composer.setSize(S.W, S.H);
     const samples = S.q === 0 && S.pr < 1.5 ? 4 : 0;
     for (const t of [composer.renderTarget1, composer.renderTarget2]) if (t.samples !== samples) { t.samples = samples; t.dispose(); }
+    // grade pass: chromatic aberration only at the top levels; image-based light resolution steps down
+    grade.uniforms.uCA.value = S.q <= 1 ? 0.006 : 0;
+    grade.uniforms.uGrain.value = S.q <= 3 ? 0.022 : 0;
+    skyEnv.size = S.q >= 3 ? 64 : S.q >= 2 ? 128 : 256;
     const shadows = S.q < 4;
     if (sun.castShadow !== shadows) sun.castShadow = shadows;
     sun.shadow.mapSize.setScalar(S.q >= 2 ? 1024 : 2048);
@@ -313,6 +281,9 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
     S.snow += ((stations[ns].snow ? 1 : 0) - S.snow) * damp(1.3, dt);
     S.rain += ((stations[ns].rain ? 1 : 0) - S.rain) * damp(1.3, dt);
 
+    // golden-hour warmth: how orange the horizon is (0 = neutral/blue, 1 = deep amber)
+    const warm = clamp((cBot.r - cBot.b) * 1.6, 0, 1) * smooth(0.05, 0.5, day);
+    const wetSky = Math.max(S.rain, S.snow * 0.8);
     skyMat.uniforms.uTop.value.copy(cTop);
     skyMat.uniforms.uBot.value.copy(cBot);
     skyMat.uniforms.uStars.value = smooth(0.35, 0.8, dark) * (1 - S.rain * 0.9);
@@ -321,8 +292,17 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
     const isMoon = dark > 0.45;
     skyMat.uniforms.uMoon.value = isMoon ? 1 : 0;
     skyMat.uniforms.uSize.value = isMoon ? 0.028 : 0.034;
-    if (isMoon) { skyMat.uniforms.uDisc.value.setRGB(1.7, 1.62, 1.42); skyMat.uniforms.uHalo.value.setRGB(0.5, 0.55, 0.7).multiplyScalar(dark * (1 - S.rain * 0.8)); }
-    else { skyMat.uniforms.uDisc.value.setRGB(4.2, 3.7, 2.8).multiplyScalar(1 - S.rain * 0.9); skyMat.uniforms.uHalo.value.setRGB(1.3, 0.95, 0.6).multiplyScalar(0.5 + day * 0.5); }
+    if (isMoon) { skyMat.uniforms.uDisc.value.setRGB(1.8, 1.72, 1.52); skyMat.uniforms.uHalo.value.setRGB(0.45, 0.52, 0.72).multiplyScalar(dark * (1 - S.rain * 0.8)); }
+    else { skyMat.uniforms.uDisc.value.setRGB(4.6, 3.9, 2.8).multiplyScalar(1 - S.rain * 0.9); skyMat.uniforms.uHalo.value.setRGB(1.3, 0.92 - 0.2 * warm, 0.6 - 0.25 * warm).multiplyScalar((0.5 + day * 0.5) * (1 - wetSky * 0.6)); }
+    {
+      const su = skyMat.uniforms;
+      su.uCloud.value = lerp(lerp(CLOUD_BASE[i0 % CLOUD_BASE.length], CLOUD_BASE[i1 % CLOUD_BASE.length], ft), 0.9, wetSky);
+      su.uCloudSpeed.value = reduced ? 0.002 : 0.012;
+      // lit cloud tops pick up the horizon colour by day, dim blue-grey by moonlight
+      su.uCloudLit.value.copy(WHITE).lerp(cBot, 0.3 + 0.45 * warm).multiplyScalar(lerp(0.1, 1.1, day) * (1 - wetSky * 0.4));
+      su.uCloudShade.value.copy(cTop).lerp(cBot, 0.6).multiplyScalar(lerp(0.6, 0.78, day) * (1 - wetSky * 0.25));
+      su.uGlow.value.setRGB(1.0, 0.55, 0.25).multiplyScalar(0.35 * warm * (1 - wetSky)).add(cTmp2.copy(cBot).multiplyScalar(0.08 * dark));
+    }
     (scene.fog as THREE.Fog).color.copy(cBot).multiplyScalar(ls);
     {
       const fog = scene.fog as THREE.Fog, wet = Math.max(S.rain, S.snow * 0.7);
@@ -330,13 +310,33 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
       fog.far = S.d + lerp(lerp(430, 340, dark), 170, wet);
     }
 
-    hemi.color.copy(cTop).lerp(WHITE, 0.6);
+    hemi.color.copy(cTop).lerp(WHITE, 0.55);
     hemi.groundColor.copy(GROUND_HEMI).lerp(cBot, 0.3);
-    hemi.intensity = (0.16 + 1.5 * day * day) * ls;
-    sun.color.copy(MOON).lerp(cTmp.copy(SUNC).lerp(cBot, 0.25), smooth(0.2, 0.85, day));
-    sun.intensity = (0.55 + 2.4 * day) * ls * (1 - S.rain * 0.55);
-    scene.environmentIntensity = (0.06 + 0.4 * day) * ls;
+    hemi.intensity = (0.12 + 1.2 * day * day) * ls;
+    sun.color.copy(MOON).lerp(cTmp.copy(SUNC).lerp(cBot, 0.25 + 0.3 * warm), smooth(0.2, 0.85, day));
+    sun.intensity = (0.6 + 2.6 * day) * ls * (1 - S.rain * 0.55) * (1 - S.snow * 0.2);
+    // sky-matched image-based light: reflections on paint, glass and rails follow the sky
+    envSunDir.set(34, 62, 46).normalize();
+    cEnvSun.copy(sun.color).multiplyScalar(sun.intensity * (isMoon ? 0.25 : 0.5));
+    cEnvGround.copy(GROUND_HEMI).lerp(cBot, 0.3).multiplyScalar(0.3 + 0.7 * day);
+    cWarmSky.copy(cBot).multiplyScalar(1.15);
+    scene.environment = skyEnv.update(now, cTop, cWarmSky, cEnvGround, envSunDir, cEnvSun, S.q >= 4 ? 900 : 250);
+    scene.environmentIntensity = (0.5 + 0.35 * day) * ls;
     renderer.toneMappingExposure = 1.0;
+    // distant mountains: ambient from the sky, hazed toward the horizon colour
+    {
+      const ru = ridges.mat.uniforms;
+      ru.uHaze.value.copy(cBot).lerp(cTop, 0.12);
+      ru.uAmb.value.copy(cTop).lerp(WHITE, 0.5).multiplyScalar(0.18 + 0.85 * day);
+      ru.uRim.value.copy(sun.color).multiplyScalar(0.25 * day + 0.4 * warm);
+      ru.uWet.value = wetSky * 0.55;
+      ru.uLight.value = ls;
+    }
+    // grade: cool shadows, warm highlights at golden hour, a bluer night
+    grade.uniforms.uShadow.value.setRGB(lerp(0.97, 0.9, dark), lerp(1.0, 0.97, dark), lerp(1.04, 1.12, dark));
+    grade.uniforms.uHigh.value.setRGB(1.03 + 0.06 * warm, 1.0, lerp(0.96, 0.86, warm));
+    grade.uniforms.uVig.value = lerp(0.3, 0.42, dark);
+    grade.uniforms.uSat.value = lerp(1.07, 1.0, wetSky) + 0.04 * warm;
     shared.uNight.value = smooth(0.12, 0.6, dark) * ls;
     scenery.railGlow.color.setScalar((0.9 + 1.5 * dark) * ls);
     scenery.mats.building.emissiveIntensity = 1;
@@ -571,9 +571,14 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
     skyMat.uniforms.uSunDir.value.copy(S.sunDir);
 
     // shadows follow the train; light comes from the camera side so the train's face is lit
-    const scx = tx - 9;
-    sun.target.position.set(scx, 0, -3);
-    sun.position.set(scx + 34, 62, 46);
+    // snapped to whole shadow-map texels in light space, so shadow edges don't shimmer while the train rolls
+    {
+      const texel = 76 / sun.shadow.mapSize.x;
+      const lx = SH_X.x * (tx - 9) + SH_X.z * -3, ly = SH_Y.x * (tx - 9) + SH_Y.y * 0 + SH_Y.z * -3;
+      v1.set(tx - 9, 0, -3).addScaledVector(SH_X, Math.round(lx / texel) * texel - lx).addScaledVector(SH_Y, Math.round(ly / texel) * texel - ly);
+    }
+    sun.target.position.copy(v1);
+    sun.position.set(v1.x + 34, v1.y + 62, v1.z + 46);
     sun.target.updateMatrixWorld();
 
     /* weather + birds */
@@ -586,9 +591,13 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
     birds.update(now, S.T.x, S.T.z, reduced ? 0 : 0.8 * (1 - smooth(0.3, 0.55, dark)) * (1 - S.rain) * ls);
 
     /* draw */
-    const useBloom = S.q < 3;
-    if (useBloom) {
-      bloom.strength = lerp(0.42, 0.72, dark);
+    // q0-2: bloom + grade, q3: grade only, q4-5: straight to screen (renderer's own ACES tone mapping)
+    if (S.q < 4) {
+      bloom.enabled = S.q < 3;
+      bloom.strength = lerp(0.3, 0.72, dark);
+      bloom.threshold = lerp(1.1, 0.85, dark); // by day only real highlights bloom, so signs stay readable
+      const gu = grade.uniforms;
+      gu.uRes.value.set(S.W * S.pr, S.H * S.pr); gu.uTime.value = reduced ? 0 : time; gu.uExposure.value = renderer.toneMappingExposure;
       composer.render(dt);
     } else renderer.render(scene, camera);
     S.init = true;
@@ -627,8 +636,8 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
     train.geos.forEach((g) => g.dispose());
     landmarks.dispose(); disposeLoaders();
     scenery.dispose(); puffs.dispose(); glows.dispose(); weather.dispose(); birds.dispose();
-    pageTex.dispose(); glintTex.dispose(); envTex.dispose();
-    bloom.dispose(); output.dispose(); composer.dispose(); rt.dispose();
+    pageTex.dispose(); glintTex.dispose(); skyEnv.dispose();
+    bloom.dispose(); grade.dispose(); composer.dispose(); rt.dispose();
     renderer.dispose();
   }
 

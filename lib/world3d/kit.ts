@@ -136,6 +136,34 @@ export function patchSway(mat: THREE.MeshStandardMaterial, sh: Shared, amount = 
   mat.customProgramCacheKey = () => 'sway-' + amount;
 }
 
+/** Ground: world-space value noise breaks up the flat vertex colours into patches of lush / dry / worn grass and soil. */
+export function patchGround(mat: THREE.MeshStandardMaterial) {
+  mat.onBeforeCompile = (s) => {
+    s.vertexShader = s.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 vGW;')
+      .replace('#include <project_vertex>', '#include <project_vertex>\nvGW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+    s.fragmentShader = s.fragmentShader
+      .replace('#include <common>', `#include <common>
+        varying vec3 vGW;
+        float gH(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
+        float gN(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+          return mix(mix(gH(i), gH(i + vec2(1.0, 0.0)), f.x), mix(gH(i + vec2(0.0, 1.0)), gH(i + vec2(1.0, 1.0)), f.x), f.y); }`)
+      .replace('#include <color_fragment>', `#include <color_fragment>
+        {
+          vec2 q = vGW.xz;
+          float big = gN(q * 0.035), mid = gN(q * 0.16 + 7.0), fine = gN(q * 0.9 + 3.0), speck = gN(q * 3.7);
+          float lum = 0.8 + 0.28 * big + 0.16 * mid + 0.1 * fine + 0.06 * speck;
+          vec3 dry = diffuseColor.rgb * vec3(1.16, 1.06, 0.78);
+          vec3 lush = diffuseColor.rgb * vec3(0.86, 1.04, 0.86);
+          float dm = smoothstep(0.35, 0.75, gN(q * 0.05 + 21.0));
+          diffuseColor.rgb = mix(lush, dry, dm) * lum;
+          // worn, darker soil along the track bed
+          diffuseColor.rgb *= 1.0 - 0.18 * (1.0 - smoothstep(2.6, 4.2, abs(vGW.z)));
+        }`);
+  };
+  mat.customProgramCacheKey = () => 'ground-v1';
+}
+
 /* ---------------- generated textures ---------------- */
 
 export function canvasTex(w: number, h: number, draw: (c: CanvasRenderingContext2D) => void, srgb = true) {

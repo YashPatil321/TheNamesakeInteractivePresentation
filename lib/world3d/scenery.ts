@@ -2,7 +2,7 @@
 import * as THREE from 'three';
 import type { Station, Region } from '../stations';
 import { NAME_COLORS } from '../stations';
-import { GAP, rng, place, paint, boxMM, merge, composeInto, clamp, patchWindows, patchSway, canvasTex, gravelTexture, type Shared } from './kit';
+import { GAP, rng, place, paint, boxMM, merge, composeInto, clamp, patchWindows, patchSway, patchGround, canvasTex, gravelTexture, type Shared } from './kit';
 import { RAIL_TOP } from './train';
 
 export const X_MIN = -4 * GAP, X_MAX = 19 * GAP;
@@ -190,32 +190,13 @@ export function buildScenery(scene: THREE.Scene, stations: Station[], sh: Shared
     g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
     g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
     g.setIndex(idx); g.computeVertexNormals();
-    const m = new THREE.Mesh(keep(g), keep(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1 })));
+    const gmat = keep(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1 }));
+    patchGround(gmat);
+    const m = new THREE.Mesh(keep(g), gmat);
     m.receiveShadow = true; scene.add(m);
   }
 
-  /* ---------- distant ridges ---------- */
-  {
-    const parts: THREE.BufferGeometry[] = [];
-    const layers = [{ z: -150, h: 7, a: 7, col: '#2f3d36' }, { z: -215, h: 14, a: 12, col: '#34413f' }, { z: -300, h: 24, a: 20, col: '#3b4650' }];
-    layers.forEach((L, li) => {
-      const pos: number[] = [], idx: number[] = [];
-      let n = 0;
-      for (let x = X_MIN - 200; x <= X_MAX + 200; x += 6) {
-        const reg = regionAt(x);
-        const k = reg === 'lake' ? 1.7 : reg === 'nyc' ? 0.55 : reg === 'india' ? 0.8 : 1;
-        const hgt = (L.h + L.a * (0.5 + 0.5 * Math.sin(x * 0.011 + li * 2)) + L.a * 0.35 * Math.sin(x * 0.037 + li)) * k + Math.abs(Math.sin(x * 0.09 + li)) * 2;
-        pos.push(x, -2, L.z, x, hgt, L.z + Math.sin(x * 0.05) * 6);
-        if (n > 0) { const a = (n - 1) * 2; idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3); }
-        n++;
-      }
-      const g = new THREE.BufferGeometry();
-      g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals();
-      parts.push(paint(g, L.col));
-    });
-    const m = new THREE.Mesh(keep(merge(parts)), keep(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, flatShading: true })));
-    scene.add(m);
-  }
+  // distant ridges live in ./sky.ts (layered, with aerial perspective)
 
   /* ---------- track: gravel bed, sleepers, rails, glowing name inlay, braid ---------- */
   const L = X_MAX - X_MIN, XC = (X_MIN + X_MAX) / 2;
@@ -229,15 +210,25 @@ export function buildScenery(scene: THREE.Scene, stations: Station[], sh: Shared
     // sleepers
     const n = Math.floor(L / 0.9);
     const sg = keep(new THREE.BoxGeometry(0.3, 0.13, 2.3));
-    const sm = new THREE.InstancedMesh(sg, keep(new THREE.MeshStandardMaterial({ color: '#3b2d24', roughness: 0.95 })), n);
+    const sm = new THREE.InstancedMesh(sg, keep(new THREE.MeshStandardMaterial({ color: '#46362b', roughness: 0.9 })), n);
     const mm = new THREE.Matrix4(), r = rng(5);
-    for (let k = 0; k < n; k++) { composeInto(mm, X_MIN + k * 0.9, 0.34, 0, (r() - 0.5) * 0.04, 1, 1, 1); sm.setMatrixAt(k, mm); }
+    const sc = new THREE.Color();
+    for (let k = 0; k < n; k++) {
+      composeInto(mm, X_MIN + k * 0.9, 0.34, 0, (r() - 0.5) * 0.04, 1, 1, 1); sm.setMatrixAt(k, mm);
+      const v = 0.75 + r() * 0.5; sc.setRGB(v, v * (0.95 + r() * 0.08), v * (0.9 + r() * 0.1)); sm.setColorAt(k, sc); // weathered timber
+    }
     sm.receiveShadow = true; sm.computeBoundingSphere(); scene.add(sm);
     // steel rails
-    const rg = merge([boxMM(X_MIN, 0.4, -0.78, X_MAX, RAIL_TOP, -0.66), boxMM(X_MIN, 0.4, 0.66, X_MAX, RAIL_TOP, 0.78)]);
-    paint(rg, '#8d939c');
-    const rm = new THREE.Mesh(keep(rg), keep(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.32, metalness: 0.85 })));
+    // rusty web + foot, and a polished running head that catches the sky
+    const rg = merge([
+      paint(boxMM(X_MIN, 0.4, -0.8, X_MAX, 0.46, -0.64), '#4a3a30'), paint(boxMM(X_MIN, 0.46, -0.745, X_MAX, RAIL_TOP - 0.05, -0.695), '#5a4536'),
+      paint(boxMM(X_MIN, 0.4, 0.64, X_MAX, 0.46, 0.8), '#4a3a30'), paint(boxMM(X_MIN, 0.46, 0.695, X_MAX, RAIL_TOP - 0.05, 0.745), '#5a4536'),
+    ]);
+    const rm = new THREE.Mesh(keep(rg), keep(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.75, metalness: 0.35 })));
     rm.receiveShadow = true; scene.add(rm);
+    const hg = merge([boxMM(X_MIN, RAIL_TOP - 0.05, -0.78, X_MAX, RAIL_TOP, -0.66), boxMM(X_MIN, RAIL_TOP - 0.05, 0.66, X_MAX, RAIL_TOP, 0.78)]);
+    const hm = new THREE.Mesh(keep(hg), keep(new THREE.MeshStandardMaterial({ color: '#c9ccd2', roughness: 0.18, metalness: 1 })));
+    hm.receiveShadow = true; scene.add(hm);
   }
   // glowing inlay colored by whose name the track carries
   const railGlow = keep(new THREE.MeshBasicMaterial({ vertexColors: true }));
