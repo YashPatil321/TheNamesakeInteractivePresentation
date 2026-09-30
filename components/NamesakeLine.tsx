@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { startLine } from '@/lib/engine';
 import { STATIONS } from '@/lib/stations';
+import Scenes from '@/components/Scenes';
 
 /*
  * The whole experience is one static tree that the canvas engine (lib/engine.ts) animates
@@ -20,6 +21,7 @@ export default function NamesakeLine() {
     <div className="app lens-gogol" id="app" ref={rootRef}>
       <div id="stage">
         <canvas id="scene" aria-label="Animated train travelling through Gogol's life" />
+        <canvas id="scene3d" hidden aria-label="3D train travelling through Gogol's life" />
         <div className="vignette" />
       </div>
 
@@ -39,6 +41,7 @@ export default function NamesakeLine() {
           <button className="chip-btn opt-hide" id="analysisBtn" aria-pressed="false" title="Highlight the 4 I's across the timeline (A)">4 I&apos;s</button>
           <button className="chip-btn" id="soundBtn" aria-pressed="true" title="Sound (M)">Sound</button>
           <button className="chip-btn opt-hide" id="presentBtn" aria-pressed="false" title="Presenter mode (P)">Present</button>
+          <button className="chip-btn" id="scenesBtn" title="Our scenes (S)">Scenes</button>
           <button className="chip-btn" id="passBtn" title="Your passport (V)">
             <span className="pp-word">Passport </span><span className="pp-ico" aria-hidden="true">✦ </span><b id="passN">0</b>{`/${STATIONS.length}`}
           </button>
@@ -77,6 +80,8 @@ export default function NamesakeLine() {
             <dt><kbd>A</kbd></dt><dd>Show the 4 I&apos;s on the timeline</dd>
             <dt><kbd>V</kbd></dt><dd>Open your passport</dd>
             <dt><kbd>Q</kbd></dt><dd>Ticket inspector quiz</dd>
+            <dt><kbd>E</kbd></dt><dd>Step inside a first-person view (4 stations)</dd>
+            <dt><kbd>S</kbd></dt><dd>Our scenes</dd>
             <dt><kbd>P</kbd></dt><dd>Presenter mode (hides extra buttons)</dd>
             <dt><kbd>F</kbd></dt><dd>Fullscreen</dd>
             <dt><kbd>M</kbd></dt><dd>Sound on / off</dd>
@@ -104,6 +109,12 @@ export default function NamesakeLine() {
             </span>
           </div>
         </div>
+      </div>
+
+      <div className="overlay fp" id="fp" hidden />
+
+      <div className="overlay scenes-ov" id="scenesOverlay" hidden>
+        <Scenes mode="overlay" />
       </div>
 
       <div className="overlay quiz" id="quiz" hidden>

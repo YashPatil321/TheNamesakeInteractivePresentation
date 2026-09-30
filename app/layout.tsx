@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import { Caveat, Courier_Prime, Rozha_One, Spectral } from 'next/font/google';
 import './globals.css';
+import './styles/fp.css';
+import './styles/scenes.css';
 
 const rozha = Rozha_One({ weight: '400', subsets: ['latin'], variable: '--font-rozha', display: 'swap' });
 const spectral = Spectral({ weight: ['400', '600'], style: ['normal', 'italic'], subsets: ['latin'], variable: '--font-spectral', display: 'swap' });

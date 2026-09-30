@@ -18,10 +18,12 @@ type LineState = {
   quizOpen: boolean;
   finaleOpen: boolean;
   present: boolean;
+  fpOpen?: boolean;
+  scenesOpen?: boolean;
 };
 
 type Command =
-  | { type: 'hello' | 'next' | 'prev' | 'lens' | 'reveal' | 'rewind' | 'finale' | 'quiz' | 'present' }
+  | { type: 'hello' | 'next' | 'prev' | 'lens' | 'reveal' | 'rewind' | 'finale' | 'quiz' | 'present' | 'fp' | 'scenes' }
   | { type: 'go'; i: number }
   | { type: 'tab'; tab: LineState['tab'] }
   | { type: 'vote'; k: number };
@@ -70,6 +72,8 @@ export default function Presenter() {
       else if (k === '3') send({ type: 'tab', tab: 'scene' });
       else if (k === 'n' || k === 'N') send({ type: 'lens' });
       else if (k === 'q' || k === 'Q') send({ type: 'quiz' });
+      else if (k === 'e' || k === 'E') send({ type: 'fp' });
+      else if (k === 's' || k === 'S') send({ type: 'scenes' });
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -160,6 +164,12 @@ export default function Presenter() {
             <button className="pr-chip" disabled={!allVisited} onClick={() => send({ type: 'finale' })}>{allVisited ? 'Open the book (finale)' : `Finale: ${line?.visited.length ?? 0}/${STATIONS.length} visited`}</button>
             <button className={`pr-chip ${line?.quizOpen ? 'on' : ''}`} onClick={() => send({ type: 'quiz' })}>{line?.quizOpen ? 'Close quiz' : 'Quiz'}</button>
           </div>
+          <div className="pr-row">
+            <button className={`pr-chip ${line?.fpOpen ? 'on' : ''}`} disabled={!s.fp && !line?.fpOpen} onClick={() => send({ type: 'fp' })}>
+              {line?.fpOpen ? 'Leave first-person view' : s.fp ? 'Step inside (first person)' : 'No first-person view here'}
+            </button>
+            <button className={`pr-chip ${line?.scenesOpen ? 'on' : ''}`} onClick={() => send({ type: 'scenes' })}>{line?.scenesOpen ? 'Close scenes' : 'Our scenes'}</button>
+          </div>
 
           <h3>Jump to</h3>
           <div className="pr-stations">
@@ -176,7 +186,7 @@ export default function Presenter() {
               </button>
             ))}
           </div>
-          <p className="pr-keys">Keys here: ← → Space · 1 2 3 tabs · N flip · Q quiz</p>
+          <p className="pr-keys">Keys here: ← → Space · 1 2 3 tabs · N flip · Q quiz · E first person · S scenes</p>
         </aside>
       </main>
     </div>

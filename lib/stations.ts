@@ -5,6 +5,7 @@ export type Tag = 'IDEOLOGICAL' | 'INSTITUTIONAL' | 'INTERPERSONAL' | 'INTERNALI
 export type NameLens = 'none' | 'gogol' | 'nikhil' | 'both';
 export type Region = 'india' | 'town' | 'suburb' | 'campus' | 'nyc' | 'lake' | 'cleveland';
 export type TryKind = 'shoes' | 'cert' | 'rice' | 'rub' | 'gift' | 'phone';
+export type FpKind = 'compartment' | 'classroom' | 'car' | 'bedroom';
 
 export interface Station {
   year: string;
@@ -20,6 +21,8 @@ export interface Station {
   rain?: boolean;
   snow?: boolean;
   try?: TryKind;
+  /** a first-person 3D view you can step into from this station */
+  fp?: FpKind;
   detail?: string;
   quote?: { text: string; cite: string };
   voice?: { gogol: string; nikhil: string };
@@ -30,7 +33,7 @@ export interface Station {
 }
 
 export const STATIONS: Station[] = [
-  { year: '1961', title: 'The Night Train', place: 'Near Jamshedpur, India', code: 'JSR', region: 'india', name: 'none', flashback: true,
+  { year: '1961', title: 'The Night Train', place: 'Near Jamshedpur, India', code: 'JSR', region: 'india', name: 'none', flashback: true, fp: 'compartment',
     sky: ['#04060c', '#1b2133'],
     story: [
       'Ashoke Ganguli, 22, rides an overnight train to visit his grandfather, rereading the stories of Nikolai Gogol, his grandfather\'s favorite writer.',
@@ -97,7 +100,7 @@ export const STATIONS: Station[] = [
     voice: { gogol: 'A whole book with my name on the cover. I don\'t want to read it.', nikhil: 'Nikolai Gogol isn\'t me. Why does Dad keep pushing him on me?' },
     analysis: { tag: 'INTERNALIZED', text: 'By 14 Gogol has absorbed the idea that his name, and what it stands for, is embarrassing. He rejects the gift before he knows what it means.', world: 'Many children of immigrants remember rejecting their parents\' food, language or names to avoid standing out.' } },
 
-  { year: '1985', title: 'English Class', place: 'High school, Massachusetts', code: 'HS', region: 'suburb', name: 'gogol',
+  { year: '1985', title: 'English Class', place: 'High school, Massachusetts', code: 'HS', region: 'suburb', name: 'gogol', fp: 'classroom',
     sky: ['#3b4a6b', '#b8c2d6'],
     story: [
       'His English teacher decides to teach Nikolai Gogol and walks the class through the writer\'s strange, lonely life and miserable death.',
@@ -118,7 +121,7 @@ export const STATIONS: Station[] = [
     analysis: { tag: 'INTERNALIZED', text: 'He erases the name his parents gave him to be accepted. The pressure to assimilate becomes his own choice.', world: 'Immigrants and their children still anglicize names on résumés and at coffee shops. Hiring studies show why.' },
     video: 'videos/nikhil.mp4', shots: ['Party music: "Hey, what\'s your name?"', 'He hesitates: "…Nikhil."', 'A hand crosses out GOGOL on a name tag and writes NIKHIL'] },
 
-  { year: '1987', title: 'The Truth in the Car', place: 'Train home from Yale', code: 'NHV', region: 'campus', name: 'nikhil',
+  { year: '1987', title: 'The Truth in the Car', place: 'Train home from Yale', code: 'NHV', region: 'campus', name: 'nikhil', fp: 'car',
     sky: ['#070b18', '#27304f'],
     story: [
       'Nikhil takes the train home. It stops for hours: someone has died on the tracks. His father drives out to pick him up.',
@@ -168,7 +171,7 @@ export const STATIONS: Station[] = [
     voice: { gogol: 'Maybe we married the idea of each other.', nikhil: 'Maybe Nikhil was never the answer.' },
     analysis: { tag: 'TURNING', text: 'Assimilating didn\'t fix him, and neither did returning to the "right" Bengali life. He has to find himself without a script.', world: 'Identity isn\'t something someone else can hand you, whether it\'s your parents or society.' } },
 
-  { year: '2000', title: 'The Man Who Gave You His Name', place: 'Pemberton Road, Christmas Eve', code: 'PEM', region: 'suburb', name: 'both', snow: true,
+  { year: '2000', title: 'The Man Who Gave You His Name', place: 'Pemberton Road, Christmas Eve', code: 'PEM', region: 'suburb', name: 'both', snow: true, fp: 'bedroom',
     sky: ['#0a1430', '#2d3d6b'],
     story: [
       'Ashima is selling the house to split her year between Calcutta and America. At her last Christmas Eve party, Gogol slips upstairs to his old bedroom.',
@@ -218,3 +221,11 @@ export const QUIZ: QuizQuestion[] = [
 
 export const START = 2; // the book opens in 1968
 export const NIKHIL_AT = 8; // the name switch unlocks here
+
+/** Labels for the first-person views (lib/firstperson.ts builds the rooms). */
+export const FP_INFO: Record<FpKind, { title: string; blurb: string }> = {
+  compartment: { title: 'Inside the night train', blurb: "Sit in Ashoke's compartment the night of the crash and look around." },
+  classroom: { title: "Gogol's desk in English class", blurb: 'The teacher starts on Nikolai Gogol. Feel every head turn.' },
+  car: { title: 'The passenger seat', blurb: 'Ride home with Ashoke the night he tells the truth.' },
+  bedroom: { title: 'His old bedroom', blurb: 'Christmas Eve, 2000. Find the book his father gave him.' },
+};

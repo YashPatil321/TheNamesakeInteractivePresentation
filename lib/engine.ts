@@ -1,6 +1,7 @@
 // @ts-nocheck -- the canvas + DOM engine, ported from the original single-file page.
 // Story content and types live in lib/stations.ts; this file animates and wires the UI.
-import { STATIONS, NAME_COLORS, TAG_COLORS, TAG_NAMES, QUIZ, START, NIKHIL_AT } from './stations';
+import { STATIONS, NAME_COLORS, TAG_COLORS, TAG_NAMES, QUIZ, START, NIKHIL_AT, FP_INFO } from './stations';
+import { createWorld } from './world3d';
 
 export const CHANNEL = 'namesake-line';
 
@@ -110,6 +111,14 @@ export function startLine(root) {
   // next/font gives hashed family names; resolve them from the CSS variables for canvas text
   const FONT = { display: 'Georgia, serif', mono: 'monospace', body: 'Georgia, serif' };
   function readFonts() { const cs = getComputedStyle(root); for (const k of ['display', 'mono', 'body']) FONT[k] = cs.getPropertyValue('--' + k).trim() || FONT[k]; }
+  /* ---------- WORLD3D HOOKS: the Three.js world (lib/world3d.ts); the 2D canvas is the fallback ---------- */
+  const cv3 = $('#scene3d');
+  let world = null;
+  try { world = createWorld(cv3, { stations: STATIONS, reduced, fonts: () => ({ display: FONT.display, mono: FONT.mono }) }); }
+  catch (e) { console.warn('3D world unavailable, using the 2D scene', e); world = null; }
+  cv3.hidden = !world; cv.hidden = !!world;
+  const view = world ? cv3 : cv; // the canvas people see and click
+  /* ---------- end WORLD3D HOOKS ---------- */
   let W = 0, H = 0, DPR = 1, S = 1, groundY = 0, anchor = 0;
   const F_FAR = 0.45, TILE = SP * F_FAR, SPAN = 1100;
   function resize() {
@@ -122,6 +131,7 @@ export function startLine(root) {
     if (narrow) S = clamp(W / 700, .5, .8);
     groundY = narrow ? H * .36 : H * .83;
     anchor = narrow ? W * .56 : clamp(W * .66, 520, W - 260);
+    if (world) world.resize();
   }
   
   /* skyline generation per region */
@@ -551,13 +561,17 @@ export function startLine(root) {
     // grayscale for flashbacks
     const p = stationPos(), i = clamp(Math.round(p), 0, STATIONS.length - 1);
     st.gray = lerp(st.gray, STATIONS[i].flashback ? 1 : 0, .04);
-    cv.style.filter = st.gray > .01 ? `grayscale(${st.gray}) contrast(${1 + st.gray * .15}) sepia(${st.gray * .15})` : '';
+    view.style.filter = st.gray > .01 ? `grayscale(${st.gray}) contrast(${1 + st.gray * .15}) sepia(${st.gray * .15})` : '';
     // crash timeline
     if (st.crashT >= 0) crashTick(dt / 1000);
     st.shake = Math.max(0, st.shake - dt / 900);
     par.x = lerp(par.x, par.tx, .06); par.y = lerp(par.y, par.ty, .06);
     snd.tick(now, st.speed);
-    draw(now);
+    if (world) {
+      world.render({ now, p: stationPos(), cur: st.cur, target: st.target, moving: st.moving, speed: st.speed, derail: st.derail, crashT: st.crashT,
+        shake: reduced ? 0 : st.shake, lens: st.lens, visited: st.visited, parX: par.x, parY: par.y,
+        cardSide: ticket.classList.contains('away') ? 'none' : (window.innerWidth < 760 ? 'bottom' : 'left') });
+    } else draw(now);
     if (!disposed) rafId = requestAnimationFrame(frame);
   }
   
@@ -774,7 +788,7 @@ export function startLine(root) {
     const a = s.analysis;
     let panel = '';
     if (st.tab === 'story') {
-      panel = s.story.map((p) => `<p>${esc(p)}</p>`).join('') +
+      panel = fpHTML(i, s) + s.story.map((p) => `<p>${esc(p)}</p>`).join('') +
         (s.quote ? `<blockquote class="quote">${esc(s.quote.text)}<cite>${esc(s.quote.cite)}</cite></blockquote>` : '') +
         (s.detail ? `<p style="font-size:.95rem;color:var(--ink-soft)">${esc(s.detail)}</p>` : '') +
         tryHTML(i, s) + voiceHTML(s) + pollHTML(i, s) + specialHTML(i, s);
@@ -853,6 +867,7 @@ export function startLine(root) {
     if (act === 'rewind') travelTo(0, { rewind: true });
     if (act === 'replay') replayCrash();
     if (act === 'finale') openFinale();
+    if (act === 'fp') openFP(STATIONS[st.cur].fp);
   });
   
   /* =========================================================
@@ -882,7 +897,8 @@ export function startLine(root) {
     $('#ppGrid').innerHTML = STATIONS.map((s, i) => st.visited.has(i)
       ? `<button class="pp-stamp got" data-i="${i}" style="--c:${PP_COLORS[s.name]};--r:${(i * 37) % 23 - 11}deg" title="${esc(s.title)}"><b>${esc(s.year)}</b>${esc(s.code)}${s.try && st.done[s.try] ? ' <span class="star">★</span>' : ''}</button>`
       : `<button class="pp-stamp" data-i="${i}" title="Not visited yet"><b>?</b>STN ${String(i + 1).padStart(2, '0')}</button>`).join('');
-    $('#ppFoot').textContent = `★ Hands-on moments: ${tries} of ${TRY_COUNT} · ` + (st.visited.size === STATIONS.length ? 'The ending is unlocked.' : 'Visit every station to unlock the ending.');
+    const fps = STATIONS.filter((s) => s.fp && st.done['fp-' + s.fp]).length, fpTotal = STATIONS.filter((s) => s.fp).length;
+    $('#ppFoot').textContent = `★ Hands-on moments: ${tries} of ${TRY_COUNT} · First-person views: ${fps} of ${fpTotal} · ` + (st.visited.size === STATIONS.length ? 'The ending is unlocked.' : 'Visit every station to unlock the ending.');
   }
   function openPassport() { renderPassport(); passport.hidden = false; $('#ppClose').focus(); }
   on($('#passBtn'), 'click', openPassport);
@@ -943,25 +959,29 @@ export function startLine(root) {
   function fullscreen() { const el = document.documentElement; if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); else if (el.requestFullscreen) el.requestFullscreen().catch(() => toast('Fullscreen is not available here.')); }
   
   /* canvas click → station */
-  on(cv, 'click', (e) => {
+  on(view, 'click', (e) => {
+    if (world) { const hit = world.pick(e.clientX, e.clientY); if (typeof hit === 'number') travelTo(hit); else if (hit === 'train') snd.whistle(); return; }
     const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
     for (let i = 0; i < STATION_HIT.length; i++) { const h = STATION_HIT[i]; if (h && x >= h.x && x <= h.x + h.w && y >= h.y && y <= h.y + h.h) { travelTo(i); return; } }
     // click the train for a whistle
     const tx = st.trainX - st.camX; if (Math.abs(x - tx) < 300 * S && Math.abs(y - (groundY - 60 * S)) < 80 * S) snd.whistle();
   });
-  on(cv, 'mousemove', (e) => {
+  on(view, 'mousemove', (e) => {
+    if (world) { view.style.cursor = world.pick(e.clientX, e.clientY) != null ? 'pointer' : 'default'; return; }
     const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
     cv.style.cursor = STATION_HIT.some((h) => h && x >= h.x && x <= h.x + h.w && y >= h.y && y <= h.y + h.h) ? 'pointer' : 'default';
   });
   // swipe on the stage
   let tsx = null;
-  on(cv, 'touchstart', (e) => { tsx = e.touches[0].clientX; }, { passive: true });
-  on(cv, 'touchend', (e) => { if (tsx == null) return; const dx = e.changedTouches[0].clientX - tsx; if (Math.abs(dx) > 50) travelTo(st.target + (dx < 0 ? 1 : -1)); tsx = null; });
+  on(view, 'touchstart', (e) => { tsx = e.touches[0].clientX; }, { passive: true });
+  on(view, 'touchend', (e) => { if (tsx == null) return; const dx = e.changedTouches[0].clientX - tsx; if (Math.abs(dx) > 50) travelTo(st.target + (dx < 0 ? 1 : -1)); tsx = null; });
   
   /* keyboard */
   on(document, 'keydown', (e) => {
     if (e.target.tagName === 'INPUT') { if (e.key === 'Enter') { if (e.target.id === 'certName') doTry('sign'); else board(); } return; }
     if (!st.started) { if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); board(); } return; }
+    if (fpCtl || !fpBox.hidden) return; // the first-person view handles its own keys
+    if (!scenesOv.hidden) { if (e.key === 'Escape') closeScenes(); return; } // the scenes section handles its own keys
     if (!help.hidden) { if (e.key === 'Escape' || e.key === '?') help.hidden = true; return; }
     if (!passport.hidden) { if (e.key === 'Escape' || e.key === 'v' || e.key === 'V') passport.hidden = true; return; }
     if (!quiz.hidden) {
@@ -981,6 +1001,8 @@ export function startLine(root) {
     else if (k === 'a' || k === 'A') toggleAnalysis();
     else if (k === 'v' || k === 'V') openPassport();
     else if (k === 'q' || k === 'Q') openQuiz();
+    else if (k === 'e' || k === 'E') { if (STATIONS[st.cur].fp && !st.moving) openFP(STATIONS[st.cur].fp); }
+    else if (k === 's' || k === 'S') openScenes();
     else if (k === '?' || k === 'h' || k === 'H') help.hidden = false;
     else if (k === 'Home') travelTo(0);
     else if (k === 'End') travelTo(STATIONS.length - 1);
@@ -1105,6 +1127,7 @@ export function startLine(root) {
     try {
       bc.postMessage({ type: 'state', cur: st.cur, target: st.target, moving: st.moving, tab: st.tab, lens: st.lens, lensUnlocked: st.lensUnlocked,
         visited: [...st.visited], polls: st.polls, revealed: st.revealed, started: st.started, quizOpen: !quiz.hidden, finaleOpen: !$('#finale').hidden,
+        fpOpen: !fpBox.hidden, scenesOpen: !scenesOv.hidden,
         present: root.classList.contains('present') });
     } catch (_) {}
   }
@@ -1112,7 +1135,7 @@ export function startLine(root) {
   function remote(m) {
     if (m.type === 'hello') { publish(); return; }
     if (!st.started) { board(); setTimeout(() => remote(m), 900); return; }
-    const nav = () => { help.hidden = true; passport.hidden = true; if (!quiz.hidden) quiz.hidden = true; if (!$('#finale').hidden) closeFinale(); };
+    const nav = () => { if (!fpBox.hidden) closeFP(); closeScenes(false); help.hidden = true; passport.hidden = true; if (!quiz.hidden) quiz.hidden = true; if (!$('#finale').hidden) closeFinale(); };
     switch (m.type) {
       case 'go': nav(); travelTo(m.i); break;
       case 'next': nav(); travelTo((st.moving ? st.target : st.cur) + 1); break;
@@ -1125,9 +1148,66 @@ export function startLine(root) {
       case 'finale': if (STATIONS.every((_, k) => st.visited.has(k))) { nav(); openFinale(); } else toast('Visit every station to unlock the ending.'); break;
       case 'quiz': if (quiz.hidden) openQuiz(); else closeQuiz(); break;
       case 'present': togglePresent(); break;
+      case 'fp': if (!fpBox.hidden) closeFP(); else if (STATIONS[st.cur].fp && !st.moving) { nav(); openFP(STATIONS[st.cur].fp); } break;
+      case 'scenes': if (scenesOv.hidden) openScenes(); else closeScenes(); break;
     }
   }
   if (bc) bc.onmessage = (e) => remote(e.data || {});
+
+  /* =========================================================
+     FIRST-PERSON VIEWS (lib/firstperson.ts, loaded on demand)
+     ========================================================= */
+  const fpBox = $('#fp');
+  let fpCtl = null, fpKind = null;
+  function fpHTML(i, s) {
+    if (!s.fp) return '';
+    const info = FP_INFO[s.fp], done = st.done['fp-' + s.fp];
+    return `<button class="fp-tile" data-act="fp"><span class="fp-eye" aria-hidden="true"></span><span class="fp-txt"><b>Step inside · ${esc(info.title)}</b><span>${esc(info.blurb)}</span></span>${done ? '<i class="fp-done" aria-label="explored">✓</i>' : '<kbd class="fp-key">E</kbd>'}</button>`;
+  }
+  async function openFP(kind) {
+    if (fpCtl || !kind || st.moving) return;
+    fpKind = kind; hideCard(); help.hidden = true; passport.hidden = true;
+    fpBox.hidden = false; root.classList.add('fp-open');
+    publish();
+    try {
+      const m = await import('./firstperson');
+      if (disposed || fpKind !== kind) return;
+      fpCtl = m.startFirstPerson(fpBox, kind, {
+        reduced, visitor: st.visitor,
+        sfx: { clack: () => snd.clack(), thump: () => snd.thump(), chime: () => snd.chime(), whistle: () => snd.whistle(), boom: () => snd.boom(),
+          noise: (f, q, pk, d) => snd.noiseBurst(f, q, pk, d) },
+        onFound: () => {},
+        onComplete: () => { st.done['fp-' + kind] = true; save(); updatePass(true); },
+        onExit: () => closeFP(),
+      });
+    } catch (e) { console.error(e); closeFP(); toast('This view could not load on this device.'); }
+  }
+  function closeFP() {
+    if (fpCtl) { fpCtl.dispose(); fpCtl = null; }
+    const was = fpKind; fpKind = null;
+    fpBox.hidden = true; fpBox.innerHTML = ''; root.classList.remove('fp-open');
+    if (was && !st.moving && $('#finale').hidden && quiz.hidden) showCard(false);
+    publish();
+  }
+
+  /* =========================================================
+     OUR SCENES overlay (components/Scenes.tsx renders inside #scenesOverlay)
+     ========================================================= */
+  const scenesOv = $('#scenesOverlay');
+  function openScenes() {
+    if (!scenesOv.hidden) return;
+    hideCard(); help.hidden = true; passport.hidden = true;
+    scenesOv.hidden = false; window.dispatchEvent(new CustomEvent('namesake:scenes-open')); publish();
+  }
+  function closeScenes(show = true) {
+    if (scenesOv.hidden) return;
+    scenesOv.hidden = true; window.dispatchEvent(new CustomEvent('namesake:scenes-closed'));
+    if (show && !st.moving && $('#finale').hidden && quiz.hidden && fpBox.hidden) showCard(false);
+    publish();
+  }
+  on($('#scenesBtn'), 'click', () => openScenes());
+  on(window, 'namesake:scenes-close', () => closeScenes());
+  on(window, 'namesake:go', (e) => { closeScenes(false); const i = +e.detail; if (!st.started) { board(); setTimeout(() => travelTo(i), 900); } else travelTo(i); });
 
   /* boot */
   on(window, 'resize', () => { resize(); });
@@ -1135,7 +1215,7 @@ export function startLine(root) {
   st.trainX = START * SP; st.camX = st.trainX - anchor;
   setSound(snd.on);
   readFonts();
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!disposed) readFonts(); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!disposed) { readFonts(); if (world) world.refreshText(); } });
   updatePass(false);
   rafId = requestAnimationFrame(frame);
 
@@ -1146,5 +1226,7 @@ export function startLine(root) {
     ringStop(); clearInterval(typeIv);
     if (snd.ctx) snd.ctx.close().catch(() => {});
     if (bc) bc.close();
+    if (fpCtl) fpCtl.dispose();
+    if (world) world.dispose();
   };
 }
