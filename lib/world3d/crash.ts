@@ -449,7 +449,7 @@ export function createCrash(scene: THREE.Scene, train: TrainParts, opts: CrashOp
         if (s < 0.06) L = 1.6; // the jolt
       }
       this.lights = L;
-      reader.visible = ct >= 0 && s < 0.4;
+      reader.visible = false; // the Blender coach has its own passenger silhouettes in the windows
 
       // fire in the spilled firebox
       S.fire = s < 0.8 ? 0 : smooth(0.8, 2.2, s);
@@ -539,10 +539,11 @@ export function createCrash(scene: THREE.Scene, train: TrainParts, opts: CrashOp
           fov = 44;
         } else if (ct < CRASH.SCREECH) { // B: the window, a man reading
           const u = ct - CRASH.WINDOW;
-          unitPoint(1, -0.4 - u * 0.25, 3.05, 3.5, camP);
-          unitPoint(1, -2.05, 2.86, 1.1, camL);
+          // wide enough to read as a row of lit windows (passengers inside) racing through the night
+          unitPoint(1, 1.2 - u * 0.6, 3.2, 8.2, camP);
+          unitPoint(1, -1.2, 2.7, 1.1, camL);
           if (!reduced) camP.y += Math.sin(now * 0.004) * 0.03;
-          fov = 30;
+          fov = 40;
         } else if (ct < CRASH.WIDE) { // C: low, ahead of the train; impact in slow motion
           W(camP, IMP + 11.5, 0.75, 7.6);
           const L = unitPoint(0, 2.5, 1.9, 0, v1);
