@@ -115,7 +115,8 @@ export const STATIONS: Station[] = [
     voice: { gogol: 'Gogol stays home. That\'s who my parents still see.', nikhil: 'Nikhil can be anyone. Nikhil kisses girls at parties.' },
     poll: { q: 'Would you legally change your name to fit in?', options: ['Yes, I\'d change it', 'No, I\'d keep it'], actual: 'He changes it. But he keeps feeling like he is pretending, living as two people.' },
     special: 'decree',
-    analysis: { tag: 'INTERNALIZED', text: 'He erases the name his parents gave him to be accepted. The pressure to assimilate becomes his own choice.', world: 'Immigrants and their children still anglicize names on résumés and at coffee shops. Hiring studies show why.' } },
+    analysis: { tag: 'INTERNALIZED', text: 'He erases the name his parents gave him to be accepted. The pressure to assimilate becomes his own choice.', world: 'Immigrants and their children still anglicize names on résumés and at coffee shops. Hiring studies show why.' },
+    video: 'videos/nikhil.mp4', shots: ['Party music: "Hey, what\'s your name?"', 'He hesitates: "…Nikhil."', 'A hand crosses out GOGOL on a name tag and writes NIKHIL'] },
 
   { year: '1987', title: 'The Truth in the Car', place: 'Train home from Yale', code: 'NHV', region: 'campus', name: 'nikhil',
     sky: ['#070b18', '#27304f'],
@@ -136,7 +137,8 @@ export const STATIONS: Station[] = [
     ],
     voice: { gogol: 'Gogol feels too loud at the Ratliffs\' table.', nikhil: 'Their life is so easy. I want to belong here.' },
     poll: { q: 'Gogol feels more at home with Maxine\'s family than his own. Does that make sense to you?', options: ['I get it', 'Not at all'], actual: 'It lasts until his father dies. Then Maxine\'s world suddenly feels like it has no place for his grief.' },
-    analysis: { tag: 'IDEOLOGICAL', text: 'The "perpetual foreigner" belief: that an American with brown skin must really be from somewhere else.', world: '"Where are you really from?" is one of the most common experiences Asian Americans report.' } },
+    analysis: { tag: 'IDEOLOGICAL', text: 'The "perpetual foreigner" belief: that an American with brown skin must really be from somewhere else.', world: '"Where are you really from?" is one of the most common experiences Asian Americans report.' },
+    video: 'videos/ratliffs.mp4', shots: ['Dinner table, Nikhil laughing with Maxine\'s family', 'Guest: "You must never get sick in India!"', 'Nikhil: "I\'m from Massachusetts." Awkward silence'] },
 
   { year: '1990s', title: 'The Phone Call', place: 'Cleveland, Ohio', code: 'CLE', region: 'cleveland', name: 'nikhil', rain: true, try: 'phone',
     sky: ['#15171f', '#3d4250'],
@@ -145,7 +147,8 @@ export const STATIONS: Station[] = [
       'Back home he shaves his head, following Bengali mourning custom, the first tradition he chooses for himself. He drifts away from Maxine.'
     ],
     voice: { gogol: 'I\'m Gogol again. His son. That\'s the only name that matters now.', nikhil: 'Nikhil has nothing to say here.' },
-    analysis: { tag: 'BREAKING', text: 'The climax. Everything he pushed away, his father, his name, his family, can\'t be taken back. He never read the book, and the only person who knew the full story is gone.', world: 'Grief often pulls second-generation kids back toward the traditions they once avoided.' } },
+    analysis: { tag: 'BREAKING', text: 'The climax. Everything he pushed away, his father, his name, his family, can\'t be taken back. He never read the book, and the only person who knew the full story is gone.', world: 'Grief often pulls second-generation kids back toward the traditions they once avoided.' },
+    video: 'videos/phonecall.mp4', shots: ['His phone rings; he answers and slowly sits down', 'He packs his father\'s shirts into a box', 'He looks in the mirror, holding a razor'] },
 
   { year: 'Late 1990s', title: 'Moushumi', place: 'New York City', code: 'NYC', region: 'nyc', name: 'nikhil',
     sky: ['#1a2440', '#b06a7a'],
@@ -192,10 +195,10 @@ export const NOTES: string[][] = [
   ['Hands-on: rub the gravestone.', 'Interpersonal: the mailbox vandalism.', 'Real world: the 1987 "Dotbusters" in Jersey City.'],
   ['Hands-on: try to open the book, and it goes on the shelf.', 'Internalized: he rejects the gift before he knows what it means.', 'Plant the seed: this book comes back at the very end.'],
   ['English class turns into public humiliation.', 'Real world: Kohli & Solórzano (2012) on students\' names.'],
-  ['PETITION GRANTED stamp plays on first visit. The Gogol/Nikhil switch unlocks.', 'Class vote: would you change your name?', 'Press N to flip the inner voice between names.'],
+  ['PETITION GRANTED stamp plays on first visit. The Gogol/Nikhil switch unlocks.', 'Class vote: would you change your name?', 'Press N to flip the inner voice between names.', 'Scene video station (the party).'],
   ['Turning point: the truth in the car.', 'Read the quote slowly: "You remind me of everything that followed."', 'Scene video station.'],
-  ['The Ratliffs: the easy America he wanted.', 'Class vote, then reveal.', 'Ideological: the "perpetual foreigner" belief.'],
-  ['The climax. Let the phone ring once or twice before answering.', 'Breaking point: he shaves his head, the first tradition he chooses.'],
+  ['The Ratliffs: the easy America he wanted.', 'Class vote, then reveal.', 'Ideological: the "perpetual foreigner" belief.', 'Scene video station (dinner with the Ratliffs).'],
+  ['The climax. Let the phone ring once or twice before answering.', 'Breaking point: he shaves his head, the first tradition he chooses.', 'Scene video station (the phone call).'],
   ['Moushumi: two people who both know both of his names.', 'Internalized: expectations around marriage.'],
   ['The marriage ends. Neither path came with a script.', 'Turning point: identity cannot be handed to you.'],
   ['The track braids orange and blue. He is both now.', 'If every station is visited, open the book for the finale.', 'After the finale, run the ticket inspector quiz with the class.'],

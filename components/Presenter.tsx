@@ -59,8 +59,10 @@ export default function Presenter() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if ((e.target as HTMLElement).tagName === 'INPUT') return;
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === 'INPUT') return;
       const k = e.key;
+      if (k === ' ' && tag === 'BUTTON') return; // let Space press the focused button instead
       if (k === 'ArrowRight' || k === 'PageDown' || k === ' ') { e.preventDefault(); send({ type: 'next' }); }
       else if (k === 'ArrowLeft' || k === 'PageUp') { e.preventDefault(); send({ type: 'prev' }); }
       else if (k === '1') send({ type: 'tab', tab: 'story' });

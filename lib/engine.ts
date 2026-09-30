@@ -829,15 +829,15 @@ export function startLine(root) {
   }
   function reveal() { if (!STATIONS[st.cur].poll || st.moving) return; st.revealed[st.cur] = true; snd.chime(); st.tab = 'story'; renderCard(false); }
 
-  ticket.addEventListener('input', (e) => { if (e.target.id === 'certName') st.certDraft = e.target.value; });
-  ticket.addEventListener('pointermove', (e) => {
+  on(ticket, 'input', (e) => { if (e.target.id === 'certName') st.certDraft = e.target.value; });
+  on(ticket, 'pointermove', (e) => {
     if (e.pointerType !== 'mouse' || reduced) return;
     const r = ticket.getBoundingClientRect();
     ticket.style.setProperty('--tx', ((e.clientX - r.left) / r.width - .5) * 5 + 'deg');
     ticket.style.setProperty('--ty', -((e.clientY - r.top) / r.height - .5) * 4 + 'deg');
   });
-  ticket.addEventListener('pointerleave', () => { ticket.style.setProperty('--tx', '0deg'); ticket.style.setProperty('--ty', '0deg'); });
-  ticket.addEventListener('click', (e) => {
+  on(ticket, 'pointerleave', () => { ticket.style.setProperty('--tx', '0deg'); ticket.style.setProperty('--ty', '0deg'); });
+  on(ticket, 'click', (e) => {
     const t = e.target.closest('button'); if (!t || t.disabled) return;
     if (t.dataset.tab) { st.tab = t.dataset.tab; renderCard(false); return; }
     if (t.dataset.try) { doTry(t.dataset.try, t); return; }
@@ -861,7 +861,7 @@ export function startLine(root) {
   const rail = $('#rail');
   rail.innerHTML = STATIONS.map((s, i) => `<button class="stop" data-i="${i}" style="--c:${NAME_COLORS[s.name]}" title="${esc(s.title)}">
     ${s.video ? '<span class="film">SCENE</span>' : ''}<i class="tagdot" style="background:${TAG_COLORS[s.analysis.tag]}"></i>${esc(s.year.replace('Late 1990s', "late '90s"))}</button>`).join('');
-  rail.addEventListener('click', (e) => { const b = e.target.closest('.stop'); if (b) travelTo(+b.dataset.i); });
+  on(rail, 'click', (e) => { const b = e.target.closest('.stop'); if (b) travelTo(+b.dataset.i); });
   function markRail(target) {
     rail.querySelectorAll('.stop').forEach((b, i) => { b.classList.toggle('current', i === target); b.classList.toggle('visited', st.visited.has(i)); });
     const cur = rail.children[target]; if (cur) cur.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', inline: 'center', block: 'nearest' });
@@ -885,15 +885,15 @@ export function startLine(root) {
     $('#ppFoot').textContent = `★ Hands-on moments: ${tries} of ${TRY_COUNT} · ` + (st.visited.size === STATIONS.length ? 'The ending is unlocked.' : 'Visit every station to unlock the ending.');
   }
   function openPassport() { renderPassport(); passport.hidden = false; $('#ppClose').focus(); }
-  $('#passBtn').addEventListener('click', openPassport);
-  $('#ppClose').addEventListener('click', () => { passport.hidden = true; });
-  $('#ppQuiz').addEventListener('click', () => openQuiz());
-  $('#ppReset').addEventListener('click', (e) => {
+  on($('#passBtn'), 'click', openPassport);
+  on($('#ppClose'), 'click', () => { passport.hidden = true; });
+  on($('#ppQuiz'), 'click', () => openQuiz());
+  on($('#ppReset'), 'click', (e) => {
     const b = e.currentTarget;
     if (b.dataset.armed) { store.set('progress', null); try { history.replaceState(null, '', location.pathname); } catch (_) {} location.reload(); return; }
     b.dataset.armed = '1'; b.textContent = 'Sure? Click again'; setTimeout(() => { delete b.dataset.armed; b.textContent = 'Start over'; }, 3000);
   });
-  passport.addEventListener('click', (e) => {
+  on(passport, 'click', (e) => {
     if (e.target === passport) { passport.hidden = true; return; }
     const b = e.target.closest('.pp-stamp'); if (b) { passport.hidden = true; travelTo(+b.dataset.i); }
   });
@@ -909,7 +909,7 @@ export function startLine(root) {
     if (st.lens === 'both') { toast('At the end he is both. Ride back to flip again.'); return; }
     setLens(st.lens === 'gogol' ? 'nikhil' : 'gogol');
   }
-  $('#nameSwitch').addEventListener('click', toggleLens);
+  on($('#nameSwitch'), 'click', toggleLens);
   
   function doDecree() {
     const d = $('#decree'); d.classList.remove('on'); void d.offsetWidth; d.classList.add('on');
@@ -927,36 +927,36 @@ export function startLine(root) {
     'Still lost somewhere between Calcutta and Cambridge.',
     'Some names never arrive. Keep riding.',
   ];
-  $('#letter').addEventListener('click', () => { toast(LETTER_LINES[st.letterClicks++ % LETTER_LINES.length]); snd.noiseBurst(5000, 1, .05, .2); });
+  on($('#letter'), 'click', () => { toast(LETTER_LINES[st.letterClicks++ % LETTER_LINES.length]); snd.noiseBurst(5000, 1, .05, .2); });
   
   /* toggles */
   function setSound(on) { snd.on = on; store.set('sound', on); $('#soundBtn').setAttribute('aria-pressed', on); $('#soundBtn').textContent = on ? 'Sound' : 'Muted'; if (on) { snd.init(); snd.ctx && snd.ctx.resume(); } }
-  $('#soundBtn').addEventListener('click', () => setSound(!snd.on));
+  on($('#soundBtn'), 'click', () => setSound(!snd.on));
   function toggleAnalysis() { st.analysis = !st.analysis; root.classList.toggle('show-analysis', st.analysis); $('#analysisBtn').setAttribute('aria-pressed', st.analysis);
     if (st.analysis) { st.tab = 'analysis'; if (!st.moving) renderCard(false); toast('4 I\'s mode: colored dots on the timeline show each kind of oppression.'); } }
-  $('#analysisBtn').addEventListener('click', toggleAnalysis);
+  on($('#analysisBtn'), 'click', toggleAnalysis);
   function togglePresent() { const on = root.classList.toggle('present'); $('#presentBtn').setAttribute('aria-pressed', on); publish(); }
-  $('#presentBtn').addEventListener('click', togglePresent);
+  on($('#presentBtn'), 'click', togglePresent);
   const help = $('#help');
-  $('#helpBtn').addEventListener('click', () => { help.hidden = false; $('#helpClose').focus(); });
-  $('#helpClose').addEventListener('click', () => { help.hidden = true; });
+  on($('#helpBtn'), 'click', () => { help.hidden = false; $('#helpClose').focus(); });
+  on($('#helpClose'), 'click', () => { help.hidden = true; });
   function fullscreen() { const el = document.documentElement; if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); else if (el.requestFullscreen) el.requestFullscreen().catch(() => toast('Fullscreen is not available here.')); }
   
   /* canvas click → station */
-  cv.addEventListener('click', (e) => {
+  on(cv, 'click', (e) => {
     const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
     for (let i = 0; i < STATION_HIT.length; i++) { const h = STATION_HIT[i]; if (h && x >= h.x && x <= h.x + h.w && y >= h.y && y <= h.y + h.h) { travelTo(i); return; } }
     // click the train for a whistle
     const tx = st.trainX - st.camX; if (Math.abs(x - tx) < 300 * S && Math.abs(y - (groundY - 60 * S)) < 80 * S) snd.whistle();
   });
-  cv.addEventListener('mousemove', (e) => {
+  on(cv, 'mousemove', (e) => {
     const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
     cv.style.cursor = STATION_HIT.some((h) => h && x >= h.x && x <= h.x + h.w && y >= h.y && y <= h.y + h.h) ? 'pointer' : 'default';
   });
   // swipe on the stage
   let tsx = null;
-  cv.addEventListener('touchstart', (e) => { tsx = e.touches[0].clientX; }, { passive: true });
-  cv.addEventListener('touchend', (e) => { if (tsx == null) return; const dx = e.changedTouches[0].clientX - tsx; if (Math.abs(dx) > 50) travelTo(st.target + (dx < 0 ? 1 : -1)); tsx = null; });
+  on(cv, 'touchstart', (e) => { tsx = e.touches[0].clientX; }, { passive: true });
+  on(cv, 'touchend', (e) => { if (tsx == null) return; const dx = e.changedTouches[0].clientX - tsx; if (Math.abs(dx) > 50) travelTo(st.target + (dx < 0 ? 1 : -1)); tsx = null; });
   
   /* keyboard */
   on(document, 'keydown', (e) => {
@@ -1019,7 +1019,7 @@ export function startLine(root) {
     setTimeout(() => travelTo(startAt), 500);
     publish();
   }
-  $('#boardBtn').addEventListener('click', board);
+  on($('#boardBtn'), 'click', board);
   function hashStation() { const m = /^#s(\d+)$/.exec(location.hash); return m ? clamp(+m[1] - 1, 0, STATIONS.length - 1) : START; }
   
   let typeIv;
@@ -1042,9 +1042,9 @@ export function startLine(root) {
     }, reduced ? 1 : 55); }, 2800);
   }
   function closeFinale() { const f = $('#finale'); f.classList.remove('on'); clearInterval(typeIv); setTimeout(() => { f.hidden = true; showCard(false); }, 600); }
-  $('#finBack').addEventListener('click', closeFinale);
-  $('#finQuiz').addEventListener('click', () => openQuiz());
-  $('#finReplay').addEventListener('click', () => { closeFinale(); st.crashDone = false; setTimeout(() => travelTo(0, { rewind: true }), 700); });
+  on($('#finBack'), 'click', closeFinale);
+  on($('#finQuiz'), 'click', () => openQuiz());
+  on($('#finReplay'), 'click', () => { closeFinale(); st.crashDone = false; setTimeout(() => travelTo(0, { rewind: true }), 700); });
   
   /* =========================================================
      TICKET INSPECTOR QUIZ
@@ -1081,7 +1081,7 @@ export function startLine(root) {
     const p = $('#quizPunches').children[qi]; if (p) p.className = ok ? 'hit' : 'miss';
     if (ok) snd.thump(); else snd.noiseBurst(300, 2, .15, .1);
   }
-  quiz.addEventListener('click', (e) => {
+  on(quiz, 'click', (e) => {
     if (e.target === quiz) { closeQuiz(); return; }
     const b = e.target.closest('button'); if (!b) return;
     if (b.dataset.a != null) answer(+b.dataset.a);
@@ -1096,8 +1096,8 @@ export function startLine(root) {
   function save() { store.set('progress', { visited: [...st.visited], done: st.done, certWaits: st.certWaits, quizBest: st.quizBest }); }
   const saved = store.get('progress', null);
   if (saved) {
-    (saved.visited || []).forEach((i) => { if (i >= 0 && i < STATIONS.length) st.visited.add(i); });
-    Object.assign(st.done, saved.done || {}); st.certWaits = saved.certWaits || 0; st.quizBest = saved.quizBest ?? null;
+    (Array.isArray(saved.visited) ? saved.visited : []).forEach((i) => { if (i >= 0 && i < STATIONS.length) st.visited.add(i); });
+    if (saved.done && typeof saved.done === 'object') Object.assign(st.done, saved.done); st.certWaits = saved.certWaits || 0; st.quizBest = saved.quizBest ?? null;
   }
   const bc = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(CHANNEL) : null;
   function publish() {
