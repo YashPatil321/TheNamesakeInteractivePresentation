@@ -106,6 +106,7 @@ export default function NamesakeLine() {
           <p className="help-p"><b>Presenting?</b> Open the remote on your laptop and put this window on the projector. The remote shows speaker notes, a timer and vote buttons, and it steers this screen.</p>
           <div className="help-actions">
             <a className="btn hot" href="/presenter" target="_blank" rel="noopener">Open presenter remote ↗</a>
+            <a className="btn" href="/video">Scenes to film</a>
             <button className="btn" id="helpClose">Back to the train</button>
           </div>
         </div>
