@@ -10,6 +10,8 @@ import type { Station } from './stations';
 import { NAME_COLORS } from './stations';
 import { GAP, clamp, lerp, smooth, damp, canvasTex, starTexture, type Shared } from './world3d/kit';
 import { buildTrain, TRAIN_BACK, TRAIN_FRONT, LIVERIES } from './world3d/train';
+import { addLandmarks } from './world3d/landmarks';
+import { disposeLoaders } from './world3d/assets';
 import { buildScenery, SIGN_DX, SIGN_Y, SIGN_Z, LAMP_DX, LAMP_Z, LAMP_Y } from './world3d/scenery';
 import { Puffs, Glows, Weather, Birds } from './world3d/fx';
 
@@ -145,6 +147,7 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
 
   /* ---------- world ---------- */
   const scenery = buildScenery(scene, stations, shared);
+  const landmarks = addLandmarks(scene, stations, GAP, shared);
   const train = buildTrain(scene);
   const puffs = new Puffs(scene);
   const glows = new Glows(scene, scenery.lampCount + 2);
@@ -301,6 +304,7 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
     cTop.setRGB(tr / 255, tg / 255, tb / 255, THREE.SRGBColorSpace);
     cBot.setRGB(br / 255, bg / 255, bb / 255, THREE.SRGBColorSpace);
     const dark = clamp(1 - ((br * 0.3 + bg * 0.59 + bb * 0.11) / 255) * 1.3, 0, 1);
+    landmarks.update({ now, dark, trainX: tx });
     const day = 1 - dark;
     const ct = f.crashT;
     const dk = ct >= 0 ? clamp((ct - 1.3) / 0.6, 0, 1) * (1 - clamp((ct - 6.5) / 1.2, 0, 1)) : 0;
@@ -621,6 +625,7 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
       const sl = o as THREE.DirectionalLight; if (sl.isLight && sl.shadow && sl.shadow.map) sl.shadow.map.dispose();
     });
     train.geos.forEach((g) => g.dispose());
+    landmarks.dispose(); disposeLoaders();
     scenery.dispose(); puffs.dispose(); glows.dispose(); weather.dispose(); birds.dispose();
     pageTex.dispose(); glintTex.dispose(); envTex.dispose();
     bloom.dispose(); output.dispose(); composer.dispose(); rt.dispose();
