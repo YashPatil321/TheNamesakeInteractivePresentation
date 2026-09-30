@@ -440,18 +440,21 @@ export function buildScenery(scene: THREE.Scene, stations: Station[], sh: Shared
         break;
       }
       case 'suburb': {
+        // Pemberton Road landmarks (cities/suburb.ts) fill xs-50 .. xs+18 up to ~70 back: filler only outside that, or far behind it
         const walls = ['#e9e4d8', '#c9d6e0', '#e6d3a8', '#b8c9b0', '#d9b8a8', '#f0ece2'];
+        const held = (xa: number, xb = xa) => xb > xs - 50 && xa < xs + 18;
         rowX(x0, x1, (x) => {
-          const w = 6.5 + r() * 2, d = 6 + r(), h = 3.6 + r() * 1.2, z = -20 - r() * 3;
+          const w = 6.5 + r() * 2, d = 6 + r(), h = 3.6 + r() * 1.2, z = -30 - r() * 3;
+          if (held(x - 3, x + w + 3)) return 3;
           house(x + w / 2, z, w, d, h, pick(walls), pick(['#4a4f5c', '#5a4038', '#39404a', '#6a5040']), 2.3 + r() * 0.8, r() < 0.4);
           put('fence', x + w / 2, z + d / 2 + 2.2, 0, w / 4, 0.9, 1, '#f2efe6');
           tree(x + w + 2, z + 1 - r() * 4, 1.2 + r() * 0.6);
           return w + 4 + r() * 3;
         });
-        rowX(x0, x1, (x) => { tree(x, -34 - r() * 30, 1.3 + r() * 0.9); return 3 + r() * 4; });
-        rowX(x0, x1, (x) => { const w = 7 + r() * 2; house(x, -52 - r() * 10, w, 6, 4, pick(walls), '#4a4f5c', 2.6); return w + 5 + r() * 6; });
+        rowX(x0, x1, (x) => { if (held(x)) tree(x, -74 - r() * 14, 1.4 + r() * 0.9); else tree(x, -40 - r() * 26, 1.3 + r() * 0.9); return 3 + r() * 4; });
+        rowX(x0, x1, (x) => { const w = 7 + r() * 2; house(x, (held(x) ? -80 : -56) - r() * 10, w, 6, 4, pick(walls), '#4a4f5c', 2.6); return w + 5 + r() * 6; });
         rowX(x0, x1, (x) => { if (!nearClear(x)) tree(x, -12.5 - r() * 1.5, 0.9 + r() * 0.4); return 8 + r() * 10; });
-        if (s.snow) for (let k = 0; k < 8; k++) pine(x0 + r() * (x1 - x0), -30 - r() * 20, 1.3 + r() * 0.6);
+        if (s.snow) for (let k = 0; k < 8; k++) { const x = x0 + r() * (x1 - x0); pine(x, (held(x) ? -64 : -32) - r() * 16, 1.3 + r() * 0.6); }
         break;
       }
       case 'campus': {
@@ -472,18 +475,27 @@ export function buildScenery(scene: THREE.Scene, stations: Station[], sh: Shared
         break;
       }
       case 'nyc': {
+        // cities/nyc.ts sets fill xs-52 .. xs+20: the first NYC stop is midtown (brownstones, cabs, deco towers behind),
+        // the second the bridge over the river with downtown beyond; filler stays outside that, and stays low behind midtown
         const cols = ['#5d6470', '#7b8290', '#4a4f5a', '#8c8a84', '#a09482', '#3c4250', '#6b6660'];
+        const bridgeStop = stations.slice(0, i).some((t) => t.region === 'nyc');
+        const held = (xa: number, xb = xa) => xb > xs - 52 && xa < xs + 20;
         rowX(x0, x1, (x) => {
           const w = 5 + r() * 5, d = 5 + r() * 5, h = (12 + r() * 24) * tall(x), z = -26 - r() * 14, c = pick(cols);
+          if (held(x, x + w)) return 3;
           put('box', x + w / 2, z, 0, w, h, d, c);
           if (r() < 0.45) put('box', x + w / 2, z, 0, w * 0.65, h * 0.25, d * 0.65, c, h);
           if (r() < 0.3) put('cyl', x + w / 2, z, 0, 0.18, 6 + r() * 6, 0.18, '#2a2c33', h);
           else if (r() < 0.35) put('tower', x + w * 0.3, z, 0, 1.6, 1.6, 1.6, '#6b4a34', h);
           return w + 1 + r() * 2;
         });
-        rowX(x0, x1, (x) => { const w = 6 + r() * 8, h = (26 + r() * 46) * tall(x), c = pick(cols); put('box', x, -60 - r() * 30, 0, w, h, 8, c); if (r() < 0.3) put('box', x, -60, 0, w * 0.6, h * 0.3, 5, c, h); return w + 1 + r() * 3; });
-        // a landmark tower with setbacks and a spire
-        if (i % 2 === 0) { const lx = xs + 18, lz = -85; put('box', lx, lz, 0, 14, 60, 14, '#8a8680'); put('box', lx, lz, 0, 10, 16, 10, '#8a8680', 60); put('box', lx, lz, 0, 6, 10, 6, '#8a8680', 76); put('cone', lx, lz, 0, 1.4, 16, 1.4, '#a0a4aa', 86); }
+        rowX(x0, x1, (x) => {
+          const w = 6 + r() * 8, c = pick(cols);
+          if (held(x - w / 2, x + w / 2) && bridgeStop) return w;
+          const h = held(x) ? 10 + r() * 12 : (26 + r() * 46) * tall(x), z = held(x) ? -52 - r() * 20 : -60 - r() * 30;
+          put('box', x, z, 0, w, h, 8, c); if (r() < 0.3) put('box', x, z, 0, w * 0.6, h * 0.3, 5, c, h);
+          return w + 1 + r() * 3;
+        });
         rowX(x0, x1, (x) => { if (!nearClear(x)) put('bush', x, -12 - r() * 2, r() * 6, 1.2, 1, 1.2, '#6a8a58'); return 6 + r() * 6; });
         break;
       }
@@ -516,27 +528,28 @@ export function buildScenery(scene: THREE.Scene, stations: Station[], sh: Shared
           const x = x0 + r() * (x1 - x0), z = -12 - r() * 100;
           const inLake = Math.abs(x - xs) < 34 && z < -11 && z > -106;
           if (inLake || (nearClear(x) && z > -14)) continue;
+          if (x > xs - 36 && x < xs + 12 && z > -56 && z < -8) continue; // the lake house point (cities/lake.ts)
           pine(x, z, 1.2 + r() * 1.2);
         }
         for (let k = 0; k < 40; k++) pine(xs - 60 + r() * 120, -108 - r() * 30, 1.8 + r() * 1.2);
-        house(xs + 26, -18, 9, 7, 4.2, '#8a6a4a', '#3a3f4a', 2.6, true);
-        put('block', xs + 20, -13.5, 0, 0.8, 0.3, 8, '#6a5038');
+        // the Ratliffs' house, dock and canoe are Blender models (cities/lake.ts)
         break;
       }
       case 'cleveland': {
         const cols = ['#6a5a50', '#5c5550', '#74655a', '#7a6a5e'];
+        // the mill, river, bridges and Terminal Tower are Blender models (cities/cleveland.ts) in xs-32 .. xs+18
+        const held = (xa: number, xb = xa) => xb > xs - 32 && xa < xs + 18;
+        for (const [sx, sh2, sz] of [[5, 26, -39], [9, 24, -39], [13, 26, -39]]) stacks.push(new THREE.Vector3(xs + sx, sh2, sz));
         rowX(x0, x1, (x) => {
           const w = 12 + r() * 8, d = 10, h = 6 + r() * 4, z = -24 - r() * 6;
+          if (held(x, x + w + 6)) return 4;
           put('box', x + w / 2, z, 0, w, h, d, pick(cols));
           for (let k = 0; k < Math.floor(w / 3); k++) put('roof', x + 1.5 + k * 3, z, Math.PI / 2, d * 0.95, 1.4, 2.6, '#4a4a4e', h);
           if (r() < 0.8) { const sx = x + w * (0.2 + r() * 0.6), sz = z - d / 2 - 2, sh2 = 16 + r() * 10; put('stack', sx, sz, 0, 1.8, sh2, 1.8, '#7a3a2e'); stacks.push(new THREE.Vector3(sx, sh2, sz)); }
           if (r() < 0.5) put('cyl', x + w + 3, z + 2, 0, 6, 4.5, 6, '#8c8f94');
           return w + 4 + r() * 4;
         });
-        // downtown with a Terminal Tower-like landmark
-        rowX(x0, x1, (x) => { const w = 6 + r() * 8; put('box', x, -65 - r() * 20, 0, w, (14 + r() * 22) * tall(x), 8, pick(['#5d6470', '#6b6660', '#7a7068'])); return w + 2 + r() * 4; });
-        const lx = xs - 12, lz = -80;
-        put('box', lx, lz, 0, 12, 34, 12, '#9a8f80'); put('box', lx, lz, 0, 8, 12, 8, '#9a8f80', 34); put('box', lx, lz, 0, 5, 8, 5, '#9a8f80', 46); put('cone', lx, lz, 0, 3, 8, 3, '#8a8078', 54);
+        rowX(x0, x1, (x) => { const w = 6 + r() * 8; if (!held(x - w / 2, x + w / 2)) put('box', x, -65 - r() * 20, 0, w, (14 + r() * 22) * tall(x), 8, pick(['#5d6470', '#6b6660', '#7a7068'])); return w + 2 + r() * 4; });
         rowX(x0, x1, (x) => { if (!nearClear(x)) put('bush', x, -12.5 - r() * 2, r() * 6, 1.1, 0.9, 1.1, '#56644a'); return 7 + r() * 8; });
         break;
       }
