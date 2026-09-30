@@ -1,6 +1,12 @@
-// The steam locomotive and its two carriages: merged low-poly geometry per material, instanced wheels, animated rods.
+// The steam locomotive and its two carriages. The real model is made in Blender (blender/train.py -> public/models/train.glb)
+// and swapped in once it loads; until then (or if it fails) a procedural low-poly train stands in with the same parts.
+// Either way: merged geometry per material, instanced wheels, animated rods, and shared materials the world tints at runtime.
 import * as THREE from 'three';
+import type { GLTF } from 'three/addons/loaders/GLTFLoader.js';
 import { place, paint, boxMM, merge, composeInto, clamp, canvasTex } from './kit';
+import { loadGLB } from './assets';
+
+export const TRAIN_GLB = '/models/train.glb';
 
 export const RAIL_TOP = 0.58;
 const DRV_R = 0.78, SML_R = 0.45, CRANK = 0.34;
@@ -101,8 +107,9 @@ export function buildTrain(scene: THREE.Scene): TrainParts {
     plate: new THREE.MeshStandardMaterial({ map: plate.tex, emissiveMap: plate.tex, emissive: '#ffffff', emissiveIntensity: 0.25, roughness: 0.35, metalness: 0.3 }),
   };
   const geos: THREE.BufferGeometry[] = [];
+  const proc: THREE.Mesh[] = []; // procedural placeholder meshes, replaced when the Blender model arrives
   const mesh = (g: THREE.BufferGeometry, m: THREE.Material, parent: THREE.Object3D, shadow = true) => {
-    geos.push(g); const o = new THREE.Mesh(g, m); o.castShadow = shadow; o.receiveShadow = true; parent.add(o); return o;
+    geos.push(g); const o = new THREE.Mesh(g, m); o.castShadow = shadow; o.receiveShadow = true; parent.add(o); proc.push(o); return o;
   };
   const root = new THREE.Group(); scene.add(root);
 
@@ -168,7 +175,7 @@ export function buildTrain(scene: THREE.Scene): TrainParts {
   ironL.push(paint(boxMM(3.5, 4.06, -0.27, 3.98, 4.6, 0.27), IRON));
   ironL.push(paint(place(new THREE.ConeGeometry(0.12, 0.25, 8), 3.74, 4.72, 0), IRON));
   const lensMesh = new THREE.Mesh(place(new THREE.CylinderGeometry(0.19, 0.19, 0.05, 20), 4.0, 4.33, 0, 0, 0, Math.PI / 2), mats.lamp);
-  geos.push(lensMesh.geometry); loco.add(lensMesh);
+  geos.push(lensMesh.geometry); loco.add(lensMesh); proc.push(lensMesh);
   // nameplates both sides
   const plateGeo = new THREE.PlaneGeometry(2.0, 0.5); geos.push(plateGeo);
   const pl1 = new THREE.Mesh(plateGeo, mats.plate); pl1.position.set(-2.95, 1.98, 1.195); loco.add(pl1);
@@ -230,7 +237,7 @@ export function buildTrain(scene: THREE.Scene): TrainParts {
     const g = new THREE.Group(); g.position.x = cx; root.add(g); cars.push(g);
     const sets = [[L.body, mats.body, true], [L.trim, mats.paint, true], [L.iron, mats.iron, true], [L.brass, mats.brass, true], [L.glass, mats.glass, false], [L.lens, mats.lens, false]] as const;
     for (const [list, m, sh] of sets) { if (!list.length) continue; mesh(merge([...list]), m, g, sh); }
-    if (idx === 1) for (const sd of [-0.8, 0.8]) { const t = new THREE.Mesh(new THREE.SphereGeometry(0.11, 10, 8), tail); geos.push(t.geometry); t.position.set(-4.4, 3.3, sd); g.add(t); }
+    if (idx === 1) for (const sd of [-0.8, 0.8]) { const t = new THREE.Mesh(new THREE.SphereGeometry(0.11, 10, 8), tail); geos.push(t.geometry); t.position.set(-4.4, 3.3, sd); g.add(t); proc.push(t); }
   });
   // couplings
   const coupG = boxMM(-0.5, 1.15, -0.12, 0.5, 1.35, 0.12); geos.push(coupG);
@@ -240,16 +247,20 @@ export function buildTrain(scene: THREE.Scene): TrainParts {
 
   /* ---------------- wheels (instanced across all units) ---------------- */
   const wheelG = wheelGeometry(); geos.push(wheelG);
-  type WheelDef = { unit: THREE.Object3D; x: number; y: number; z: number; r: number };
+  type WheelDef = { unit: THREE.Object3D; x: number; y: number; z: number; r: number; slot: number };
   const defs: WheelDef[] = [];
   for (const s of [-1, 1]) {
-    for (const x of [-3.35, -1.75, -0.15]) defs.push({ unit: loco, x, y: DRV_Y, z: s * 0.74, r: DRV_R });
-    for (const x of [2.15, 3.35]) defs.push({ unit: loco, x, y: SML_Y, z: s * 0.74, r: SML_R });
-    for (const car of cars) for (const x of [-3.55, -2.15, 2.15, 3.55]) defs.push({ unit: car, x, y: SML_Y, z: s * 0.74, r: SML_R });
+    for (const x of [-3.35, -1.75, -0.15]) defs.push({ unit: loco, x, y: DRV_Y, z: s * 0.74, r: DRV_R, slot: 0 });
+    for (const x of [2.15, 3.35]) defs.push({ unit: loco, x, y: SML_Y, z: s * 0.74, r: SML_R, slot: 0 });
+    for (const car of cars) for (const x of [-3.55, -2.15, 2.15, 3.55]) defs.push({ unit: car, x, y: SML_Y, z: s * 0.74, r: SML_R, slot: 0 });
   }
+  let nDrv = 0, nSml = 0;
+  for (const w of defs) w.slot = w.r === DRV_R ? nDrv++ : nSml++;
   const wheels = new THREE.InstancedMesh(wheelG, mats.wheel, defs.length);
   wheels.castShadow = true; wheels.receiveShadow = true; wheels.frustumCulled = false;
   scene.add(wheels);
+  let smallWheels: THREE.InstancedMesh | null = null; // Blender model: driving wheels stay in `wheels`, the small ones get their own
+  let headY = 1.32; // crosshead height (the Blender cylinders sit higher)
 
   // coupling rods + main rods
   const rodG = boxMM(-1.7, -0.07, -0.04, 1.7, 0.07, 0.04); geos.push(paint(rodG, '#b7bcc4'));
@@ -291,17 +302,22 @@ export function buildTrain(scene: THREE.Scene): TrainParts {
     for (let i = 0; i < defs.length; i++) {
       const w = defs[i];
       const ang = -(x / w.r) - (w.unit === loco ? 0 : spin);
-      composeInto(_l, w.x, w.y, w.z, 0, w.r, w.r, 1, 0, ang);
+      // modelled wheels have an outer face (+z): the far-side ones are turned round, crank pins kept in phase
+      if (smallWheels && w.z < 0) composeInto(_l, w.x, w.y, w.z, Math.PI, w.r, w.r, 1, 0, Math.PI - ang);
+      else composeInto(_l, w.x, w.y, w.z, 0, w.r, w.r, 1, 0, ang);
       _m.multiplyMatrices(w.unit.matrixWorld, _l);
-      wheels.setMatrixAt(i, _m);
+      if (!smallWheels) wheels.setMatrixAt(i, _m);
+      else if (w.r === DRV_R) wheels.setMatrixAt(w.slot, _m);
+      else smallWheels.setMatrixAt(w.slot, _m);
     }
     wheels.instanceMatrix.needsUpdate = true;
+    if (smallWheels) smallWheels.instanceMatrix.needsUpdate = true;
     // rods follow the crank pins
     const a = -(x / DRV_R);
     const cx = Math.cos(a) * CRANK, cy = Math.sin(a) * CRANK;
     for (let s = 0; s < 2; s++) {
       rods[s].position.set(-1.75 + cx, DRV_Y + cy, rods[s].position.z);
-      const pinX = -0.15 + cx, pinY = DRV_Y + cy, headX = 1.55 + cx * 0.3, headY = 1.32;
+      const pinX = -0.15 + cx, pinY = DRV_Y + cy, headX = 1.55 + cx * 0.3;
       const dx = headX - pinX, dy = headY - pinY;
       mains[s].position.set(pinX, pinY, mains[s].position.z);
       mains[s].rotation.z = Math.atan2(dy, dx);
@@ -309,5 +325,72 @@ export function buildTrain(scene: THREE.Scene): TrainParts {
     }
   }
 
-  return { root, loco, cars, wheels, rods, mains, headlight, headPos: new THREE.Vector3(4.05, 4.33, 0), funnelTop: new THREE.Vector3(3.45, 5.3, 0), pick, mats, plate, update, geos };
+  /* ---------------- the Blender model ---------------- */
+  // Every GLB material maps onto one of the shared runtime materials so the world's tinting keeps working:
+  // Livery* -> mats.body (era colour; LiveryDark carries a grey vertex tint), Lens -> the name stripe, Glass -> lit windows,
+  // Lamp -> headlight lens, TailLamp -> red tail lamps, Brass -> brass; everything else keeps its colour as vertex colour.
+  const DIM = new Set(['Iron', 'Smokebox', 'Steel', 'Coal', 'Bellows']);
+  const target = (name: string): [THREE.Material, boolean, boolean] => { // material, bake colour, casts shadow
+    if (name.startsWith('Livery')) return [mats.body, true, true];
+    if (name === 'Brass') return [mats.brass, false, true];
+    if (name === 'Glass') return [mats.glass, false, false];
+    if (name === 'Lens') return [mats.lens, false, false];
+    if (name === 'Lamp') return [mats.lamp, false, false];
+    if (name === 'TailLamp') return [tail, false, false];
+    return [DIM.has(name) ? mats.iron : mats.paint, true, true];
+  };
+  const bake = (node: THREE.Object3D, map: (name: string) => [THREE.Material, boolean, boolean]) => {
+    const by = new Map<THREE.Material, { list: THREE.BufferGeometry[]; shadow: boolean }>();
+    node.traverse((o) => {
+      const m = o as THREE.Mesh;
+      if (!m.isMesh) return;
+      const src = m.material as THREE.MeshStandardMaterial;
+      const [dst, keepColor, shadow] = map(src.name);
+      const g = m.geometry.clone();
+      g.applyMatrix4(m.matrixWorld);
+      paint(g, keepColor && src.color ? src.color : 0xffffff);
+      let e = by.get(dst); if (!e) { e = { list: [], shadow }; by.set(dst, e); }
+      e.list.push(g);
+    });
+    return by;
+  };
+  const one = (node: THREE.Object3D) => { const b = bake(node, () => [mats.wheel, true, true]); const l = [...b.values()][0].list; const g = merge(l); geos.push(g); return g; };
+
+  function useModel(gltf: GLTF) {
+    const src = gltf.scene; src.updateMatrixWorld(true);
+    const units: [string, THREE.Object3D][] = [['Loco', loco], ['Coach', cars[0]], ['Van', cars[1]]];
+    const nodes = units.map(([n]) => src.getObjectByName(n));
+    const wd = src.getObjectByName('WheelDriver'), ws = src.getObjectByName('WheelSmall'), cr = src.getObjectByName('CouplingRod');
+    if (nodes.some((n) => !n) || !wd || !ws || !cr) throw new Error('train.glb: missing nodes');
+    // retire the placeholder bodies
+    for (const o of proc) {
+      o.removeFromParent(); o.geometry.dispose();
+      const gi = geos.indexOf(o.geometry); if (gi >= 0) geos.splice(gi, 1);
+    }
+    proc.length = 0;
+    units.forEach(([, unit], k) => {
+      for (const [mat, { list, shadow }] of bake(nodes[k]!, target)) {
+        const g = merge(list); geos.push(g);
+        const o = new THREE.Mesh(g, mat); o.castShadow = shadow; o.receiveShadow = true; unit.add(o);
+      }
+    });
+    // wheels: driving wheels keep the original instanced mesh, the small ones get a second one
+    const oldW = wheels.geometry;
+    wheels.geometry = one(wd); wheels.count = nDrv;
+    oldW.dispose(); { const gi = geos.indexOf(oldW); if (gi >= 0) geos.splice(gi, 1); }
+    smallWheels = new THREE.InstancedMesh(one(ws), mats.wheel, nSml);
+    smallWheels.castShadow = true; smallWheels.receiveShadow = true; smallWheels.frustumCulled = false;
+    scene.add(smallWheels);
+    // coupling rods (far one turned to face out), crossheads now at the cylinder centre line
+    const rg = one(cr);
+    rods.forEach((r) => { r.geometry = rg; if (r.position.z < 0) r.rotation.y = Math.PI; });
+    headY = 1.5;
+    update(lastX, lastD, lastT);
+  }
+  let lastX = 0, lastD = 0, lastT = 0;
+  const update0 = update;
+  function tracked(x: number, derail: number, now: number) { lastX = x; lastD = derail; lastT = now; update0(x, derail, now); }
+  loadGLB(TRAIN_GLB).then((g) => { if (root.parent) useModel(g); }).catch((err) => console.warn('train model unavailable, keeping the placeholder', err));
+
+  return { root, loco, cars, wheels, rods, mains, headlight, headPos: new THREE.Vector3(4.05, 4.33, 0), funnelTop: new THREE.Vector3(3.45, 5.3, 0), pick, mats, plate, update: tracked, geos };
 }
