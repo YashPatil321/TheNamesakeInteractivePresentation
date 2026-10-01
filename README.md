@@ -2,7 +2,7 @@
 
 An interactive, animated timeline of Jhumpa Lahiri's *The Namesake*. A steam train rides through Gogol's life from 1961 to 2000 and stops at 15 stations. Each stop opens a ticket with the story, a 4 I's analysis, a hands-on moment at five stations, and a slot for an acted scene video at 7 key stations.
 
-**Filmed vs. generated.** The 7 acted scenes are filmed by our group and marked with a warm film-strip "Filmed by our group" badge. Everything computer-made (the 3D crash, the step-inside 3D rooms, the Then & Now animations) wears a cool "Animated" / "3D" badge, and never re-stages a moment we film (see `lib/media.ts`).
+**Our scenes.** The 7 acted scenes are filmed by our group and open automatically, full screen, at their stations.
 
 **Group:** Shiven Swami, Yash Patil, Jonah Luo, Drew Dupart
 

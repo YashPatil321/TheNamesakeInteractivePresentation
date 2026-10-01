@@ -132,7 +132,7 @@ const V: Record<number, Vignette> = {
   // 1961 → today: the 1965 law and the community it made possible
   0: {
     title: 'A law opens the door', dur: 9.5, still: 8.2,
-    alt: 'Animation: travelers with suitcases wait at a barrier beside a booth. The barrier lifts and they walk through toward a row of houses, and the hillside behind fills with small figures, a community growing.',
+    alt: 'travelers with suitcases wait at a barrier beside a booth. The barrier lifts and they walk through toward a row of houses, and the hillside behind fills with small figures, a community growing.',
     beats: [
       { at: 0, text: 'A law decides who is allowed in.' },
       { at: 3.0, text: 'The 1965 law ended the national-origins quotas that had kept many Indians out.' },
@@ -185,7 +185,7 @@ const V: Record<number, Vignette> = {
   // 1968 → 2023: an official form decides how a name may look
   2: {
     title: 'A form that can’t spell a name', dur: 10, still: 8.6,
-    alt: 'Animation: a birth certificate form. Someone types the name José; the form rejects the accented é and turns it into a plain e. Then a stamp reads Proposed: AB 77, and the accent is accepted.',
+    alt: 'a birth certificate form. Someone types the name José; the form rejects the accented é and turns it into a plain e. Then a stamp reads Proposed: AB 77, and the accent is accepted.',
     beats: [
       { at: 0, text: 'An official birth form decides how a child’s name is allowed to look.' },
       { at: 2.3, text: 'California had not allowed accent marks like é or ñ on state records since 1986.' },
@@ -228,7 +228,7 @@ const V: Record<number, Vignette> = {
   // 1968 → 2023: a tradition written into a school calendar
   3: {
     title: 'On the school calendar', dur: 9, still: 7.5,
-    alt: 'Animation: a school calendar page. A small clay lamp, a diya, floats in and settles on one day, which lights up and reads No school, Diwali. More lamps glow along the bottom.',
+    alt: 'a school calendar page. A small clay lamp, a diya, floats in and settles on one day, which lights up and reads No school, Diwali. More lamps glow along the bottom.',
     beats: [
       { at: 0, text: 'In 1968 the Bengali community kept its traditions alive in private.' },
       { at: 3.2, text: 'In 2023 New York made Diwali a city public school holiday.' },
@@ -266,7 +266,7 @@ const V: Record<number, Vignette> = {
   // 1973 → 2026: who decides how a name is said at school
   4: {
     title: 'Names at commencement', dur: 11.5, still: 6.2,
-    alt: 'Animation: a graduate records her own name on a phone. At commencement a speaker on the podium plays it back while she crosses the stage in cap and gown. Then two reactions: a check mark for names said right, and a petition asking for a human announcer.',
+    alt: 'a graduate records her own name on a phone. At commencement a speaker on the podium plays it back while she crosses the stage in cap and gown. Then two reactions: a check mark for names said right, and a petition asking for a human announcer.',
     beats: [
       { at: 0, text: 'A Texas school district planned to have AI read graduates’ names.' },
       { at: 2.0, text: 'Students record how their own names should be said.' },
@@ -333,7 +333,7 @@ const V: Record<number, Vignette> = {
   // 1982 → 2024: learning to be ashamed of what comes from home
   6: {
     title: 'The lunchbox', dur: 11, still: 9.2,
-    alt: 'Animation: at a school cafeteria table a kid opens a home-cooked lunch; steam rises and the other kids turn to stare, so the kid closes the lid and slumps. Then, years later, the same food is set out proudly for a table of smiling adult friends.',
+    alt: 'at a school cafeteria table a kid opens a home-cooked lunch; steam rises and the other kids turn to stare, so the kid closes the lid and slumps. Then, years later, the same food is set out proudly for a table of smiling adult friends.',
     beats: [
       { at: 0, text: 'A kid opens a home-cooked lunch at school…' },
       { at: 2.2, text: '…gets stared at, and learns to feel ashamed of it.' },
@@ -383,7 +383,7 @@ const V: Record<number, Vignette> = {
   // 1986 → 2024: same résumé, different name
   8: {
     title: 'Same résumé, different name', dur: 10.5, still: 9.0,
-    alt: 'Animation: two identical résumés side by side. Only the name line differs, labeled white-sounding name and Black-sounding name. Callback bars grow beneath each; the first grows slightly taller.',
+    alt: 'two identical résumés side by side. Only the name line differs, labeled white-sounding name and Black-sounding name. Callback bars grow beneath each; the first grows slightly taller.',
     beats: [
       { at: 0, text: 'Economists sent about 83,000 fake job applications to large U.S. companies.' },
       { at: 2.8, text: 'The résumés matched. Only the names were changed.' },
@@ -422,7 +422,7 @@ const V: Record<number, Vignette> = {
   // 1990s → 2023: the "perpetual foreigner" question
   10: {
     title: '“Where are you really from?”', dur: 10, still: 8.4,
-    alt: 'Animation: two people at a dinner table with candles. One asks, Where are you from? The other answers, Here. I was born here. The first asks again, No, where are you really from? The second looks down.',
+    alt: 'two people at a dinner table with candles. One asks, Where are you from? The other answers, Here. I was born here. The first asks again, No, where are you really from? The second looks down.',
     beats: [
       { at: 0, text: 'Small talk at a dinner table.' },
       { at: 4.4, text: 'An American with brown skin is assumed to be from somewhere else.' },
@@ -450,7 +450,7 @@ const V: Record<number, Vignette> = {
   // 1990s → 2025: tradition, adapted
   11: {
     title: 'A river stands in for the Ganges', dur: 12, still: 7.0,
-    alt: 'Animation: a calm river at dusk with trees on the far bank. A family stands on the near bank; marigold flowers drift out from the shore and float slowly downstream.',
+    alt: 'a calm river at dusk with trees on the far bank. A family stands on the near bank; marigold flowers drift out from the shore and float slowly downstream.',
     beats: [
       { at: 0, text: 'Families who can’t travel to India’s Ganges River to scatter ashes…' },
       { at: 4.0, text: '…have made Florida’s Suwannee River a substitute site.' },
@@ -522,7 +522,7 @@ export function vignetteHTML(i: number, esc: (s: string) => string, badge: strin
       </div>
       <div class="vg-bar" aria-hidden="true"><i></i></div>
     </div>
-    <figcaption class="vg-cap"><span class="vg-cap-t">${esc(v.beats[0].text)}</span><small>Our animated illustration of the news story below, not real footage.</small></figcaption>
+    <figcaption class="vg-cap"><span class="vg-cap-t">${esc(v.beats[0].text)}</span></figcaption>
   </figure>`;
 }
 

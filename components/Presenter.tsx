@@ -119,7 +119,7 @@ export default function Presenter() {
           <div className="pr-year">{s.year}</div>
           <h2>{s.title}</h2>
           <div className="pr-place">{s.place} · <b>{TAG_NAMES[s.analysis.tag]}</b></div>
-          <div className="pr-media" aria-label="What's on screen here: filmed or animated" dangerouslySetInnerHTML={{ __html: mediaBadges(i) }} />
+          <div className="pr-media" aria-label="Our filmed scene" dangerouslySetInnerHTML={{ __html: mediaBadges(i) }} />
           <h3>Speaker notes</h3>
           <ul className="pr-notes">{NOTES[i].map((n) => <li key={n}>{n}</li>)}</ul>
 
@@ -170,7 +170,7 @@ export default function Presenter() {
           </div>
           <div className="pr-row">
             <button className={`pr-chip ${line?.fpOpen ? 'on' : ''}`} disabled={!s.fp && !line?.fpOpen} onClick={() => send({ type: 'fp' })}>
-              {line?.fpOpen ? 'Leave the 3D room' : s.fp ? 'Step inside (3D room)' : s.video ? 'Filmed stop: no 3D room' : 'No 3D room here'}
+              {line?.fpOpen ? 'Leave first-person view' : s.fp ? 'Step inside (first person)' : 'No first-person view here'}
             </button>
             <button className={`pr-chip ${line?.scenesOpen ? 'on' : ''}`} onClick={() => send({ type: 'scenes' })}>{line?.scenesOpen ? 'Close scenes' : 'Our scenes'}</button>
           </div>

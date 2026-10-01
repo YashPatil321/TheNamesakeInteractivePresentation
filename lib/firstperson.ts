@@ -563,7 +563,7 @@ export function startFirstPerson(container: HTMLElement, kind: FpKind, opts: FpO
     fb.innerHTML = `<div class="fp-fb-in">
       <div class="fp-fb-k">${esc(station.year)} <i>·</i> ${esc(info.title)}</div>
       <h2 class="fp-fb-t">${esc(station.title)}</h2>
-      <p class="fp-fb-note">3D isn’t available on this device, so here is everything you would find inside.</p>
+      <p class="fp-fb-note">This view can’t load on this device, so here is everything you would find inside.</p>
       <ol class="fp-fb-list">${items}</ol>
       <p class="fp-done-p">${esc(copy.done.text)}</p>
       <div class="fp-done-b"><button type="button" class="fp-btn" data-act="back">Back to the line</button></div>

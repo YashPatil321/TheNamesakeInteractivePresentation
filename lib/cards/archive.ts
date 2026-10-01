@@ -41,7 +41,7 @@ const mod: CardModule = {
     <span class="ar-stamp${india ? ' ar-in' : ''}" aria-hidden="true"><i>${e(c.country)}</i><b>${e(c.stamp)}</b><svg viewBox="0 0 24 24"><path d="M2 17h20M4 17V11h10l3 3h3v3M6 17v2M17 17v2M7 11V8h4v3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
     <span class="ar-mark" aria-hidden="true"><svg viewBox="0 0 100 100"><defs><path id="ar-c${i}" d="M50 50m-36 0a36 36 0 1 1 72 0a36 36 0 1 1 -72 0"/></defs><circle cx="50" cy="50" r="44"/><circle cx="50" cy="50" r="27"/><text><textPath href="#ar-c${i}" startOffset="2%">${e(c.mark)} · ${e(s.code)} ·</textPath></text><text x="50" y="56" text-anchor="middle" class="ar-y">${e(yearOf(s.year))}</text></svg><span class="ar-waves"></span></span>
   </div>
-  <figcaption class="ar-cap">Illustration rendered for this project <span>· ${e(s.year)}, ${e(s.place)} · tap to enlarge</span></figcaption>
+  <figcaption class="ar-cap">${e(s.year)} <span>· ${e(s.place)} · tap to enlarge</span></figcaption>
 </figure>`;
   },
 

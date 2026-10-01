@@ -215,7 +215,7 @@ export default function Scenes({ mode }: { mode: 'page' | 'overlay' }) {
             <p className="sc-sub">Seven moments we act out, one for each turning point.</p>
             <p className="sc-made">
               <span dangerouslySetInnerHTML={{ __html: filmBadge('Filmed by our group', 'sm') }} />
-              <span className="sc-made-t">{GROUP_CREDIT}. Live action only: these moments are never recreated in 3D or animation on the line.</span>
+              <span className="sc-made-t">{GROUP_CREDIT}.</span>
             </p>
           </div>
           <div className="sc-head-r">

@@ -22,8 +22,8 @@ export function filmBadge(label = 'Filmed by our group', size: MkSize = 'sm', ti
   return `<span class="mk mk-film mk-${size}" title="${title}">${FILM_ICO}<span>${label}</span></span>`;
 }
 /** Cool badge: computer-generated (3D or animated). */
-export function animBadge(label = 'Animated · 3D', size: MkSize = 'sm', title = 'Computer-generated animation, not footage') {
-  return `<span class="mk mk-anim mk-${size}" title="${title}">${ANIM_ICO}<span>${label}</span></span>`;
+export function animBadge(_label = '', _size: MkSize = 'sm', _title = '') {
+  return '';
 }
 
 export interface StationMedia {
@@ -46,16 +46,12 @@ export function mediaOf(i: number): StationMedia {
 export function railMarks(i: number) {
   const m = mediaOf(i);
   const film = m.film ? filmBadge('Film', 'xs', 'Filmed by our group') : '';
-  const anim = m.crash3d || m.room3d ? animBadge('3D', 'xs', m.crash3d ? 'Animated 3D crash' : 'Step-inside 3D room') : '';
-  return film || anim ? `<span class="mk-rail">${film}${anim}</span>` : '';
+  return film ? `<span class="mk-rail">${film}</span>` : '';
 }
 
 /** Every kind of picture at a station, as full-size badges (presenter remote). */
 export function mediaBadges(i: number) {
   const m = mediaOf(i), out: string[] = [];
   if (m.film) out.push(filmBadge('Filmed by our group'));
-  if (m.crash3d) out.push(animBadge('3D crash · exterior only'));
-  if (m.room3d) out.push(animBadge('3D room · press E'));
-  if (m.vignette) out.push(animBadge('Then & Now animation'));
   return out.join('');
 }

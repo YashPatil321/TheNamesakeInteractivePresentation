@@ -203,7 +203,6 @@ export function buildCar(ctx: Ctx): Room {
   ash.torso.rotation.x = -0.14;
   ash.armL.rotation.set(-0.95, 0, -0.22); ash.foreL.rotation.x = -0.75;
   ash.armR.rotation.set(-0.95, 0, 0.22); ash.foreR.rotation.x = -0.75;
-  const ashTop = ash.mats[1];
 
   /* ---------- lights ---------- */
   const hemi = new THREE.HemisphereLight(0x3a4a7a, 0x0a0806, 0.6); scene.add(hemi);
@@ -307,7 +306,7 @@ export function buildCar(ctx: Ctx): Room {
     sway,
     spots: [
       { id: 'road', pos: new THREE.Vector3(0.4, 0.3, -9), hit: 1.2, look: new THREE.Vector3(0.1, 0.5, -14) },
-      { id: 'ashoke', pos: new THREE.Vector3(-0.3, 1.38, 0.02), hit: [0.42, 0.7, 0.45], hitPos: new THREE.Vector3(-0.38, 1.05, 0.14), look: new THREE.Vector3(-0.38, 1.24, 0.1), glow: [ashTop],
+      { id: 'ashoke', pos: new THREE.Vector3(-0.3, 1.38, 0.02), hit: [0.42, 0.7, 0.45], hitPos: new THREE.Vector3(-0.38, 1.05, 0.14), look: new THREE.Vector3(-0.38, 1.24, 0.1), glow: [],
         onFind: () => { lookAt = tNow; }, onShow: () => { if (lookAt < 0) lookBack = tNow; } },
       { id: 'truth', pos: new THREE.Vector3(-26, 9, -100), hit: 7, look: new THREE.Vector3(-4, 4, -160),
         onShow: () => { if (ghostAt < 0) { ghostAt = tNow; ctx.wait(1200).then(() => sfx.whistle()); } } },

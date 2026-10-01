@@ -97,3 +97,17 @@
 .pr-st .mk span { font-size: inherit; color: inherit; line-height: 1; }
 
 @media (prefers-reduced-motion: reduce) { .crash-mark { transition: none; } }
+
+/* Our filmed scenes take over the whole screen */
+.scene-pop.mk-cinema { z-index: 80; padding: 0; background: #000; }
+.mk-cinema .sp-frame { position: absolute; inset: 0; width: 100%; height: 100%; display: block; transform: scale(1.03); transition: transform .6s cubic-bezier(.2,.8,.2,1); }
+.scene-pop.on .sp-frame { transform: none; }
+.mk-cinema .sp-reel { position: absolute; inset: 0; padding: 0; border-radius: 0; box-shadow: none; }
+.mk-cinema .sp-reel::before, .mk-cinema .sp-reel::after { display: none; }
+.mk-cinema .sp-video { width: 100%; height: 100%; max-height: none; aspect-ratio: auto; object-fit: contain; border-radius: 0; background: #000; }
+.mk-cinema .sp-head { position: absolute; z-index: 2; top: 0; left: 0; right: 0; padding: 18px clamp(16px, 3vw, 36px) 40px; background: linear-gradient(rgba(0,0,0,.75), transparent); transition: opacity .5s; }
+.mk-cinema .sp-bar { position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; height: 4px; border-radius: 0; }
+.mk-cinema .sp-credit { position: absolute; z-index: 2; left: 0; right: 0; bottom: 14px; padding: 0 16px; text-shadow: 0 1px 8px #000; transition: opacity .5s; }
+.scene-pop.sp-idle .sp-head, .scene-pop.sp-idle .sp-credit { opacity: 0; }
+.scene-pop.sp-idle { cursor: none; }
+.mk-cinema .sp-credit { top: 64px; bottom: auto; text-align: left; padding: 0 clamp(16px, 3vw, 36px); }

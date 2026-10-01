@@ -37,7 +37,7 @@ export default function NamesakeLine() {
     <div className="app lens-gogol" id="app" ref={rootRef}>
       <div id="stage">
         <canvas id="scene" aria-label="Animated train travelling through Gogol's life" />
-        <canvas id="scene3d" hidden aria-label="3D train travelling through Gogol's life" />
+        <canvas id="scene3d" hidden aria-label="Train travelling through Gogol's life" />
         <div className="vignette" />
       </div>
 

@@ -1,10 +1,5 @@
 // All story text lives here. Edit freely; the app re-renders from this file.
 // video: put the file in public/videos (e.g. public/videos/crash.mp4) and reference it as 'videos/crash.mp4'.
-//
-// FILMED vs GENERATED: a moment the group films (video:) is never also generated. Stations with a video
-// get no first-person room (fp:) or hands-on moment (try:) that re-stages the filmed action, and the 3D crash
-// at station 1 shows only the exterior derailment (lib/world3d/crash.ts); the compartment, the flashlight and
-// the page are on film. lib/media.ts labels each kind on screen.
 
 export type Tag = 'IDEOLOGICAL' | 'INSTITUTIONAL' | 'INTERPERSONAL' | 'INTERNALIZED' | 'BREAKING' | 'RESISTANCE' | 'MIRROR' | 'TURNING';
 export type NameLens = 'none' | 'gogol' | 'nikhil' | 'both';
@@ -39,7 +34,7 @@ export interface Station {
 }
 
 export const STATIONS: Station[] = [
-  { year: '1961', title: 'The Night Train', place: 'Near Jamshedpur, India', code: 'JSR', region: 'india', name: 'none', flashback: true,
+  { year: '1961', title: 'The Night Train', place: 'Near Jamshedpur, India', code: 'JSR', region: 'india', name: 'none', flashback: true, fp: 'compartment',
     sky: ['#04060c', '#1b2133'],
     story: [
       'Ashoke Ganguli, 22, rides an overnight train to visit his grandfather, rereading the stories of Nikolai Gogol, his grandfather\'s favorite writer.',
@@ -130,7 +125,7 @@ export const STATIONS: Station[] = [
     analysis: { tag: 'INTERNALIZED', text: 'He erases the name his parents gave him to be accepted. The pressure to assimilate becomes his own choice.', world: 'Immigrants and their children still anglicize names on résumés and at coffee shops. Hiring studies show why.' },
     video: 'videos/nikhil.mp4', shots: ['Party music: "Hey, what\'s your name?"', 'He hesitates: "…Nikhil."', 'A hand crosses out GOGOL on a name tag and writes NIKHIL'] },
 
-  { year: '1987', title: 'The Truth in the Car', place: 'Train home from Yale', code: 'NHV', region: 'campus', name: 'nikhil',
+  { year: '1987', title: 'The Truth in the Car', place: 'Train home from Yale', code: 'NHV', region: 'campus', name: 'nikhil', fp: 'car',
     sky: ['#070b18', '#27304f'],
     story: [
       'Nikhil takes the train home. It stops for hours: someone has died on the tracks. His father drives out to pick him up.',
@@ -201,13 +196,13 @@ export const TAG_NAMES: Record<Tag, string> = { IDEOLOGICAL: 'Ideological', INST
 
 /** Speaker notes shown only on the presenter remote (/presenter), one list per station. */
 export const NOTES: string[][] = [
-  ['This is a flashback: Gogol has not been born yet.', 'The 3D animation shows the derailment from outside; our filmed scene follows with what happens inside the carriage and the page from "The Overcoat".', 'Mirror to society: the 1965 Hart-Celler Act opens the door for Ashoke.'],
+  ['This is a flashback: Gogol has not been born yet.', 'The crash plays out from outside the train; our filmed scene follows inside the carriage, with the page from "The Overcoat".', 'Mirror to society: the 1965 Hart-Celler Act opens the door for Ashoke.'],
   ['Still a flashback. Ashima is 19 and has not met her husband.', 'Hands-on: have someone click "Slip your feet in".', 'Talking point: isolation is the first cost of immigrating.'],
   ['The first stop where Gogol is on the train. Track turns orange.', 'Hands-on: let a classmate try to fill the birth certificate, then wait for the letter three times.', 'Institutional: a hospital form overrides a Bengali naming tradition.', 'Optional: press "Why Gogol?" to rewind to the crash.'],
   ['The rice ceremony: the Bengali community acts as family.', 'Hands-on: ask the class which item baby Gogol will pick, then tap it.', 'Read the "lifelong pregnancy" quote aloud.'],
   ['Class vote: tap once per raised hand, then reveal.', 'Institutional: the principal, not the parents, decides his name.', 'Scene video station (kindergarten).'],
   ['Hands-on: rub the gravestone.', 'Interpersonal: the mailbox vandalism.', 'Real world: the 1987 "Dotbusters" in Jersey City.'],
-  ['Hands-on: try to open the book, and it goes on the shelf.', '3D room (press E): his bedroom on his 14th birthday, Ashoke in the doorway.', 'Internalized: he rejects the gift before he knows what it means.', 'Plant the seed: this book comes back at the very end.'],
+  ['Hands-on: try to open the book, and it goes on the shelf.', 'Step inside (press E): his bedroom on his 14th birthday, Ashoke in the doorway.', 'Internalized: he rejects the gift before he knows what it means.', 'Plant the seed: this book comes back at the very end.'],
   ['English class turns into public humiliation.', 'Real world: Kohli & Solórzano (2012) on students\' names.'],
   ['PETITION GRANTED stamp plays on first visit. The Gogol/Nikhil switch unlocks.', 'Class vote: would you change your name?', 'Press N to flip the inner voice between names.', 'Scene video station (the party).'],
   ['Turning point: the truth in the car.', 'Read the quote slowly: "You remind me of everything that followed."', 'Scene video station.'],

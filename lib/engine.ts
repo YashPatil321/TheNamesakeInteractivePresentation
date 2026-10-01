@@ -704,7 +704,7 @@ export function startLine(root) {
   // corner mark while the 3D crash plays: this part is computer-generated (our filmed scene follows)
   const crashMark = document.createElement('div');
   crashMark.className = 'crash-mark'; crashMark.setAttribute('aria-hidden', 'true');
-  crashMark.innerHTML = `${animBadge('3D animation', 'sm')}<span>Inside the carriage is our filmed scene</span>`;
+  crashMark.hidden = true;
   root.appendChild(crashMark);
   function startCrash() {
     st.crashT = reduced ? 2.05 : 0; st.crashDone = true; st.derail = 0; hideCard();
@@ -1340,7 +1340,7 @@ export function startLine(root) {
       <div class="sp-head">${filmBadge('Filmed by our group', 'md')}<h2 id="spTitle"></h2><button class="sp-close" aria-label="Close the scene">Skip ✕</button></div>
       <div class="mk-filmframe sp-reel"><video class="sp-video" playsinline controls preload="auto"></video></div>
       <div class="sp-bar"><i></i></div>
-      <p class="sp-credit">${esc(GROUP_CREDIT)} · live action, not animation</p>
+      <p class="sp-credit">${esc(GROUP_CREDIT)}</p>
     </div>`;
   root.appendChild(scenePop);
   const spVideo = scenePop.querySelector('.sp-video'), spBar = scenePop.querySelector('.sp-bar i');
@@ -1373,6 +1373,10 @@ export function startLine(root) {
     publish();
   }
   on(scenePop.querySelector('.sp-close'), 'click', closeScenePop);
+  // full-screen viewing: the title and Skip fade out while the scene plays, and come back on any movement
+  let spIdle = 0;
+  const spWake = () => { scenePop.classList.remove('sp-idle'); clearTimeout(spIdle); spIdle = setTimeout(() => { if (!spVideo.paused) scenePop.classList.add('sp-idle'); }, 2600); };
+  on(scenePop, 'pointermove', spWake); on(spVideo, 'play', spWake); on(spVideo, 'pause', () => scenePop.classList.remove('sp-idle'));
   on(spVideo, 'ended', closeScenePop);
   on(spVideo, 'timeupdate', () => { spBar.style.transform = `scaleX(${spVideo.duration ? spVideo.currentTime / spVideo.duration : 0})`; });
   on(scenePop, 'click', (e) => { if (e.target === scenePop) closeScenePop(); });
