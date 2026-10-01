@@ -745,7 +745,7 @@ export function startLine(root) {
   function pollHTML(i, s) {
     if (!s.poll) return '';
     const v = st.polls[i] || s.poll.options.map(() => 0), tot = v.reduce((a, b) => a + b, 0) || 1;
-    return `<div class="poll" id="poll"><div class="label">Class vote · tap once per hand</div><p class="q">${esc(s.poll.q)}</p>
+    return `<div class="poll" id="poll"><div class="label">${s.poll.predict ? 'Predict · tap once per hand' : 'Class vote · tap once per hand'}</div><p class="q">${esc(s.poll.q)}</p>
       ${s.poll.options.map((o, k) => `<button class="opt" data-vote="${k}"><i class="bar" style="width:${v[k] / tot * 100}%"></i><span>${esc(o)}</span><span class="n">${v[k]}</span></button>`).join('')}
       ${st.revealed[i] ? `<div class="answer"><b>What happened:</b> ${esc(s.poll.actual)}</div>` : `<button class="btn ghost reveal" data-reveal>Reveal what Gogol did</button>`}
     </div>`;
