@@ -33,6 +33,7 @@ export interface WorldFrame {
   parX: number; // pointer parallax -1..1 (0 on touch devices)
   parY: number;
   cardSide: 'left' | 'bottom' | 'none'; // where the ticket card covers the screen, so the camera frames the train in the free space
+  intro?: boolean; // the title screen is up: hold the establishing shot behind it (lib/world3d/camera.ts idle shot)
 }
 
 export interface World {
@@ -156,6 +157,7 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
     // adaptive quality
     q: qParam === 'low' ? 4 : /^[0-5]$/.test(qParam) ? +qParam : 0, qLocked: qParam === 'high' || qParam === 'low' || /^[0-5]$/.test(qParam), slow: 0, frames: 0, ema: 16,
     measureT: 0, layout: { cardRight: 0, cardTop: 0, hud: 64, rail: 90 },
+    introK: 0, // 1 while the title screen composes the shot (train right of the type on wide screens), eases to 0 after boarding
   };
 
   const v3 = new THREE.Vector3(), vC = new THREE.Vector3(), vS = new THREE.Vector3();
@@ -407,7 +409,7 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
     const funnel = train.loco.localToWorld(v1.copy(train.funnelTop));
     if (derail < 0.3) {
       const moving = f.moving || f.speed > 0.05;
-      const rate = reduced ? 2 : moving ? 12 + 26 * Math.min(1.5, f.speed) : 3.2;
+      const rate = reduced ? 2 : moving ? 12 + 26 * Math.min(1.5, f.speed) : f.intro ? 7 : 3.2;
       S.emit += rate * dt;
       while (S.emit >= 1) {
         S.emit -= 1;
@@ -438,6 +440,12 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
     /* camera */
     const L = S.layout, W = S.W, H = S.H;
     let fx0 = 0, fx1 = W, fy0 = L.hud, fy1 = H - L.rail;
+    S.introK += ((f.intro ? 1 : 0) - S.introK) * (S.init ? damp(f.intro ? 6 : 1.4, dt) : 1);
+    if (S.introK > 0.001) {
+      // title screen: the type sits on the left on wide screens (train to its right); on phones the type is above and below the train
+      const wide = clamp((W / H - 1.1) / 0.4, 0, 1);
+      fx0 = lerp(fx0, W * 0.46 * wide, S.introK); fy0 = lerp(fy0, H * lerp(0.3, 0.04, wide), S.introK); fy1 = lerp(fy1, H * lerp(0.64, 0.96, wide), S.introK);
+    }
     if (f.cardSide === 'left') fx0 = Math.min(W * 0.62, L.cardRight + 12);
     else if (f.cardSide === 'bottom') fy1 = Math.max(fy0 + 80, L.cardTop - 6);
     const kF = S.init ? damp(3.2, dt) : 1;
@@ -499,7 +507,7 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
     S.fov += (fovT - S.fov) * (S.init ? damp(3, dt) : 1);
     // the director's shot for this trip (crane / low / drone / dolly / boarding flyover), blended over the framing camera
     vC.set(tx + (TRAIN_BACK + TRAIN_FRONT) / 2, 2.6, 0);
-    const shot = director.update({ now, dt, p: f.p, target: f.target, moving: f.moving, speed: f.speed, crash: derail > 0 || inCrash, cardOpen: f.cardSide !== 'none', center: vC, gap: GAP });
+    const shot = director.update({ now, dt, p: f.p, target: f.target, moving: f.moving, speed: f.speed, crash: derail > 0 || inCrash, cardOpen: f.cardSide !== 'none', center: vC, gap: GAP, idle: !!f.intro, portrait: clamp((1.2 - aspect) / 0.6, 0, 1) });
     camera.position.copy(S.T).addScaledVector(back, S.d * shot.push);
     v2.copy(S.T);
     if (shot.w > 0.001) {

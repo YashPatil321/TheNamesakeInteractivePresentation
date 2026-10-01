@@ -2,11 +2,13 @@
 // Between stations it picks a shot per trip (crane up, low wheel-height tracking, aerial drone pass, side dolly),
 // favours the arriving city's landmark (a "reveal"), and on arrival hands back to the card framing with a gentle push-in.
 // The first trip after boarding is an establishing flyover that descends from high over the line onto the train.
-// Nothing here runs with reduced motion or during the 1961 crash (lib/world3d/crash.ts owns that camera).
+// Before boarding, an 'idle' establishing shot holds on the train waiting at a lamplit platform behind the title
+// (a slow low-angle drift; static with reduced motion); boarding cranes up out of that shot into the flyover.
+// Nothing else here runs with reduced motion or during the 1961 crash (lib/world3d/crash.ts owns that camera).
 import * as THREE from 'three';
 import { clamp, lerp, smooth, damp } from './kit';
 
-export type ShotKind = 'none' | 'intro' | 'crane' | 'low' | 'drone' | 'dolly';
+export type ShotKind = 'none' | 'idle' | 'intro' | 'crane' | 'low' | 'drone' | 'dolly';
 const CYCLE: ShotKind[] = ['crane', 'dolly', 'drone', 'low'];
 
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
@@ -20,6 +22,8 @@ export interface DirectorInput {
   cardOpen: boolean; // the ticket card is on screen: hand back to the framing camera (train + sign beside the card)
   center: THREE.Vector3; // train center in world space
   gap: number;
+  idle: boolean; // the title screen is up: hold the establishing shot
+  portrait: number; // 0 landscape .. 1 tall phone screen
 }
 
 export interface Shot {
@@ -35,7 +39,11 @@ export function createDirector(reduced: boolean) {
   const st = {
     kind: 'none' as ShotKind, from: 0, to: 0, t0: 0, dir: 1, dist: 1, lastKind: 'none' as ShotKind,
     trips: 0, w: 0, prevMoving: false, prevTarget: -1, init: false, push: 1,
+    fromIdle: false, idleT0: -1,
   };
+  // last pose of the establishing shot, so the boarding move starts exactly where the title screen left the camera
+  const idlePos = new THREE.Vector3(), idleLook = new THREE.Vector3();
+  let idleFov = 34;
   const out: Shot = { w: 0, pos: new THREE.Vector3(), look: new THREE.Vector3(), fov: 34, push: 1, tilt: 0, bars: 0, kind: 'none' };
   const L = new THREE.Vector3(), tmp = new THREE.Vector3();
 
@@ -47,8 +55,29 @@ export function createDirector(reduced: boolean) {
     return k;
   }
 
+  function idleShot(f: DirectorInput) {
+    const C = f.center;
+    if (st.idleT0 < 0) st.idleT0 = f.now;
+    // a slow, low drift and push-in on the waiting engine; steam drifts through frame
+    const t = reduced ? 0 : (f.now - st.idleT0) / 1000;
+    const a = Math.sin(t * 0.07), b = Math.sin(t * 0.045 + 1.3);
+    const P = f.portrait;
+    const nose = C.x + 14; // the locomotive's buffer beam
+    // ahead of the engine and off to the platform's near side: its lamp-lit face, the cars receding behind it
+    // (z ~8 keeps the lens over the road beside the line: no grass tufts or fence posts between it and the train)
+    out.pos.set(nose + lerp(12.5, 8.5, P) + a * 1.2, lerp(1.5, 1.6, P) + b * 0.2, lerp(8.4, 8.8, P) - a * 0.5 - Math.min(t, 40) * 0.02);
+    out.look.set(nose - lerp(7.5, 5, P) + a * 0.6, lerp(3.3, 3.0, P), lerp(-1.6, -1.2, P));
+    out.fov = lerp(38, 58, P) - Math.min(t, 40) * 0.06;
+    out.w = 1; out.push = 1; out.tilt = 0.55; out.bars = 1; out.kind = 'idle';
+    idlePos.copy(out.pos); idleLook.copy(out.look); idleFov = out.fov;
+    st.kind = 'idle'; st.w = 1; st.fromIdle = true; st.init = true;
+    st.prevMoving = f.moving; st.prevTarget = f.target;
+    return out;
+  }
+
   function update(f: DirectorInput): Shot {
     const { now, dt, center: C } = f;
+    if (f.idle && !f.crash) return idleShot(f);
     if (reduced || f.crash) {
       st.kind = 'none'; st.w = 0; st.prevMoving = f.moving; st.prevTarget = f.target; st.init = true;
       out.w = 0; out.push = 1; out.tilt = 0; out.bars = 0; out.kind = 'none';
@@ -71,7 +100,7 @@ export function createDirector(reduced: boolean) {
     let wT = 0, s = u;
     if (st.kind === 'intro') {
       // time-based so the flyover is long enough to read; it lands on the train as the card opens
-      s = clamp(age / 3.8, 0, 1);
+      s = clamp(age / (st.fromIdle ? 4.4 : 3.8), 0, 1);
       wT = 1 - smooth(0.5, 1, s);
       if (s >= 1) st.kind = 'none';
     } else if (st.kind !== 'none') {
@@ -91,6 +120,16 @@ export function createDirector(reduced: boolean) {
     let fov = 34, tilt = 0.25;
     switch (st.kind) {
       case 'intro': {
+        if (st.fromIdle) {
+          // boarding from the title shot: the engine pulls out and thunders past the lens (the camera pans with it),
+          // then the camera cranes up and swings in behind and above the train to ride it into its first stop
+          const pan = smooth(0, 0.3, s), rise = ease(smooth(0.18, 1, s));
+          out.pos.copy(idlePos).lerp(tmp.set(C.x - d * 20, C.y + 13, C.z + 30), rise);
+          out.pos.y += Math.sin(Math.PI * smooth(0.18, 0.8, s)) * 6;
+          out.look.copy(idleLook).lerp(L.set(C.x + d * 9, C.y + 0.6, C.z - 1), pan).lerp(tmp.set(C.x + d * 4, C.y - 0.5, C.z - 3), rise);
+          fov = lerp(idleFov, 36, smooth(0, 0.6, s)); tilt = lerp(0.55, 0.45, s);
+          break;
+        }
         // high over the line, looking along it toward home, then descending onto the train
         const k = eOut(s);
         out.pos.set(C.x - d * lerp(60, 12, k), C.y + lerp(46, 6, k), C.z + lerp(42, 32, k));

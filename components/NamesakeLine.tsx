@@ -169,37 +169,50 @@ export default function NamesakeLine() {
       </div>
 
       <div className="overlay intro" id="intro">
-        <div className="coat l"><div className="lapel" /><div className="buttons"><i /><i /><i /></div></div>
-        <div className="coat r"><div className="lapel" /><div className="buttons"><i /><i /><i /></div></div>
+        {/* the live 3D world (an establishing shot of the waiting train) shows through; scrims keep the type legible */}
+        <div className="intro-scrim" aria-hidden="true" />
+        {/* the overcoat: two wool panels part like doors on load to reveal the world ("we all came out of Gogol's overcoat") */}
+        <div className="coat l" aria-hidden="true"><div className="lapel" /><div className="buttons"><i /><i /><i /></div></div>
+        <div className="coat r" aria-hidden="true"><div className="lapel" /><div className="buttons"><i /><i /><i /></div></div>
         <div className="intro-content">
           <div className="intro-inner">
-            <p className="epigraph layer" style={{ '--z': 0.4, '--k': 0 } as CSSProperties}>
-              &ldquo;We all came out of Gogol&apos;s overcoat.&rdquo;
-              <cite><span>Attributed to Dostoyevsky</span><span className="sep" aria-hidden="true"> · </span><span>The book&apos;s epigraph</span></cite>
-            </p>
-            <h2 className="big-title layer" aria-label="The Namesake" style={{ '--z': 1 } as CSSProperties}>
-              {TITLE_WORDS.map((w, wi) => (
-                <span className="w" key={w} aria-hidden="true">
-                  {w.split('').map((c, ci) => (
-                    <span className="ch" key={ci} style={{ '--k': (wi ? TITLE_WORDS[0].length : 0) + ci } as CSSProperties}>{c}</span>
-                  ))}
-                </span>
-              ))}
-            </h2>
-            <div className="scramble layer" id="scramble" aria-hidden="true" style={{ '--z': 0.7, '--k': 4 } as CSSProperties}>GOGOL</div>
-            <div className="nametag layer" style={{ '--z': 1.4, '--k': 5 } as CSSProperties}>
-              <div className="top"><b>HELLO</b><span>my name is</span></div>
-              <label className="sr" htmlFor="visitorName">Your name</label>
-              <input id="visitorName" maxLength={24} autoComplete="off" placeholder="write your name" />
+            <div className="intro-head">
+              <p className="epigraph layer" style={{ '--z': 0.4, '--k': 0 } as CSSProperties}>
+                &ldquo;We all came out of Gogol&apos;s overcoat.&rdquo;
+                <cite><span>Attributed to Dostoyevsky</span><span className="sep" aria-hidden="true"> · </span><span>The book&apos;s epigraph</span></cite>
+              </p>
+              <h2 className="big-title layer" aria-label="The Namesake" style={{ '--z': 1 } as CSSProperties}>
+                {TITLE_WORDS.map((w, wi) => (
+                  <span className="w" key={w} aria-hidden="true">
+                    {w.split('').map((c, ci) => (
+                      <span className="ch" key={ci} style={{ '--k': (wi ? TITLE_WORDS[0].length : 0) + ci } as CSSProperties}>{c}</span>
+                    ))}
+                  </span>
+                ))}
+              </h2>
+              <div className="scramble-row layer" style={{ '--z': 0.7, '--k': 4 } as CSSProperties}>
+                <span className="scr-label" aria-hidden="true">a boy named</span>
+                <div className="scramble" id="scramble" aria-hidden="true">GOGOL</div>
+              </div>
             </div>
-            <button className="board layer" id="boardBtn" style={{ '--z': 0.9, '--k': 6 } as CSSProperties}>
-              <span>Open the overcoat &amp; board</span><i aria-hidden="true">→</i>
-            </button>
-            <div className="intro-meta layer" style={{ '--z': 0.3, '--k': 7 } as CSSProperties}>
-              <span>Jhumpa Lahiri · 1961–2000</span><span className="sep" aria-hidden="true"> · </span><span>Calcutta → Cambridge → New York → home</span>
+            <div className="intro-foot">
+              <div className="intro-act">
+                <div className="nametag layer" style={{ '--z': 1.4, '--k': 5 } as CSSProperties}>
+                  <div className="top"><b>HELLO</b><span>my name is</span></div>
+                  <label className="sr" htmlFor="visitorName">Your name</label>
+                  <input id="visitorName" maxLength={24} autoComplete="off" placeholder="write your name" />
+                </div>
+                <button className="board layer" id="boardBtn" style={{ '--z': 0.9, '--k': 6 } as CSSProperties}>
+                  <span>Board the train</span><i aria-hidden="true">→</i>
+                </button>
+              </div>
+              <div className="intro-meta layer" style={{ '--z': 0.3, '--k': 7 } as CSSProperties}>
+                <span>Jhumpa Lahiri · 1961–2000</span><span className="sep" aria-hidden="true"> · </span><span>Calcutta → Cambridge → New York → home</span>
+              </div>
             </div>
           </div>
         </div>
+        <div className="intro-slate layer" aria-hidden="true" style={{ '--z': 0.2, '--k': 8 } as CSSProperties}><i />Now boarding<span>Platform 1</span></div>
       </div>
     </div>
   );
