@@ -1,0 +1,77 @@
+/* Archive postcards (lib/cards/archive.ts): a vintage postcard at the top of each station's Story tab + lightbox. */
+.ar-strip { margin: 2px 0 18px; padding: 0; }
+.ar-card {
+  position: relative; display: block; padding: 9px 9px 9px; border-radius: 3px; cursor: zoom-in;
+  background: #fbf6e8 linear-gradient(135deg, rgba(255,255,255,.55), rgba(214,196,152,.22));
+  box-shadow: 0 1px 0 rgba(0,0,0,.08), 0 8px 18px -8px rgba(40,28,10,.55), inset 0 0 0 1px rgba(120,96,50,.18);
+  rotate: var(--ar-tilt, 0deg); transition: rotate .35s cubic-bezier(.2,.8,.2,1), translate .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s;
+}
+.ar-card::before { /* thin printed keyline inside the white border */
+  content: ""; position: absolute; inset: 5px; border: 1px solid rgba(120,96,50,.22); border-radius: 2px; pointer-events: none; }
+.ar-card:hover, .ar-card:focus-visible { rotate: 0deg; translate: 0 -2px; box-shadow: 0 1px 0 rgba(0,0,0,.08), 0 14px 26px -10px rgba(40,28,10,.6), inset 0 0 0 1px rgba(120,96,50,.18); }
+.ar-card:focus-visible { outline: 2px solid var(--stamp, #b8382a); outline-offset: 3px; }
+.ar-img {
+  display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 1px;
+  background: linear-gradient(180deg, #2a3150, #6d6070);
+  filter: sepia(.14) saturate(1.06) contrast(1.02);
+}
+.ar-greet {
+  position: absolute; left: 20px; bottom: 18px; max-width: 64%;
+  font-family: var(--hand, cursive); font-size: clamp(1rem, 2.6vw, 1.45rem); line-height: 1; color: #fff7e4;
+  text-shadow: 0 1px 2px rgba(0,0,0,.75), 0 0 12px rgba(0,0,0,.45); pointer-events: none;
+}
+.ar-greet b { font-weight: 600; }
+
+/* the stamp: perforated edge via a radial-gradient mask */
+.ar-stamp {
+  position: absolute; top: 16px; right: 16px; width: 54px; height: 64px; padding: 6px 5px; box-sizing: border-box;
+  display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+  background: #f4ead0; color: #1d4a6e; rotate: 4deg;
+  -webkit-mask: radial-gradient(circle at 3px 3px, transparent 1.9px, #000 2.2px) -3px -3px / 6px 6px, linear-gradient(#000 0 0) 3px 3px / calc(100% - 6px) calc(100% - 6px) no-repeat;
+          mask: radial-gradient(circle at 3px 3px, transparent 1.9px, #000 2.2px) -3px -3px / 6px 6px, linear-gradient(#000 0 0) 3px 3px / calc(100% - 6px) calc(100% - 6px) no-repeat;
+  box-shadow: inset 0 0 0 4px #f4ead0, inset 0 0 0 5px currentColor;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,.35));
+}
+.ar-stamp.ar-in { color: #8a2a2a; }
+.ar-stamp i { font-style: normal; font-family: var(--mono, monospace); font-size: 7px; letter-spacing: .08em; font-weight: 700; }
+.ar-stamp b { font-family: var(--display, serif); font-weight: 400; font-size: 13px; line-height: 1; }
+.ar-stamp svg { width: 26px; height: 18px; }
+
+/* the postmark: two rings, place around the edge, year in the middle, wavy cancel lines */
+.ar-mark { position: absolute; top: 14px; right: 46px; width: 74px; height: 74px; rotate: -14deg; pointer-events: none; color: rgba(250, 244, 228, .8); filter: drop-shadow(0 1px 1px rgba(0,0,0,.45)); }
+.ar-mark svg { width: 100%; height: 100%; overflow: visible; }
+.ar-mark circle { fill: none; stroke: currentColor; stroke-width: 2.4; }
+.ar-mark text { fill: currentColor; font-family: var(--mono, monospace); font-size: 9.5px; font-weight: 700; letter-spacing: .06em; }
+.ar-mark .ar-y { font-size: 17px; letter-spacing: .02em; }
+.ar-waves { position: absolute; top: 24px; right: 64px; width: 72px; height: 26px; opacity: .8;
+  background: repeating-linear-gradient(180deg, transparent 0 5px, currentColor 5px 7px);
+  -webkit-mask: radial-gradient(10px 6px at 50% 0, transparent 98%, #000) 0 0 / 14px 100%;
+          mask: radial-gradient(10px 6px at 50% 0, transparent 98%, #000) 0 0 / 14px 100%; }
+
+.ar-cap { margin: 9px 2px 0; font-family: var(--mono, monospace); font-size: var(--t-2xs, .6875rem); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft, #3b3748); }
+.ar-cap span { opacity: .75; text-transform: none; letter-spacing: .02em; }
+
+/* lightbox */
+.ar-box {
+  position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 16px;
+  background: rgba(6, 9, 20, .86); backdrop-filter: blur(4px); opacity: 0; transition: opacity .25s; cursor: zoom-out;
+}
+.ar-box.ar-on { opacity: 1; }
+.ar-big { margin: 0; max-width: min(1200px, 100%); background: #fbf6e8; padding: 12px 12px 10px; border-radius: 4px; box-shadow: 0 24px 60px rgba(0,0,0,.6);
+  scale: .96; transition: scale .3s cubic-bezier(.2,.8,.2,1); cursor: default; }
+.ar-box.ar-on .ar-big { scale: 1; }
+.ar-big img { display: block; width: 100%; height: auto; max-height: calc(100dvh - 140px); object-fit: contain; filter: sepia(.1); }
+.ar-big figcaption { margin-top: 9px; font-family: var(--body, serif); font-size: .95rem; color: #1d1b26; }
+.ar-big figcaption span { display: block; margin-top: 2px; font-family: var(--mono, monospace); font-size: .72rem; letter-spacing: .04em; color: #5a5466; }
+.ar-x { position: absolute; top: 12px; right: 14px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(255,255,255,.35);
+  background: rgba(20,24,44,.7); color: #fff; font-size: 26px; line-height: 1; cursor: pointer; }
+.ar-x:focus-visible { outline: 2px solid #f2a33a; outline-offset: 2px; }
+
+@media (max-width: 560px) {
+  .ar-stamp { width: 44px; height: 52px; top: 12px; right: 12px; }
+  .ar-stamp svg { width: 20px; height: 14px; }
+  .ar-mark { width: 58px; height: 58px; right: 36px; top: 10px; }
+  .ar-waves { display: none; }
+  .ar-greet { left: 16px; bottom: 14px; }
+}
+@media (prefers-reduced-motion: reduce) { .ar-card, .ar-box, .ar-big { transition: none; } }
