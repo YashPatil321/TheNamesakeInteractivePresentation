@@ -644,7 +644,7 @@ export function startLine(root) {
     st.camX = lerp(st.camX, want, reduced ? 1 : .08);
     // grayscale for flashbacks
     const p = stationPos(), i = clamp(Math.round(p), 0, STATIONS.length - 1);
-    st.gray = lerp(st.gray, STATIONS[i].flashback ? 1 : 0, .04);
+    st.gray = lerp(st.gray, STATIONS[i].flashback && st.started && !st.opening ? 1 : 0, .04); // the title shot and the opening ride stay in colour
     view.style.filter = st.gray > .01 ? `grayscale(${st.gray}) contrast(${1 + st.gray * .15}) sepia(${st.gray * .15})` : '';
     // crash timeline
     if (st.crashT >= 0) crashTick(dt / 1000);
@@ -656,7 +656,7 @@ export function startLine(root) {
     if (world) {
       world.render({ now, p: stationPos(), cur: st.cur, target: st.target, moving: st.moving, speed: st.speed, derail: st.derail, crashT: st.crashT,
         shake: reduced ? 0 : st.shake, lens: st.lens, visited: st.visited, parX: par.x, parY: par.y,
-        cardSide: ticket.classList.contains('away') ? 'none' : (window.innerWidth < 760 ? 'bottom' : 'left') });
+        cardSide: ticket.classList.contains('away') ? 'none' : (window.innerWidth < 760 ? 'bottom' : 'left'), intro: !st.started });
     } else draw(now);
     if (!disposed) rafId = requestAnimationFrame(frame);
   }
@@ -667,7 +667,7 @@ export function startLine(root) {
     if (i === st.cur && !st.moving && st.trainX === i * SP) { showCard(); return; } // already parked here
     const dist = Math.abs(i * SP - st.trainX) / SP;
     st.from = st.trainX; st.to = i * SP; st.t0 = performance.now(); st.target = i; st.moving = true;
-    st.dur = reduced ? 300 : clamp(900 + dist * 520, 1300, 4200) * (opts.rewind ? .55 : 1);
+    st.dur = reduced ? 300 : opts.dur || clamp(900 + dist * 520, 1300, 4200) * (opts.rewind ? .55 : 1);
     st.derail = 0;
     if (!scenePop.hidden) closeScenePop();
     hideCard();
@@ -1163,10 +1163,12 @@ export function startLine(root) {
     const intro = $('#intro'); intro.classList.add('open');
     setTimeout(() => snd.whistle(), 250);
     setTimeout(() => { intro.hidden = true; }, 1700);
-    // opening: the train pulls in to 1968 from the left
+    // opening: the waiting train (title screen) departs and pulls in to 1968; the camera cranes up out of the title shot
     const startAt = hashStation();
     st.trainX = startAt * SP - 900; st.camX = st.trainX - anchor; st.cur = Math.max(0, startAt - 1);
-    setTimeout(() => travelTo(startAt), 500);
+    st.opening = true; setTimeout(() => { st.opening = false; }, 3900);
+    setTimeout(() => travelTo(startAt, { dur: 3400 }), 450);
+    setTimeout(() => root.classList.remove('pre'), reduced ? 0 : 2600);
     publish();
   }
   on($('#boardBtn'), 'click', board);
@@ -1387,7 +1389,9 @@ export function startLine(root) {
   /* boot */
   on(window, 'resize', () => { resize(); });
   resize();
-  st.trainX = START * SP; st.camX = st.trainX - anchor;
+  // title screen: the train waits out on the line short of the first stop (see board()), lit for the establishing shot
+  st.trainX = hashStation() * SP - 900; st.cur = Math.max(0, hashStation() - 1); st.camX = st.trainX - anchor;
+  root.classList.add('pre');
   setSound(snd.on);
   readFonts();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!disposed) { readFonts(); if (world) world.refreshText(); } });
