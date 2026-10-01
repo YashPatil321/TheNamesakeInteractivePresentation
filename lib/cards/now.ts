@@ -2,6 +2,8 @@
 // Returns '' for stations without a verified story, which hides the tab.
 import type { CardModule } from './types';
 import { NEWS } from '../news';
+import { vignetteHTML, mountVignette } from './vignettes';
+import { animBadge } from '../media';
 
 const mod: CardModule = {
   html(i, api) {
@@ -14,6 +16,7 @@ const mod: CardModule = {
       : '';
     return `<div class="now">
       <p class="now-intro">The book is set from 1961 to 2000. How does what Gogol's family faced compare with the news today?</p>
+      ${vignetteHTML(i, e, animBadge('Animated', 'sm', 'A computer animation we made to illustrate the news story. Not footage.'))}
       <div class="now-grid">
         <section class="now-then" aria-label="In the book">
           <div class="now-kicker">Then · ${e(s.year)}</div>
@@ -37,6 +40,12 @@ const mod: CardModule = {
       <p class="now-conn"><b>Connection · ${e(n.kind)}</b> ${e(n.link)}</p>
       ${stat}
     </div>`;
+  },
+  mount(root, i, api) {
+    // only while the Then & Now panel is showing (the vignette autoplays when the tab opens)
+    if (!root.querySelector('.now')) return;
+    void api;
+    return mountVignette(root, i);
   },
 };
 export default mod;

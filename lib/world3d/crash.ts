@@ -1,24 +1,25 @@
 // Station 1 (October 1961): Ashoke's night train derails near Jamshedpur.
-// A ~12 s directed sequence driven by the engine's crash clock (lib/engine.ts crashTick, WorldFrame.crashT):
+// A ~9 s directed sequence driven by the engine's crash clock (lib/engine.ts crashTick, WorldFrame.crashT).
+// Only what the group can't film: everything is seen from OUTSIDE the train. The compartment, Ghosh, the
+// flashlight and the page in Ashoke's hand are in our filmed scene (videos/crash.mp4), which the engine opens
+// right after this sequence ends (autoScene(0)), so none of that is animated here.
 //   A 0.00  low tracking shot beside the racing locomotive (clacks accelerate)
-//   B 1.30  a lit carriage window: a man reading
+//   B 1.30  high, wide exterior: the whole train racing across the dark plain
 //   C 2.25  screech; low static shot ahead of the train; impact at 2.55 drops into slow motion
 //   D 3.50  hard cut to a wide shot at full speed: loco ploughs off, coach jackknifes, van rolls; lights flicker and die
-//   E 5.30  aftermath in the dark: smoke, embers, rescuers' lanterns; one lantern passes, turns back and finds
-//           a hand holding a crumpled page of "The Overcoat" (8.5); hold, then fade back to the station card (12.0)
+//   E 5.30  wide aftermath in the dark: smoke, embers, distant rescuers' lanterns; slow push-in, fade (8.8)
 // The train's own update() poses the cars on the rails; this module overrides loco/car transforms afterwards
 // (and carries the instanced wheels along), so it keeps working when the train model is replaced.
 import * as THREE from 'three';
 import type { TrainParts } from './train';
-import { clamp, lerp, smooth, canvasTex, starTexture, paint, place, merge, boxMM } from './kit';
+import { clamp, lerp, smooth, paint, place, merge } from './kit';
 import { Puffs, Glows, Sparks, Debris } from './fx';
 
 /** Crash clock marks (seconds of WorldFrame.crashT). lib/engine.ts keeps its sound/caption cues in step with these. */
-export const CRASH = { WINDOW: 1.3, SCREECH: 2.25, IMPACT: 2.55, SLOW0: 2.6, SLOW1: 3.5, WIDE: 3.5, AFTER: 5.3, FIND: 8.5, FADE: 11.0, END: 12.0 } as const;
+export const CRASH = { RUN2: 1.3, SCREECH: 2.25, IMPACT: 2.55, SLOW0: 2.6, SLOW1: 3.5, WIDE: 3.5, AFTER: 5.3, FADE: 7.9, END: 8.8 } as const;
 const SLOW_RATE = 0.3; // time dilation during the impact
 const V = 24; // train speed before the derail, world units / s
 const LOCO_REST = { x: 2.5, z: 3.0 }, COACH_REST = { x: -5.9, z: 1.0 }, VAN_REST = { x: -14.5, z: 1.9 };
-const HAND = new THREE.Vector3(-9.2, 0, 4.05); // root-local (root sits at the station's x once derailed)
 
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const hop = (s: number, t0: number, dur: number, h: number) => (s > t0 && s < t0 + dur ? h * Math.sin(((s - t0) / dur) * Math.PI) : 0);
@@ -50,7 +51,7 @@ export interface Crash {
   dark(ct: number): number;
   /** 0..1 how lit the train's lamps/windows are */
   lights: number;
-  /** after train.update(): pose the wreck, run particles, rescuers and the page */
+  /** after train.update(): pose the wreck, run particles and the distant rescuers */
   update(ct: number, derail: number, tx: number, now: number, dt: number): void;
   /** after the world camera is placed: take over the camera for the shots, borrow the lamp light */
   late(camera: THREE.PerspectiveCamera, shake: number, now: number): void;
@@ -69,7 +70,7 @@ export function createCrash(scene: THREE.Scene, train: TrainParts, opts: CrashOp
   dust.mat.uniforms.uLit = opts.puffs.mat.uniforms.uLit;
   dust.mat.uniforms.uAmb = opts.puffs.mat.uniforms.uAmb;
   const debris = keep(new Debris(scene, 64));
-  const glows = keep(new Glows(scene, 8)); // 0..2 lanterns, 3 fire, 4 page, 5 hero lantern halo
+  const glows = keep(new Glows(scene, 8)); // 0..2 lanterns, 3 fire, 5 lead lantern halo
   glows.mat.uniforms.uScale = opts.uScale;
 
   /* ---------- the rescuers' lantern (the only real light added) ---------- */
@@ -93,79 +94,15 @@ export function createCrash(scene: THREE.Scene, train: TrainParts, opts: CrashOp
     return { body: g, lamp: l, x: 0, z: 0, y: 0, yaw: 0, lx: 0, ly: 0, lz: 0, walk: 0 };
   });
 
-  /* ---------- a man reading at a lit window (car 0) ---------- */
-  const readerTex = keep(canvasTex(128, 104, (c) => {
-    c.fillStyle = '#050403';
-    c.beginPath(); c.ellipse(52, 34, 15, 18, -0.15, 0, Math.PI * 2); c.fill(); // head, bowed over the page
-    c.beginPath(); c.moveTo(20, 104); c.quadraticCurveTo(22, 58, 50, 54); c.quadraticCurveTo(76, 54, 84, 72); c.lineTo(92, 104); c.fill(); // shoulders
-    c.fillRect(44, 44, 14, 16); // neck
-    c.save(); c.translate(88, 64); c.rotate(-0.5); c.fillRect(-4, -16, 30, 30); c.restore(); // the open book
-    c.strokeStyle = '#050403'; c.lineWidth = 2; c.beginPath(); c.moveTo(62, 30); c.lineTo(69, 32); c.stroke(); // spectacles
-  }));
-  const reader = new THREE.Mesh(keep(new THREE.PlaneGeometry(0.82, 0.66)), keep(new THREE.MeshBasicMaterial({ map: readerTex, transparent: true, depthWrite: false })));
-  reader.position.set(-2.01, 2.86, 1.13);
-  reader.visible = false;
-  if (train.cars[0]) train.cars[0].add(reader);
-
-  /* ---------- the hand, the crumpled page and its glint ---------- */
-  const pageTex = keep(canvasTex(256, 320, (c) => {
-    const g = c.createLinearGradient(0, 0, 256, 320); g.addColorStop(0, '#f3ead3'); g.addColorStop(0.55, '#e4d8b9'); g.addColorStop(1, '#f0e6cc');
-    c.fillStyle = g; c.fillRect(0, 0, 256, 320);
-    c.fillStyle = '#4a4538'; c.font = 'bold 22px Georgia, serif'; c.textAlign = 'center'; c.fillText('THE OVERCOAT', 128, 42);
-    c.fillStyle = 'rgba(60,56,48,.55)';
-    for (let k = 0; k < 14; k++) c.fillRect(26, 70 + k * 16, k % 4 === 3 ? 120 : 204, 5);
-    c.strokeStyle = 'rgba(0,0,0,.14)'; c.lineWidth = 2; c.beginPath(); c.moveTo(0, 120); c.lineTo(256, 180); c.moveTo(90, 0); c.lineTo(150, 320); c.moveTo(0, 250); c.lineTo(256, 230); c.stroke();
-  }));
-  const pageMat = keep(new THREE.MeshStandardMaterial({ map: pageTex, emissiveMap: pageTex, emissive: '#ffffff', emissiveIntensity: 0, roughness: 0.8, side: THREE.DoubleSide }));
-  const pageGeo = keep(new THREE.PlaneGeometry(0.62, 0.8, 8, 10));
-  {
-    const p = pageGeo.attributes.position as THREE.BufferAttribute;
-    for (let i = 0; i < p.count; i++) {
-      const x = p.getX(i), y = p.getY(i);
-      p.setZ(i, Math.sin(x * 9 + y * 4) * 0.03 + Math.sin(y * 13 - x * 5) * 0.025 + Math.max(0, x + 0.12) * 0.22 * (0.5 + y)); // crumpled, one side curling into the fist
-    }
-    pageGeo.computeVertexNormals();
-  }
-  const victim = new THREE.Group(); victim.visible = false; scene.add(victim);
-  const page = new THREE.Mesh(pageGeo, pageMat);
-  page.position.set(0.42, 0.07, 0.12); page.rotation.set(-Math.PI / 2 + 0.12, 0, 0.5);
-  victim.add(page);
-  {
-    const SK = '#6b4630', SL = '#cfc8b8';
-    const parts: THREE.BufferGeometry[] = [
-      paint(place(new THREE.CylinderGeometry(0.1, 0.13, 0.9, 10), -0.62, 0.1, -0.22, 0, 0, Math.PI / 2 - 0.08), SL), // kurta sleeve
-      paint(place(new THREE.CylinderGeometry(0.058, 0.07, 0.26, 10), -0.1, 0.075, -0.1, 0, 0, Math.PI / 2 - 0.05), SK), // wrist
-      paint(place(new THREE.SphereGeometry(0.1, 12, 8), 0.07, 0.07, -0.07, 0, 0.2, 0, 1.15, 0.45, 0.95), SK), // back of the hand
-    ];
-    for (let k = 0; k < 4; k++) { // fingers curled over the page
-      const z = -0.14 + k * 0.05;
-      parts.push(paint(place(new THREE.CapsuleGeometry(0.022, 0.07, 3, 6), 0.19, 0.075, z, 0, 0, Math.PI / 2 - 0.5), SK));
-      parts.push(paint(place(new THREE.CapsuleGeometry(0.02, 0.04, 3, 6), 0.245, 0.035, z + 0.004, 0, 0, Math.PI / 2 + 0.7), SK));
-    }
-    parts.push(paint(place(new THREE.CapsuleGeometry(0.024, 0.07, 3, 6), 0.12, 0.06, 0.05, 0.9, 0.5, 0), SK)); // thumb
-    // a broken door panel and a plank across the arm: he is under the wreckage
-    parts.push(paint(place(boxMM(-0.7, 0, -0.55, 0.7, 0.07, 0.55), -1.0, 0.24, -0.25, 0.15, 0.4, -0.18), '#3a2e26'));
-    parts.push(paint(place(boxMM(-0.9, -0.05, -0.08, 0.9, 0.05, 0.08), -0.55, 0.3, 0.05, 0, -0.5, 0.12), '#4a3b2e'));
-    const hg = keep(merge(parts));
-    const hand = new THREE.Mesh(hg, keep(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.7 })));
-    hand.castShadow = true;
-    victim.add(hand);
-  }
-  victim.scale.setScalar(1.35);
-  const glintTex = keep(starTexture());
-  const glintMat = keep(new THREE.SpriteMaterial({ map: glintTex, color: new THREE.Color(3, 2.8, 2.4), blending: THREE.AdditiveBlending, depthWrite: false, transparent: true }));
-  const glint = new THREE.Sprite(glintMat);
-  glint.visible = false; glint.renderOrder = 7; scene.add(glint);
-
   /* ---------- scratch ---------- */
   const units: THREE.Object3D[] = [train.loco, ...train.cars.slice(0, 2)];
   const rest = units.map(() => new THREE.Matrix4()), delta = units.map(() => new THREE.Matrix4());
   const mA = new THREE.Matrix4(), mB = new THREE.Matrix4(), mInv = new THREE.Matrix4(), vS = new THREE.Vector3();
-  const v1 = new THREE.Vector3(), v2 = new THREE.Vector3(), v3 = new THREE.Vector3(), camP = new THREE.Vector3(), camL = new THREE.Vector3();
+  const v1 = new THREE.Vector3(), camP = new THREE.Vector3(), camL = new THREE.Vector3();
   const lastP = new THREE.Vector3(), lastQ = new THREE.Quaternion(), qTmp = new THREE.Quaternion();
   const lampCol0 = lampLight.color.clone(), FIRE = new THREE.Color(1, 0.5, 0.2);
   let wheelUnit: Int8Array | null = null, wheelMapped = false;
-  const S = { prevTau: -1, prevCt: -1, tx: 0, ct: -1, tau: -1, s: -1, on: false, wasOn: false, endAt: -1, lastFov: 34, glintT0: -1, glinted: false,
+  const S = { prevTau: -1, prevCt: -1, tx: 0, ct: -1, tau: -1, s: -1, on: false, wasOn: false, endAt: -1, lastFov: 34,
     fire: 0, dustAcc: 0, emitSp: 0, emitDust: 0, emitEmber: 0, emitHiss: 0, restored: true };
 
   function slideTime(finalX: number, restX: number) { // time to decelerate uniformly from V to 0 so the unit ends at finalX
@@ -344,15 +281,11 @@ export function createCrash(scene: THREE.Scene, train: TrainParts, opts: CrashOp
   }
 
   /* ---------- rescuers ---------- */
-  // hero: from beyond the engine, hurries along the field, passes him, stops, turns back and lowers the lantern
+  // the lead rescuer hurries along the field past the wreck, sweeping the ground with his lantern.
+  // (Who they find, and the page in his hand, is our filmed scene, not animated.)
   const hero = (ct: number, out: { x: number; z: number; yaw: number; walk: number; raise: number }) => {
-    const a = clamp((ct - 5.4) / (7.7 - 5.4), 0, 1);
-    if (ct < 7.7) { out.x = lerp(1, -12.4, a); out.z = lerp(7.8, 6.9, a); out.yaw = Math.PI; out.walk = 1; out.raise = 0; }
-    else if (ct < 8.05) { out.x = -12.4; out.z = 6.9; out.yaw = Math.PI + Math.sin((ct - 7.7) * 9) * 0.5; out.walk = 0.2; out.raise = 0; }
-    else {
-      const b = ease(clamp((ct - 8.05) / 0.55, 0, 1));
-      out.x = lerp(-12.4, -10.7, b); out.z = lerp(6.9, 5.7, b); out.yaw = lerp(Math.PI, 0.83, b); out.walk = b < 1 ? 0.8 : 0; out.raise = b;
-    }
+    const a = clamp((ct - 5.4) / (CRASH.END - 5.4), 0, 1);
+    out.x = lerp(1, -9.5, a); out.z = lerp(8.4, 7.6, a); out.yaw = Math.PI; out.walk = 1; out.raise = 0;
   };
   const HS = { x: 0, z: 0, yaw: 0, walk: 0, raise: 0 };
 
@@ -373,7 +306,6 @@ export function createCrash(scene: THREE.Scene, train: TrainParts, opts: CrashOp
   function hideAll() {
     sparks.lines.visible = sparks.heads.visible = false;
     dust.points.visible = false; debris.visible = false; glows.points.visible = false;
-    victim.visible = false; glint.visible = false; reader.visible = false;
     for (const f of figs) { f.body.visible = false; f.lamp.visible = false; }
     lantern.intensity = 0;
   }
@@ -400,12 +332,12 @@ export function createCrash(scene: THREE.Scene, train: TrainParts, opts: CrashOp
       const on = ct >= 0 || derail > 0;
       if (!on) {
         if (S.on) { // travelled away / replay: clear the wreck
-          hideAll(); sparks.clear(); debris.clear(); S.on = false; S.prevTau = -1; S.glinted = false; S.fire = 0; this.lights = 1;
+          hideAll(); sparks.clear(); debris.clear(); S.on = false; S.prevTau = -1; S.fire = 0; this.lights = 1;
         }
         return;
       }
       if (!S.on || (ct >= 0 && ct < S.prevCt - 0.001)) { // (re)start
-        showAll(); sparks.clear(); debris.clear(); S.prevTau = -1; S.glinted = false; S.glintT0 = -1;
+        showAll(); sparks.clear(); debris.clear(); S.prevTau = -1;
         S.emitSp = S.emitDust = S.emitEmber = S.emitHiss = 0;
       }
       S.on = true;
@@ -449,46 +381,37 @@ export function createCrash(scene: THREE.Scene, train: TrainParts, opts: CrashOp
         if (s < 0.06) L = 1.6; // the jolt
       }
       this.lights = L;
-      reader.visible = false; // the Blender coach has its own passenger silhouettes in the windows
 
       // fire in the spilled firebox
       S.fire = s < 0.8 ? 0 : smooth(0.8, 2.2, s);
 
       // rescuers + lanterns
       glows.set(3, 0, -50, 0, 0, 0, 0, 0);
+      glows.set(4, 0, -50, 0, 0, 0, 0, 0); // unused slot (no close-up of the page: that is on film)
       if (s > 0.8) {
         const p = unitPoint(0, -3.0, 1.2, 0.2, v1), fk = 0.8 + 0.2 * Math.sin(now / 70) * Math.sin(now / 130 + 1);
         glows.set(3, p.x, Math.max(0.4, p.y), p.z + 0.6, 1.6 * S.fire * fk, 0.62 * S.fire * fk, 0.2 * S.fire * fk, 3.2);
       }
-      const dkE = crash.dark(ct);
       const showFig = cte >= CRASH.AFTER;
       if (showFig) {
         hero(Math.min(cte, CRASH.END), HS);
         placeFig(0, tx + HS.x, 0, HS.z, HS.yaw, ct >= 0 ? HS.walk : 0, now, HS.raise);
-        const b = clamp((Math.min(cte, CRASH.END) - 5.8) / 6, 0, 1);
+        const b = clamp((Math.min(cte, CRASH.END) - 5.8) / (CRASH.END - 5.8), 0, 1);
         placeFig(1, tx - 36 + 12 * b, 0, 9.4 - b, 0.05, ct >= 0 && b < 1 ? 0.8 : 0, now, 0);
-        const c = clamp((Math.min(cte, CRASH.END) - 5.3) / 6.7, 0, 1);
+        const c = clamp((Math.min(cte, CRASH.END) - 5.3) / (CRASH.END - 5.3), 0, 1);
         placeFig(2, tx - 26 + 21 * c, 1.0, -4.3, -0.02, ct >= 0 && c < 1 ? 0.7 : 0, now, 0.2);
         const inA = smooth(CRASH.AFTER, CRASH.AFTER + 0.6, Math.min(cte, CRASH.END));
-        const near = smooth(8.05, 8.6, Math.min(cte, CRASH.END)); // the camera is beside the hero once he stoops
         for (let i = 0; i < 3; i++) {
-          const f = figs[i], k = inA * (i === 0 ? 1 - 0.7 * near : 0.8) * (0.9 + 0.1 * Math.sin(now / 90 + i * 3));
+          const f = figs[i], k = inA * (i === 0 ? 1 : 0.8) * (0.9 + 0.1 * Math.sin(now / 90 + i * 3));
           glows.set(i, f.lx, f.ly, f.lz, 2.6 * k, 1.8 * k, 0.9 * k, 1.1);
         }
-        // the hero's lantern is a real light: sweeps the ground ahead, searches, then settles on the hand
-        const f = figs[0], hw = W(v2, HAND.x + 0.3, 0.05, HAND.z + 0.15);
-        let tx2: number, ty2: number, tz2: number;
-        const cc = Math.min(cte, CRASH.END);
-        if (cc < 7.7) { tx2 = f.lx - 3.2; ty2 = 0; tz2 = f.lz - 0.8 + Math.sin(cc * 2.1) * 0.8; }
-        else if (cc < 8.05) { const u = (cc - 7.7) / 0.35; tx2 = f.lx - 2.6 + u * 2; ty2 = 0; tz2 = f.lz - 1.5 - u; }
-        else { const u = ease(clamp((cc - 8.05) / 0.5, 0, 1)); tx2 = lerp(f.lx - 0.6, hw.x, u); ty2 = lerp(0, hw.y, u); tz2 = lerp(f.lz - 2.5, hw.z, u); }
+        // the lead lantern is a real light: it sweeps the ground ahead as he searches the field
+        const f = figs[0], cc = Math.min(cte, CRASH.END);
         lantern.position.set(f.lx, f.ly + 0.05, f.lz);
-        lantern.target.position.set(tx2, ty2, tz2);
+        lantern.target.position.set(f.lx - 3.2, 0, f.lz - 1.2 + Math.sin(cc * 2.1) * 1.1);
         lantern.target.updateMatrixWorld();
-        // once it settles on the hand the lamp is ~2 units from a white page: dim it so the page reads, not blows out
-        const settle = cc < 8.05 ? 0 : ease(clamp((cc - 8.05) / 0.5, 0, 1));
-        lantern.intensity = lerp(140, 7, settle) * inA * (ct >= 0 ? 1 : 0.6);
-        glows.set(5, f.lx, f.ly, f.lz, 0.7 * inA, 0.47 * inA, 0.24 * inA, lerp(1.8, 0.9, settle));
+        lantern.intensity = 120 * inA * (ct >= 0 ? 1 : 0.6);
+        glows.set(5, f.lx, f.ly, f.lz, 0.7 * inA, 0.47 * inA, 0.24 * inA, 1.8);
       } else {
         for (const f of figs) { f.body.visible = false; f.lamp.visible = false; }
         for (let i = 0; i < 3; i++) glows.set(i, 0, -50, 0, 0, 0, 0, 0);
@@ -496,22 +419,6 @@ export function createCrash(scene: THREE.Scene, train: TrainParts, opts: CrashOp
         lantern.intensity = 0;
       }
 
-      // the hand and the page
-      victim.visible = s > 0.2;
-      victim.position.set(tx + HAND.x, HAND.y, HAND.z); victim.rotation.y = 0.35;
-      const found = smooth(CRASH.FIND - 0.25, CRASH.FIND + 0.4, Math.min(cte, CRASH.END));
-      pageMat.emissiveIntensity = 0.02 + 0.1 * found * (ct >= 0 ? 1 : 0.6) + 0.05 * (1 - dkE);
-      page.getWorldPosition(v3);
-      glows.set(4, v3.x, v3.y + 0.08, v3.z, 0.1 * found, 0.09 * found, 0.07 * found, 0.6 * found + 0.001);
-      if (ct >= 0 && !S.glinted && ct >= CRASH.FIND + 0.15) { S.glinted = true; S.glintT0 = now; }
-      const ga = S.glintT0 < 0 ? -1 : (now - S.glintT0) / 1100;
-      if (ga >= 0 && ga < 1) {
-        glint.visible = true;
-        glint.position.set(v3.x + 0.1, v3.y + 0.2, v3.z + 0.1);
-        const k = Math.sin(ga * Math.PI);
-        glint.scale.setScalar(1.1 * k + 0.01);
-        glintMat.rotation = ga * 1.4; glintMat.opacity = k;
-      } else glint.visible = false;
       glows.commit();
     },
     late(camera, shake, now) {
@@ -532,18 +439,18 @@ export function createCrash(scene: THREE.Scene, train: TrainParts, opts: CrashOp
       if (S.on && ct >= 0) {
         const tx = S.tx, tau = S.tau;
         let fov = 34, shk = 0;
-        if (ct < CRASH.WINDOW) { // A: low beside the driving wheels, racing
+        if (ct < CRASH.RUN2) { // A: low beside the driving wheels, racing
           const L = unitPoint(0, 0, 0, 0, v1);
           camP.set(L.x + 9.5 - ct * 3.2, 0.95, 6.2); camL.set(L.x - 3.5 - ct * 2, 1.9, 0);
           if (!reduced) { camP.y += Math.sin(now * 0.05) * 0.015 + Math.sin(now * 0.021) * 0.02; }
           fov = 44;
-        } else if (ct < CRASH.SCREECH) { // B: the window, a man reading
-          const u = ct - CRASH.WINDOW;
-          // wide enough to read as a row of lit windows (passengers inside) racing through the night
-          unitPoint(1, 1.2 - u * 0.6, 3.2, 8.2, camP);
-          unitPoint(1, -1.2, 2.7, 1.1, camL);
+        } else if (ct < CRASH.SCREECH) { // B: high and wide, the whole train racing across the dark plain (exterior only)
+          const u = ct - CRASH.RUN2;
+          const L = unitPoint(0, 0, 0, 0, v1);
+          camP.set(L.x + 4 - u * 9, 5.2 - u * 0.4, 24);
+          camL.set(L.x - 9 - u * 4, 1.4, 0);
           if (!reduced) camP.y += Math.sin(now * 0.004) * 0.03;
-          fov = 40;
+          fov = 38;
         } else if (ct < CRASH.WIDE) { // C: low, ahead of the train; impact in slow motion
           W(camP, IMP + 11.5, 0.75, 7.6);
           const L = unitPoint(0, 2.5, 1.9, 0, v1);
@@ -554,12 +461,11 @@ export function createCrash(scene: THREE.Scene, train: TrainParts, opts: CrashOp
           const u = (ct - CRASH.WIDE) / (CRASH.AFTER - CRASH.WIDE);
           W(camP, -13 + u * 1.5, 7.5 - u * 0.6, 44 - u * 3); W(camL, -13, 1.6, 0);
           fov = 36; shk = 0.55 * (1 - u);
-        } else { // E: aftermath, a slow push-in to the hand
-          const u = ease(clamp((ct - CRASH.AFTER - 0.2) / (CRASH.FIND + 1.3 - CRASH.AFTER), 0, 1));
-          const u2 = clamp((ct - CRASH.FIND - 1.3) / 2.5, 0, 1);
-          W(camP, lerp(-5, -7.35, u) + u2 * 0.15, lerp(5.4, 1.5, u) - u2 * 0.08, lerp(27, 8.0, u) - u2 * 0.35);
-          W(camL, lerp(-8, HAND.x + 0.15, u), lerp(1.4, 0.25, u), lerp(0, HAND.z + 0.1, u));
-          fov = lerp(36, 29, u);
+        } else { // E: the wide aftermath, a slow push-in on the wreck (no close-ups: the rescue is on film)
+          const u = ease(clamp((ct - CRASH.AFTER - 0.2) / (CRASH.END - CRASH.AFTER - 0.2), 0, 1));
+          W(camP, lerp(-4.5, -6.5, u), lerp(5.8, 4.4, u), lerp(29, 21, u));
+          W(camL, lerp(-8, -8.6, u), lerp(1.4, 1.0, u), lerp(0, 0.8, u));
+          fov = lerp(36, 33, u);
         }
         if (!reduced && shake > 0) {
           // heavy and slow in slow motion: phase runs on the simulation clock
@@ -588,9 +494,8 @@ export function createCrash(scene: THREE.Scene, train: TrainParts, opts: CrashOp
     },
     dispose() {
       disposables.forEach((d) => d.dispose());
-      scene.remove(lantern, lantern.target, victim, glint);
+      scene.remove(lantern, lantern.target);
       for (const f of figs) scene.remove(f.body, f.lamp);
-      if (reader.parent) reader.parent.remove(reader);
     },
   };
   return crash;

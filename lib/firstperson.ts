@@ -1,10 +1,11 @@
-// First-person 3D views (Three.js) you can step into from four stations.
+// First-person 3D views (Three.js) you can step into from two stations (rooms for filmed moments are not on the line).
 // lib/engine.ts shows the #fp overlay and calls startFirstPerson(); this module builds everything inside it.
 // Rooms live in lib/fp/*.ts, every caption in lib/fp/copy.ts, styles in app/styles/fp.css.
 import * as THREE from 'three';
 import { STATIONS, FP_INFO, type FpKind } from './stations';
 import { Kit, disposeTree, disposeSharedGeometry, clamp, lerp, easeInOut } from './fp/kit';
 import { COPY, type SpotCopy } from './fp/copy';
+import { animBadge } from './media';
 import type { Ctx, Room, Spot, Sfx } from './fp/types';
 import { buildCompartment } from './fp/compartment';
 import { buildClassroom } from './fp/classroom';
@@ -63,7 +64,7 @@ export function startFirstPerson(container: HTMLElement, kind: FpKind, opts: FpO
     <div class="fp-vig" aria-hidden="true"></div>
     <div class="fp-bars" aria-hidden="true"><i></i><i></i></div>
     <div class="fp-top">
-      <div class="fp-badge"><b>${esc(station.year)}</b><span>${esc(info.title)}</span></div>
+      <div class="fp-badge"><b>${esc(station.year)}</b><span>${esc(info.title)}</span>${animBadge('3D · computer-generated', 'xs')}</div>
       <div class="fp-count" role="status" aria-live="polite"><span class="fp-pips" aria-hidden="true">${pips}</span><span class="fp-count-t">0 of ${total} found</span></div>
       <button class="fp-exit" type="button" aria-label="Exit the first-person view"><span>Exit</span><kbd>Esc</kbd></button>
     </div>

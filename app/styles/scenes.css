@@ -378,3 +378,10 @@
   .sc *, .sc *::before, .sc *::after, .sc { animation: none !important; transition: none !important; }
   .sc-beat.is-tilt { transform: none; }
 }
+
+/* filmed-by-our-group credit (shared badge from lib/media.ts, styled in media.css) */
+.sc-made { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 8px; }
+.sc-made > span:first-child { display: inline-flex; }
+.sc-made-t { font-family: var(--mono); font-size: .72rem; letter-spacing: .03em; color: var(--sc-soft); max-width: 62ch; line-height: 1.45; }
+.sc-d-kicker .mk { letter-spacing: .1em; }
+@media (min-width: 1000px) and (max-height: 780px) { .sc-made-t { display: none; } }
