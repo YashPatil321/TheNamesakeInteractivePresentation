@@ -208,7 +208,7 @@ export function buildCompartment(ctx: Ctx): Room {
   let lampNext = 3.5;
 
   /* ---------- Ghosh, the friendly stranger across from you ---------- */
-  const g = figure(kit, { skin: 0x8c5b3c, top: 0xd9d2bf, bottom: 0x3a3a44, hair: 0x15110f, hairStyle: 'short', seated: true, collar: 0xbfb8a4 });
+  const g = figure(kit, { skin: 0x8c5b3c, top: 0xd9d2bf, bottom: 0x3a3a44, hair: 0x2a2624, hairStyle: 'fringe', seated: true, collar: 0xbfb8a4, moustache: true, shoulders: 1.08 });
   g.root.position.set(0.28, 0.0, -0.98); room.add(g.root);
   g.armR.rotation.x = -0.5; g.foreR.rotation.x = -1.0; g.armR.rotation.z = 0.08;
   g.armL.rotation.x = -0.45; g.foreL.rotation.x = -0.75; g.armL.rotation.z = -0.05;

@@ -1,5 +1,6 @@
 // Shared building blocks for the first-person rooms: materials, canvas textures, glow sprites, low-poly figures.
 import * as THREE from 'three';
+import { loadGLB } from '../world3d/assets';
 
 export interface Fonts { display: string; body: string; mono: string; hand: string }
 
@@ -169,9 +170,13 @@ export class Kit {
 
 export interface FigureOpts {
   skin: THREE.ColorRepresentation; top: THREE.ColorRepresentation; bottom?: THREE.ColorRepresentation;
-  hair: THREE.ColorRepresentation; hairStyle?: 'short' | 'long' | 'bob' | 'bald' | 'curly';
+  hair: THREE.ColorRepresentation; hairStyle?: 'short' | 'long' | 'bob' | 'bald' | 'curly' | 'part' | 'fringe';
   seated?: boolean; scale?: number; shoulders?: number; collar?: THREE.ColorRepresentation; glasses?: boolean;
   legs?: boolean; // default true; hidden legs save draw calls under desks
+  /** sculpted-model options (public/models/people/people.glb, built by blender/people.py) */
+  sex?: 'm' | 'f'; // default: 'f' for long/bob hair, otherwise 'm'
+  garment?: 'shirt' | 'sweater'; // default: 'shirt' when a collar colour is given, otherwise 'sweater'
+  moustache?: boolean; eyes?: THREE.ColorRepresentation;
 }
 
 export interface Figure {
@@ -197,7 +202,8 @@ export function figure(k: Kit, o: FigureOpts): Figure {
   const sw = o.shoulders ?? 1;
   const hipY = o.seated ? 0.47 : 0.92;
 
-  const add = (g: THREE.BufferGeometry, m: THREE.Material, p: THREE.Object3D, x = 0, y = 0, z = 0) => k.mesh(g, m, p, x, y, z);
+  const lo: THREE.Mesh[] = []; // placeholder meshes, swapped for the sculpted parts once they load
+  const add = (g: THREE.BufferGeometry, m: THREE.Material, p: THREE.Object3D, x = 0, y = 0, z = 0) => { const me = k.mesh(g, m, p, x, y, z); lo.push(me); return me; };
 
   // legs
   const thigh = geo('thigh', () => new THREE.CapsuleGeometry(0.075, 0.34, 4, 8));
@@ -226,6 +232,7 @@ export function figure(k: Kit, o: FigureOpts): Figure {
   sh.scale.set(sw * 1.02, 0.42, 0.66);
   if (o.collar !== undefined) {
     const c = add(geo('collar', () => new THREE.ConeGeometry(0.07, 0.12, 3)), k.std(o.collar, 0.8), torso, 0, 0.56, 0.12);
+    c.name = 'collar';
     c.rotation.x = Math.PI; mats.push(c.material as THREE.MeshStandardMaterial);
   }
 
@@ -242,8 +249,9 @@ export function figure(k: Kit, o: FigureOpts): Figure {
   nose.rotation.x = Math.PI / 2;
   small(add(geo('ear', () => new THREE.SphereGeometry(0.022, 6, 6)), skin, head, -0.094, 0.1, 0));
   small(add(geo('ear', () => new THREE.SphereGeometry(0.022, 6, 6)), skin, head, 0.094, 0.1, 0));
-  const style = o.hairStyle ?? 'short';
-  if (style !== 'bald') {
+  const style0 = o.hairStyle ?? 'short';
+  const style = style0 === 'part' ? 'short' : style0;
+  if (style !== 'bald' && style !== 'fringe') {
     const cap = add(geo('hair', () => new THREE.SphereGeometry(0.114, 14, 10, 0, Math.PI * 2, 0, Math.PI * 0.55)), hair, head, 0, 0.115, -0.008);
     cap.scale.set(0.95, 1.1, 1.06); cap.rotation.x = -0.28;
     if (style === 'long' || style === 'bob') {
@@ -281,7 +289,81 @@ export function figure(k: Kit, o: FigureOpts): Figure {
   armL.rotation.z = -0.08; armR.rotation.z = 0.08;
 
   if (o.scale) root.scale.setScalar(o.scale);
-  return { root, torso, neck, head, armL, armR, foreL, foreR, mats };
+  const fig = { root, torso, neck, head, armL, armR, foreL, foreR, mats };
+  void peopleParts().then((P) => sculpted(k, fig, o, lo, P)).catch(() => { /* keep the placeholder */ });
+  return fig;
+}
+
+/* ---------------- Sculpted people (blender/people.py) ---------------- */
+
+type Part = { geo: THREE.BufferGeometry; mat: string }[];
+let partsP: Promise<Record<string, Part>> | null = null;
+/** Loads the body-part kit once; each part is one or more primitives tagged with its material name. */
+export function peopleParts() {
+  if (!partsP) partsP = loadGLB('/models/people/people.glb').then((g) => {
+    const out: Record<string, Part> = {};
+    for (const node of g.scene.children) {
+      const part: Part = [];
+      node.traverse((m) => {
+        const mesh = m as THREE.Mesh;
+        if (mesh.isMesh) part.push({ geo: mesh.geometry, mat: (mesh.material as THREE.Material).name });
+      });
+      out[node.name] = part;
+    }
+    return out;
+  }).catch((e) => { partsP = null; throw e; });
+  return partsP;
+}
+
+function sculpted(k: Kit, f: Figure, o: FigureOpts, lo: THREE.Mesh[], P: Record<string, Part>) {
+  const [skin, top, bottom, hair, shoe] = f.mats;
+  const collarMesh = lo.find((m) => m.name === 'collar');
+  const style = o.hairStyle ?? 'short';
+  const fem = o.sex ? o.sex === 'f' : style === 'long' || style === 'bob';
+  const garment = o.garment ?? (o.collar !== undefined ? 'shirt' : 'sweater');
+  const sw = o.shoulders ?? 1;
+  // skin reads warmer and softer with a hint of emissive "subsurface"; all sculpted parts carry baked cavity in COLOR_0
+  skin.roughness = 0.58; skin.emissive.copy(skin.color).multiplyScalar(0.06);
+  hair.roughness = 0.5;
+  const collar = collarMesh ? (collarMesh.material as THREE.MeshStandardMaterial) : top;
+  const sclera = k.std(0xeee8de, 0.25), iris = k.std(o.eyes ?? 0x3a2414, 0.2), pupil = k.std(0x060508, 0.08, 0, { envMapIntensity: 2 });
+  const frame = k.std(0x2a2420, 0.35, 0.3);
+  f.mats.push(sclera, iris, pupil, frame);
+  const byName: Record<string, THREE.MeshStandardMaterial> = {
+    Skin: skin, Top: top, Bottom: bottom, Hair: hair, Shoe: shoe, Collar: collar, Sclera: sclera, Iris: iris, Pupil: pupil, Frame: frame,
+  };
+  for (const m of new Set(Object.values(byName))) { m.vertexColors = true; m.needsUpdate = true; }
+  // the placeholder's own geometry has no colour attribute: drop it before the materials expect one
+  for (const m of lo) m.removeFromParent();
+
+  const put = (name: string, parent: THREE.Object3D, x = 0, y = 0, z = 0, shadow = true) => {
+    const part = P[name];
+    if (!part) return;
+    for (const { geo: g, mat } of part) {
+      const me = new THREE.Mesh(g, byName[mat] ?? top);
+      me.position.set(x, y, z); me.castShadow = shadow; me.receiveShadow = true;
+      parent.add(me);
+    }
+  };
+  if (o.legs !== false) for (const s of [-1, 1]) put(o.seated ? 'leg_seated' : 'leg_standing', f.root, s * 0.1);
+  const tName = `torso_${garment}_${fem ? 'f' : 'm'}`;
+  const tp = P[tName] ? tName : (fem ? 'torso_top_f' : 'torso_shirt_m');
+  const tg = new THREE.Group(); tg.scale.x = sw * (fem ? 1.05 : 1); f.torso.add(tg);
+  put(tp, tg);
+  if (garment === 'shirt' && !fem) put('collar', tg, 0, 0, 0, false);
+  put('neck', f.neck);
+  f.head.position.y = 0.07;
+  put(fem ? 'head_f' : 'head_m', f.head);
+  put(fem ? 'face_f' : 'face_m', f.head, 0, 0, 0, false);
+  const hairPart: Record<string, string> = { short: 'hair_short', part: 'hair_part', long: 'hair_long', bob: 'hair_bob', curly: 'hair_curly', fringe: 'hair_fringe' };
+  if (hairPart[style]) put(hairPart[style], f.head);
+  if (o.moustache) put('moustache', f.head, 0, 0, 0, false);
+  if (o.glasses) put('glasses', f.head, 0, 0, 0, false);
+  for (const [arm, fore, side] of [[f.armL, f.foreL, 'L'], [f.armR, f.foreR, 'R']] as const) {
+    put('arm_upper', arm);
+    put('arm_fore', fore);
+    put('hand_' + side, fore, 0, 0, 0, false);
+  }
 }
 
 /** Disposes everything under an object (geometries, materials, their textures). */
