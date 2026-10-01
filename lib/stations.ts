@@ -26,7 +26,8 @@ export interface Station {
   detail?: string;
   quote?: { text: string; cite: string };
   voice?: { gogol: string; nikhil: string };
-  poll?: { q: string; options: string[]; actual: string };
+  /** predict: true marks a "predict what happens next" poll (label reads "Predict"). */
+  poll?: { q: string; options: string[]; actual: string; predict?: boolean };
   special?: 'rewind' | 'decree' | 'finale';
   video?: string;
   shots?: string[];
@@ -50,6 +51,7 @@ export const STATIONS: Station[] = [
       'Weeks later they are married, and Ashima follows a man she barely knows to Cambridge, Massachusetts.'
     ],
     detail: 'In Cambridge she is alone most of the day in a small apartment, far from everyone she has ever known.',
+    poll: { predict: true, q: 'Next stop, 1968: the baby is born, and Ashima\'s grandmother has mailed a letter with his good name. Will it arrive?', options: ['Yes, in time', 'Yes, but late', 'It never arrives'], actual: 'It never arrives. The hospital won\'t discharge a baby without a name, so Ashoke writes the pet name Gogol on the birth certificate.' },
     analysis: { tag: 'MIRROR', text: 'Ashima arrives with no family or community around her and is expected to adjust on her own. Isolation is the first cost of immigrating.', world: 'Many immigrant spouses describe the first years as the loneliest of their lives.' } },
 
   { year: '1968', title: 'A Name in a Hurry', place: 'Cambridge, Massachusetts', code: 'CAM', region: 'town', name: 'gogol', try: 'cert',
@@ -78,7 +80,7 @@ export const STATIONS: Station[] = [
       'Gogol refuses. He doesn\'t know anyone called Nikhil. The principal, Mrs. Lapidus, overrules his parents and lets him keep "Gogol."'
     ],
     voice: { gogol: 'Gogol is the name I know. Why would I answer to a stranger\'s name?', nikhil: 'Nikhil? That\'s someone else. I don\'t know him yet.' },
-    poll: { q: 'You\'re five. Your parents hand you a new "school name." Do you use it?', options: ['Keep my name', 'Use the new one'], actual: 'He refuses, and the school sides with him. He stays Gogol for the next 13 years.' },
+    poll: { predict: true, q: 'He stays "Gogol" at school. By the time he is 14, how will he feel about his name?', options: ['Proud of it', 'Embarrassed by it', 'He won\'t think about it'], actual: 'Embarrassed. At 14 he shelves a book with his name on the cover, unread, and before college he changes his name in court.' },
     analysis: { tag: 'INSTITUTIONAL', text: 'A school official, not the family, ends up deciding what the child is called.', world: 'Students with non-English names are still renamed or given nicknames by teachers who find their names "hard."' },
     video: 'videos/kindergarten.mp4', shots: ['Small backpack, parents crouched to his height', 'He shakes his head: "I\'m Gogol."', 'The principal shrugs and writes GOGOL'] },
 
@@ -89,6 +91,7 @@ export const STATIONS: Station[] = [
       'Someone vandalizes the family\'s mailbox, mocking their name. On a school trip to an old cemetery, Gogol makes rubbings of gravestones with names nobody uses anymore.'
     ],
     voice: { gogol: 'Our street looks like every other street. Why doesn\'t our name?', nikhil: 'Someday I\'ll have a name that fits the mailbox.' },
+    poll: { predict: true, q: 'Next stop, 1982: for his 14th birthday his father gives him The Short Stories of Nikolai Gogol. Will Gogol read the book?', options: ['Yes, right away', 'A few pages, then quits', 'No, it goes on a shelf'], actual: 'He thanks his father and puts it on a shelf, unread. He won\'t open it until Christmas Eve, 2000.' },
     analysis: { tag: 'INTERPERSONAL', text: 'Neighbors target the family through their name, and a child learns that his difference is visible and unwelcome.', world: 'In 1987 a group calling itself the "Dotbusters" terrorized Indian Americans in Jersey City. Research it for a citation.' } },
 
   { year: '1982', title: 'The Gift', place: 'Pemberton Road', code: 'PEM', region: 'suburb', name: 'gogol', try: 'gift',
@@ -107,6 +110,7 @@ export const STATIONS: Station[] = [
       'Every head turns toward Gogol. He sits through it, humiliated, and refuses to read the story.'
     ],
     voice: { gogol: 'Everyone is looking at me. My name belongs to a strange, sad, dead man.', nikhil: 'I need a name nobody can laugh at.' },
+    poll: { predict: true, q: 'Looking ahead to 1987: Ashoke picks his son up from a stalled train and talks to him in the car. What will he tell him?', options: ['He\'s angry about the name change', 'The story of the 1961 train crash', 'That the family is moving back to India'], actual: 'He finally tells him about the crash and the page from "The Overcoat." Gogol\'s name was never a joke. It was the night his father survived.' },
     analysis: { tag: 'INTERPERSONAL', text: 'A lesson meant as enrichment turns into public humiliation. Individual actions, even well-meaning ones, single him out.', world: 'Research on students\' names ("Teachers, please learn our names!", Kohli & Solórzano, 2012) shows how mispronounced names affect students.' } },
 
   { year: '1986', title: '"I\'m Nikhil"', place: 'Party near Boston → the courthouse', code: 'BOS', region: 'town', name: 'nikhil',
@@ -139,7 +143,7 @@ export const STATIONS: Station[] = [
       'At their lake house in New Hampshire, a dinner guest assumes he must never get sick in India because he\'s "Indian." He has to point out that he grew up in Massachusetts.'
     ],
     voice: { gogol: 'Gogol feels too loud at the Ratliffs\' table.', nikhil: 'Their life is so easy. I want to belong here.' },
-    poll: { q: 'Gogol feels more at home with Maxine\'s family than his own. Does that make sense to you?', options: ['I get it', 'Not at all'], actual: 'It lasts until his father dies. Then Maxine\'s world suddenly feels like it has no place for his grief.' },
+    poll: { predict: true, q: 'Next stop: a phone call. Ashoke has died suddenly of a heart attack in Ohio. How will Gogol react?', options: ['Lean on Maxine and the Ratliffs', 'Turn back toward his family and Bengali custom', 'Bury himself in work'], actual: 'He flies to Cleveland alone, then shaves his head in Bengali mourning custom, the first tradition he chooses for himself. He drifts away from Maxine.' },
     analysis: { tag: 'IDEOLOGICAL', text: 'The "perpetual foreigner" belief: that an American with brown skin must really be from somewhere else.', world: '"Where are you really from?" is one of the most common experiences Asian Americans report.' },
     video: 'videos/ratliffs.mp4', shots: ['Dinner table, Nikhil laughing with Maxine\'s family', 'Guest: "You must never get sick in India!"', 'Nikhil: "I\'m from Massachusetts." Awkward silence'] },
 
@@ -160,6 +164,7 @@ export const STATIONS: Station[] = [
       'They fall into an easy understanding and marry in a big Bengali wedding.'
     ],
     voice: { gogol: 'We both know what it\'s like to live between two worlds.', nikhil: 'She\'s the one person who knows both of my names.' },
+    poll: { predict: true, q: 'Two people who understand both worlds, and a big Bengali wedding. Will the marriage last?', options: ['Yes, they found each other', 'No, it will fall apart'], actual: 'It falls apart. Moushumi begins an affair with Dimitri Desjardins, a man from her past, and the marriage ends.' },
     analysis: { tag: 'INTERNALIZED', text: 'Both of them carry the same inner conflict. Part of the attraction is that neither has to explain.', world: 'Family and community expectations around marriage are still a major pressure for many second-generation kids.' } },
 
   { year: '~2000', title: 'Coming Apart', place: 'New York City', code: 'NYC', region: 'nyc', name: 'nikhil',
@@ -169,6 +174,7 @@ export const STATIONS: Station[] = [
       'He realizes they may have married the idea of each other, and the comfort of their parents\' approval.'
     ],
     voice: { gogol: 'Maybe we married the idea of each other.', nikhil: 'Maybe Nikhil was never the answer.' },
+    poll: { predict: true, q: 'Last stop: Christmas Eve, 2000, at his mother\'s final party on Pemberton Road. What will Gogol do?', options: ['Change his name back to Gogol', 'Move to Calcutta with his mother', 'Open the book his father gave him'], actual: 'He slips upstairs, finds the book, reads his father\'s inscription for the first time, and begins to read.' },
     analysis: { tag: 'TURNING', text: 'Assimilating didn\'t fix him, and neither did returning to the "right" Bengali life. He has to find himself without a script.', world: 'Identity isn\'t something someone else can hand you, whether it\'s your parents or society.' } },
 
   { year: '2000', title: 'The Man Who Gave You His Name', place: 'Pemberton Road, Christmas Eve', code: 'PEM', region: 'suburb', name: 'both', snow: true, fp: 'bedroom',
