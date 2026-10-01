@@ -1,10 +1,15 @@
 // All story text lives here. Edit freely; the app re-renders from this file.
 // video: put the file in public/videos (e.g. public/videos/crash.mp4) and reference it as 'videos/crash.mp4'.
+//
+// FILMED vs GENERATED: a moment the group films (video:) is never also generated. Stations with a video
+// get no first-person room (fp:) or hands-on moment (try:) that re-stages the filmed action, and the 3D crash
+// at station 1 shows only the exterior derailment (lib/world3d/crash.ts); the compartment, the flashlight and
+// the page are on film. lib/media.ts labels each kind on screen.
 
 export type Tag = 'IDEOLOGICAL' | 'INSTITUTIONAL' | 'INTERPERSONAL' | 'INTERNALIZED' | 'BREAKING' | 'RESISTANCE' | 'MIRROR' | 'TURNING';
 export type NameLens = 'none' | 'gogol' | 'nikhil' | 'both';
 export type Region = 'india' | 'town' | 'suburb' | 'campus' | 'nyc' | 'lake' | 'cleveland';
-export type TryKind = 'shoes' | 'cert' | 'rice' | 'rub' | 'gift' | 'phone';
+export type TryKind = 'shoes' | 'cert' | 'rice' | 'rub' | 'gift';
 export type FpKind = 'compartment' | 'classroom' | 'car' | 'bedroom';
 
 export interface Station {
@@ -34,7 +39,7 @@ export interface Station {
 }
 
 export const STATIONS: Station[] = [
-  { year: '1961', title: 'The Night Train', place: 'Near Jamshedpur, India', code: 'JSR', region: 'india', name: 'none', flashback: true, fp: 'compartment',
+  { year: '1961', title: 'The Night Train', place: 'Near Jamshedpur, India', code: 'JSR', region: 'india', name: 'none', flashback: true,
     sky: ['#04060c', '#1b2133'],
     story: [
       'Ashoke Ganguli, 22, rides an overnight train to visit his grandfather, rereading the stories of Nikolai Gogol, his grandfather\'s favorite writer.',
@@ -94,7 +99,7 @@ export const STATIONS: Station[] = [
     poll: { predict: true, q: 'Next stop, 1982: for his 14th birthday his father gives him The Short Stories of Nikolai Gogol. Will Gogol read the book?', options: ['Yes, right away', 'A few pages, then quits', 'No, it goes on a shelf'], actual: 'He thanks his father and puts it on a shelf, unread. He won\'t open it until Christmas Eve, 2000.' },
     analysis: { tag: 'INTERPERSONAL', text: 'Neighbors target the family through their name, and a child learns that his difference is visible and unwelcome.', world: 'In 1987 a group calling itself the "Dotbusters" terrorized Indian Americans in Jersey City. Research it for a citation.' } },
 
-  { year: '1982', title: 'The Gift', place: 'Pemberton Road', code: 'PEM', region: 'suburb', name: 'gogol', try: 'gift',
+  { year: '1982', title: 'The Gift', place: 'Pemberton Road', code: 'PEM', region: 'suburb', name: 'gogol', try: 'gift', fp: 'bedroom',
     sky: ['#2a1d45', '#e08a6a'],
     story: [
       'For Gogol\'s 14th birthday his father gives him a hardcover: The Short Stories of Nikolai Gogol. Gogol thanks him and puts it on a shelf, unread.',
@@ -125,7 +130,7 @@ export const STATIONS: Station[] = [
     analysis: { tag: 'INTERNALIZED', text: 'He erases the name his parents gave him to be accepted. The pressure to assimilate becomes his own choice.', world: 'Immigrants and their children still anglicize names on résumés and at coffee shops. Hiring studies show why.' },
     video: 'videos/nikhil.mp4', shots: ['Party music: "Hey, what\'s your name?"', 'He hesitates: "…Nikhil."', 'A hand crosses out GOGOL on a name tag and writes NIKHIL'] },
 
-  { year: '1987', title: 'The Truth in the Car', place: 'Train home from Yale', code: 'NHV', region: 'campus', name: 'nikhil', fp: 'car',
+  { year: '1987', title: 'The Truth in the Car', place: 'Train home from Yale', code: 'NHV', region: 'campus', name: 'nikhil',
     sky: ['#070b18', '#27304f'],
     story: [
       'Nikhil takes the train home. It stops for hours: someone has died on the tracks. His father drives out to pick him up.',
@@ -147,7 +152,7 @@ export const STATIONS: Station[] = [
     analysis: { tag: 'IDEOLOGICAL', text: 'The "perpetual foreigner" belief: that an American with brown skin must really be from somewhere else.', world: '"Where are you really from?" is one of the most common experiences Asian Americans report.' },
     video: 'videos/ratliffs.mp4', shots: ['Dinner table, Nikhil laughing with Maxine\'s family', 'Guest: "You must never get sick in India!"', 'Nikhil: "I\'m from Massachusetts." Awkward silence'] },
 
-  { year: '1990s', title: 'The Phone Call', place: 'Cleveland, Ohio', code: 'CLE', region: 'cleveland', name: 'nikhil', rain: true, try: 'phone',
+  { year: '1990s', title: 'The Phone Call', place: 'Cleveland, Ohio', code: 'CLE', region: 'cleveland', name: 'nikhil', rain: true,
     sky: ['#15171f', '#3d4250'],
     story: [
       'Ashoke, working temporarily in Ohio, dies suddenly of a heart attack. Gogol flies to Cleveland alone to identify his father and empty his apartment.',
@@ -177,7 +182,7 @@ export const STATIONS: Station[] = [
     poll: { predict: true, q: 'Last stop: Christmas Eve, 2000, at his mother\'s final party on Pemberton Road. What will Gogol do?', options: ['Change his name back to Gogol', 'Move to Calcutta with his mother', 'Open the book his father gave him'], actual: 'He slips upstairs, finds the book, reads his father\'s inscription for the first time, and begins to read.' },
     analysis: { tag: 'TURNING', text: 'Assimilating didn\'t fix him, and neither did returning to the "right" Bengali life. He has to find himself without a script.', world: 'Identity isn\'t something someone else can hand you, whether it\'s your parents or society.' } },
 
-  { year: '2000', title: 'The Man Who Gave You His Name', place: 'Pemberton Road, Christmas Eve', code: 'PEM', region: 'suburb', name: 'both', snow: true, fp: 'bedroom',
+  { year: '2000', title: 'The Man Who Gave You His Name', place: 'Pemberton Road, Christmas Eve', code: 'PEM', region: 'suburb', name: 'both', snow: true,
     sky: ['#0a1430', '#2d3d6b'],
     story: [
       'Ashima is selling the house to split her year between Calcutta and America. At her last Christmas Eve party, Gogol slips upstairs to his old bedroom.',
@@ -196,18 +201,18 @@ export const TAG_NAMES: Record<Tag, string> = { IDEOLOGICAL: 'Ideological', INST
 
 /** Speaker notes shown only on the presenter remote (/presenter), one list per station. */
 export const NOTES: string[][] = [
-  ['This is a flashback: Gogol has not been born yet.', 'Let the crash play, then point at the page from "The Overcoat". It is why Ashoke lives, and why the name will matter.', 'Mirror to society: the 1965 Hart-Celler Act opens the door for Ashoke.'],
+  ['This is a flashback: Gogol has not been born yet.', 'The 3D animation shows the derailment from outside; our filmed scene follows with what happens inside the carriage and the page from "The Overcoat".', 'Mirror to society: the 1965 Hart-Celler Act opens the door for Ashoke.'],
   ['Still a flashback. Ashima is 19 and has not met her husband.', 'Hands-on: have someone click "Slip your feet in".', 'Talking point: isolation is the first cost of immigrating.'],
   ['The first stop where Gogol is on the train. Track turns orange.', 'Hands-on: let a classmate try to fill the birth certificate, then wait for the letter three times.', 'Institutional: a hospital form overrides a Bengali naming tradition.', 'Optional: press "Why Gogol?" to rewind to the crash.'],
   ['The rice ceremony: the Bengali community acts as family.', 'Hands-on: ask the class which item baby Gogol will pick, then tap it.', 'Read the "lifelong pregnancy" quote aloud.'],
   ['Class vote: tap once per raised hand, then reveal.', 'Institutional: the principal, not the parents, decides his name.', 'Scene video station (kindergarten).'],
   ['Hands-on: rub the gravestone.', 'Interpersonal: the mailbox vandalism.', 'Real world: the 1987 "Dotbusters" in Jersey City.'],
-  ['Hands-on: try to open the book, and it goes on the shelf.', 'Internalized: he rejects the gift before he knows what it means.', 'Plant the seed: this book comes back at the very end.'],
+  ['Hands-on: try to open the book, and it goes on the shelf.', '3D room (press E): his bedroom on his 14th birthday, Ashoke in the doorway.', 'Internalized: he rejects the gift before he knows what it means.', 'Plant the seed: this book comes back at the very end.'],
   ['English class turns into public humiliation.', 'Real world: Kohli & Solórzano (2012) on students\' names.'],
   ['PETITION GRANTED stamp plays on first visit. The Gogol/Nikhil switch unlocks.', 'Class vote: would you change your name?', 'Press N to flip the inner voice between names.', 'Scene video station (the party).'],
   ['Turning point: the truth in the car.', 'Read the quote slowly: "You remind me of everything that followed."', 'Scene video station.'],
   ['The Ratliffs: the easy America he wanted.', 'Class vote, then reveal.', 'Ideological: the "perpetual foreigner" belief.', 'Scene video station (dinner with the Ratliffs).'],
-  ['The climax. Let the phone ring once or twice before answering.', 'Breaking point: he shaves his head, the first tradition he chooses.', 'Scene video station (the phone call).'],
+  ['The climax. Our filmed scene carries the phone call.', 'Breaking point: he shaves his head, the first tradition he chooses.', 'Scene video station (the phone call).'],
   ['Moushumi: two people who both know both of his names.', 'Internalized: expectations around marriage.'],
   ['The marriage ends. Neither path came with a script.', 'Turning point: identity cannot be handed to you.'],
   ['The track braids orange and blue. He is both now.', 'If every station is visited, open the book for the finale.', 'After the finale, run the ticket inspector quiz with the class.'],
@@ -233,5 +238,5 @@ export const FP_INFO: Record<FpKind, { title: string; blurb: string }> = {
   compartment: { title: 'Inside the night train', blurb: "Sit in Ashoke's compartment the night of the crash and look around." },
   classroom: { title: "Gogol's desk in English class", blurb: 'The teacher starts on Nikolai Gogol. Feel every head turn.' },
   car: { title: 'The passenger seat', blurb: 'Ride home with Ashoke the night he tells the truth.' },
-  bedroom: { title: 'His old bedroom', blurb: 'Christmas Eve, 2000. Find the book his father gave him.' },
+  bedroom: { title: 'His bedroom, 1982', blurb: 'His 14th birthday. His father stands in the doorway; the new book lies on the bed.' },
 };

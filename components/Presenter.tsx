@@ -3,12 +3,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CHANNEL } from '@/lib/engine';
 import { NAME_COLORS, NOTES, STATIONS, TAG_NAMES } from '@/lib/stations';
+import { NEWS } from '@/lib/news';
+import { mediaBadges, railMarks } from '@/lib/media';
 
 type LineState = {
   cur: number;
   target: number;
   moving: boolean;
-  tab: 'story' | 'analysis' | 'scene';
+  tab: 'story' | 'analysis' | 'now' | 'scene';
   lens: 'gogol' | 'nikhil' | 'both';
   lensUnlocked: boolean;
   visited: number[];
@@ -69,7 +71,8 @@ export default function Presenter() {
       else if (k === 'ArrowLeft' || k === 'PageUp') { e.preventDefault(); send({ type: 'prev' }); }
       else if (k === '1') send({ type: 'tab', tab: 'story' });
       else if (k === '2') send({ type: 'tab', tab: 'analysis' });
-      else if (k === '3') send({ type: 'tab', tab: 'scene' });
+      else if (k === '3') send({ type: 'tab', tab: 'now' });
+      else if (k === '4') send({ type: 'tab', tab: 'scene' });
       else if (k === 'n' || k === 'N') send({ type: 'lens' });
       else if (k === 'q' || k === 'Q') send({ type: 'quiz' });
       else if (k === 'e' || k === 'E') send({ type: 'fp' });
@@ -116,6 +119,7 @@ export default function Presenter() {
           <div className="pr-year">{s.year}</div>
           <h2>{s.title}</h2>
           <div className="pr-place">{s.place} · <b>{TAG_NAMES[s.analysis.tag]}</b></div>
+          <div className="pr-media" aria-label="What's on screen here: filmed or animated" dangerouslySetInnerHTML={{ __html: mediaBadges(i) }} />
           <h3>Speaker notes</h3>
           <ul className="pr-notes">{NOTES[i].map((n) => <li key={n}>{n}</li>)}</ul>
 
@@ -147,9 +151,9 @@ export default function Presenter() {
 
           <h3>On screen</h3>
           <div className="pr-row">
-            {(['story', 'analysis', 'scene'] as const).map((t) => (
-              <button key={t} className={`pr-chip ${line?.tab === t ? 'on' : ''}`} disabled={t === 'scene' && !s.video} onClick={() => send({ type: 'tab', tab: t })}>
-                {t === 'analysis' ? "4 I's" : t[0].toUpperCase() + t.slice(1)}
+            {(['story', 'analysis', 'now', 'scene'] as const).map((t) => (
+              <button key={t} className={`pr-chip ${line?.tab === t ? 'on' : ''}`} disabled={(t === 'scene' && !s.video) || (t === 'now' && !NEWS[i])} onClick={() => send({ type: 'tab', tab: t })}>
+                {t === 'analysis' ? "4 I's" : t === 'now' ? 'Then & Now' : t === 'scene' ? 'Our film' : 'Story'}
               </button>
             ))}
           </div>
@@ -166,7 +170,7 @@ export default function Presenter() {
           </div>
           <div className="pr-row">
             <button className={`pr-chip ${line?.fpOpen ? 'on' : ''}`} disabled={!s.fp && !line?.fpOpen} onClick={() => send({ type: 'fp' })}>
-              {line?.fpOpen ? 'Leave first-person view' : s.fp ? 'Step inside (first person)' : 'No first-person view here'}
+              {line?.fpOpen ? 'Leave the 3D room' : s.fp ? 'Step inside (3D room)' : s.video ? 'Filmed stop: no 3D room' : 'No 3D room here'}
             </button>
             <button className={`pr-chip ${line?.scenesOpen ? 'on' : ''}`} onClick={() => send({ type: 'scenes' })}>{line?.scenesOpen ? 'Close scenes' : 'Our scenes'}</button>
           </div>
@@ -183,10 +187,11 @@ export default function Presenter() {
               >
                 <b>{st.year.replace('Late 1990s', "late '90s")}</b>
                 <span>{st.title}</span>
+                <span className="pr-st-mk" dangerouslySetInnerHTML={{ __html: railMarks(k) }} />
               </button>
             ))}
           </div>
-          <p className="pr-keys">Keys here: ← → Space · 1 2 3 tabs · N flip · Q quiz · E first person · S scenes</p>
+          <p className="pr-keys">Keys here: ← → Space · 1 2 3 4 tabs · N flip · Q quiz · E first person · S scenes</p>
         </aside>
       </main>
     </div>

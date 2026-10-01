@@ -57,3 +57,24 @@
 .now-stat em { font-style: normal; font-weight: 600; }
 
 @media (prefers-reduced-motion: reduce) { .now-clip { transform: none; } }
+
+/* ---------- animated vignettes (lib/cards/vignettes.ts): generated, so they wear the cool "Animated" style ---------- */
+.vg { margin: 0 0 14px; border-radius: 10px; overflow: hidden; background: #0f1d36; border: 1px solid rgba(127, 211, 255, .38);
+  box-shadow: 0 10px 24px -14px rgba(5, 12, 30, .9), 0 0 0 3px rgba(127, 211, 255, .06); }
+.vg-top { display: flex; align-items: center; gap: 10px; padding: 7px 10px; background: linear-gradient(90deg, #0f2342, #15335f); border-bottom: 1px solid rgba(127, 211, 255, .2); }
+.vg-title { font-family: var(--display); font-size: 1.02rem; line-height: 1.15; color: #eaf3ff; min-width: 0; }
+.vg-stage { position: relative; }
+.vg-canvas { display: block; width: 100%; height: auto; aspect-ratio: 480 / 230; background: #10203c; }
+.vg-ctl { position: absolute; right: 8px; top: 8px; display: flex; gap: 6px; }
+.vg-btn { width: 30px; height: 30px; display: grid; place-items: center; padding: 0; border-radius: 50%; cursor: pointer;
+  background: rgba(10, 20, 40, .72); color: #d4f0ff; border: 1px solid rgba(127, 211, 255, .55); font-size: 12px; line-height: 1; }
+.vg-btn:hover { background: rgba(29, 90, 146, .85); }
+.vg-btn:focus-visible { outline: 2px solid #7fd3ff; outline-offset: 2px; }
+.vg-bar { height: 3px; background: rgba(127, 211, 255, .14); }
+.vg-bar i { display: block; height: 100%; background: #7fd3ff; transform-origin: left; transform: scaleX(0); }
+.vg-cap { margin: 0; padding: 9px 12px 11px; color: #eaf3ff; }
+.vg-cap-t { display: block; font-family: var(--body); font-size: 1rem; line-height: 1.4; min-height: 2.8em; text-wrap: balance; }
+.vg-cap-t.in { animation: vgIn .55s var(--ease-out) both; }
+.vg-cap small { display: block; margin-top: 4px; font-family: var(--mono); font-size: var(--t-2xs); letter-spacing: .04em; color: #9fb7d6; }
+@keyframes vgIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .vg-cap-t.in { animation: none; } }

@@ -102,7 +102,7 @@ export default function NamesakeLine() {
             <dt><kbd>F</kbd></dt><dd>Fullscreen</dd>
             <dt><kbd>M</kbd></dt><dd>Sound on / off</dd>
           </dl>
-          <p className="help-p">Click the stations on the track or the stops along the bottom to jump anywhere. Six stations have a hands-on &ldquo;Try it&rdquo; moment, and every stop stamps your passport. Keep an eye out for a letter drifting across the sky.</p>
+          <p className="help-p">Click the stations on the track or the stops along the bottom to jump anywhere. Five stations have a hands-on &ldquo;Try it&rdquo; moment, and every stop stamps your passport. Keep an eye out for a letter drifting across the sky.</p>
           <p className="help-p"><b>Presenting?</b> Open the remote on your laptop and put this window on the projector. The remote shows speaker notes, a timer and vote buttons, and it steers this screen.</p>
           <div className="help-actions">
             <a className="btn hot" href="/presenter" target="_blank" rel="noopener">Open presenter remote ↗</a>

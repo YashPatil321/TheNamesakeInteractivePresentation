@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type PointerEvent as RPointerEvent } from 'react';
 import { SCENES, videoUrl, type Scene } from '@/lib/scenes';
 import { STATIONS } from '@/lib/stations';
+import { filmBadge, GROUP_CREDIT } from '@/lib/media';
 import SceneArt from '@/components/scenes/SceneArt';
 import Clapper from '@/components/scenes/Clapper';
 
@@ -212,6 +213,10 @@ export default function Scenes({ mode }: { mode: 'page' | 'overlay' }) {
             <p className="sc-kicker">The Namesake Line · seven reels</p>
             <Title className="sc-title" id={`sc-title-${mode}`}>Our Scenes</Title>
             <p className="sc-sub">Seven moments we act out, one for each turning point.</p>
+            <p className="sc-made">
+              <span dangerouslySetInnerHTML={{ __html: filmBadge('Filmed by our group', 'sm') }} />
+              <span className="sc-made-t">{GROUP_CREDIT}. Live action only: these moments are never recreated in 3D or animation on the line.</span>
+            </p>
           </div>
           <div className="sc-head-r">
             <div className="sc-tally">
@@ -331,6 +336,8 @@ function Detail({ scene, status, mode, onPrev, onNext }: {
           <span>Scene {pad(scene.n)} <span className="sc-of">/ {pad(N)}</span></span>
           <span className="sc-sep" aria-hidden="true" />
           <span className="sc-yr">{scene.year}</span>
+          <span className="sc-sep" aria-hidden="true" />
+          <span dangerouslySetInnerHTML={{ __html: filmBadge('Live action', 'xs') }} />
         </p>
         <h3 className="sc-d-title" id={`sc-d-${scene.n}-${mode}`}>{scene.title}</h3>
         {scene.flag && (

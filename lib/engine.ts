@@ -2,6 +2,7 @@
 // Story content and types live in lib/stations.ts; this file animates and wires the UI.
 import { STATIONS, NAME_COLORS, TAG_COLORS, TAG_NAMES, QUIZ, START, NIKHIL_AT, FP_INFO } from './stations';
 import { createWorld } from './world3d';
+import { filmBadge, animBadge, railMarks, GROUP_CREDIT } from './media';
 import choicesMod from './cards/choices';
 import nowMod from './cards/now';
 import archiveMod from './cards/archive';
@@ -697,7 +698,14 @@ export function startLine(root) {
   }
   
   /* crash sequence — cue times match lib/world3d/crash.ts CRASH (the 3D side stages the shots on the same clock) */
-  const CR = { SCREECH: 2.25, IMPACT: 2.55, SLOW1: 3.5, WIDE: 3.5, GLASS: 3.9, AFTER: 5.3, CAP1: 5.6, FIND: 8.5, CAP2: 8.65, CAPOFF: 10.9, SKIP: 10.6, END: 12.0 };
+  // Exterior only: the compartment, the flashlight and the page are our filmed scene, which autoScene(0) opens at END.
+  const CR = { SCREECH: 2.25, IMPACT: 2.55, SLOW1: 3.5, WIDE: 3.5, GLASS: 3.9, AFTER: 5.3, CAP1: 5.6, CAP2: 7.1, CAPOFF: 8.5, SKIP: 7.4, END: 8.8 };
+  const CRASH_CAP2 = 'Rescuers search the wreck by lantern light.';
+  // corner mark while the 3D crash plays: this part is computer-generated (our filmed scene follows)
+  const crashMark = document.createElement('div');
+  crashMark.className = 'crash-mark'; crashMark.setAttribute('aria-hidden', 'true');
+  crashMark.innerHTML = `${animBadge('3D animation', 'sm')}<span>Inside the carriage is our filmed scene</span>`;
+  root.appendChild(crashMark);
   function startCrash() {
     st.crashT = reduced ? 2.05 : 0; st.crashDone = true; st.derail = 0; hideCard();
     snd.whistle();
@@ -718,18 +726,18 @@ export function startLine(root) {
     if (x(CR.GLASS)) snd.glass();
     if (t >= CR.IMPACT) st.derail = clamp((t - CR.IMPACT) / 1.5, 0, 1);
     if (x(CR.AFTER)) snd.aftermath(CR.END - CR.AFTER + 1.5);
-    if (x(CR.FIND)) snd.find();
     const cap = $('#crashCap');
     if (x(CR.CAP1)) { cap.textContent = 'October 1961. The train derails in the dark.'; cap.classList.add('on'); }
-    if (x(CR.CAP2)) { cap.textContent = 'A rescuer\'s lantern catches a page from "The Overcoat."'; }
+    if (x(CR.CAP2)) { cap.textContent = CRASH_CAP2; }
     if (x(CR.CAPOFF)) cap.classList.remove('on');
-    if (t > CR.END) { st.crashT = -1; st.derail = 1; showCard(true); autoScene(0); }
+    crashMark.classList.toggle('on', t < CR.END);
+    if (t > CR.END) { st.crashT = -1; st.derail = 1; crashMark.classList.remove('on'); showCard(true); autoScene(0); }
   }
-  /** Esc / Enter / Space / → (a presenter's clicker) jumps to the held shot of the page. */
+  /** Esc / Enter / Space / → (a presenter's clicker) jumps to the wide aftermath, just before the hand-off to our filmed scene. */
   function skipCrash() {
     if (st.crashT < 0 || st.crashT >= CR.SKIP) return;
     st.crashT = CR.SKIP; st.derail = 1; st.speed = 0; st.shake = 0;
-    const cap = $('#crashCap'); cap.textContent = 'A rescuer\'s lantern catches a page from "The Overcoat."'; cap.classList.add('on');
+    const cap = $('#crashCap'); cap.textContent = CRASH_CAP2; cap.classList.add('on');
   }
   on(window, 'keydown', (e) => { if (st.crashT >= 0 && ['Escape', 'Enter', ' ', 'ArrowRight', 'PageDown'].includes(e.key)) { e.preventDefault(); skipCrash(); } });
   function replayCrash() { st.crashDone = false; st.derail = 0; hideCard(); setTimeout(startCrash, 400); }
@@ -764,18 +772,11 @@ export function startLine(root) {
     return '';
   }
   /* =========================================================
-     HANDS-ON MOMENTS — a small "Try it" at six stations
+     HANDS-ON MOMENTS — a small "Try it" at five stations (never at a filmed moment)
      ========================================================= */
   const TRY_COUNT = STATIONS.filter((s) => s.try).length;
   const SHOE = '<svg viewBox="0 0 96 46" aria-hidden="true"><path d="M4 32c0-9 4-16 11-17l21-2c7 0 11 4 17 8 8 5 21 6 31 8 6 1 8 4 8 8v3H4z" fill="#2a1d18"/><path d="M4 38h88v5H4z" fill="#120c0a"/><path d="M42 17l6 6M48 15l6 6M54 14l5 5" stroke="#a8865f" stroke-width="1.5"/><path d="M12 22c6-3 14-4 22-3" stroke="#4a3830" stroke-width="2" fill="none"/></svg>';
-  const PHONE = '<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="8" y="26" width="48" height="32" rx="6" fill="#1d1b26"/><path d="M4 22c0-8 12-14 28-14s28 6 28 14l-2 6-12-2v-6H18v6L6 28z" fill="#1d1b26"/><circle cx="32" cy="42" r="10" fill="#ece4cf"/><circle cx="32" cy="42" r="3" fill="#1d1b26"/></svg>';
   const RICE_ITEMS = { earth: ['🌱', 'Earth', 'a landowner'], pen: ['🖊️', 'Pen', 'a scholar'], money: ['💵', 'Dollar', 'a businessman'] };
-  const PHONE_LINES = [
-    'It is his mother. Her voice is wrong.',
-    'Ashoke had gone to the hospital in Cleveland, feeling unwell.',
-    'It was a heart attack. He is gone.',
-    'Gogol books the first flight to Cleveland, alone.',
-  ];
   const CERT_DAYS = ['Day 1. No letter from Calcutta yet.', 'Day 2. Still nothing. The nurses keep asking for a name.', 'Day 3. The letter is lost somewhere between Calcutta and Cambridge. You have to write something.'];
   
   function tryHTML(i, s) {
@@ -812,9 +813,6 @@ export function startLine(root) {
       case 'gift': return `<div class="try">${head('Open the present')}
         <div class="giftbook"><button class="hardcover" data-try="gift" ${d ? 'disabled' : ''}>The Short Stories of Nikolai Gogol</button>
         <div class="try-msg" style="margin:0">${d ? 'Onto the shelf it goes. It stays there, unread, for eighteen years.' : 'Click the book. Will fourteen-year-old Gogol read it?'}</div></div></div>`;
-      case 'phone': return `<div class="try">${head('Pick up')}
-        <div class="phone ${d ? '' : 'ringing'}">${PHONE}
-        ${d ? `<div class="lines">${PHONE_LINES.map((l) => `<p class="on">${esc(l)}</p>`).join('')}</div>` : '<button class="btn hot sm" data-try="phone">Answer the phone</button>'}</div></div>`;
     }
     return '';
   }
@@ -840,16 +838,8 @@ export function startLine(root) {
       btn.classList.add('shake'); snd.thump();
       setTimeout(() => { st.done.gift = true; markTry(true); renderCard(false); }, 500);
     }
-    else if (kind === 'phone') {
-      ringStop(); st.done.phone = true; markTry(true); renderCard(false);
-      const lines = ticket.querySelectorAll('.phone .lines p');
-      lines.forEach((p, k) => { p.classList.remove('on'); setTimeout(() => p.classList.add('on'), 400 + k * 1400); });
-    }
   }
   
-  let ringIv = null, rings = 0;
-  function ringStart() { if (ringIv) return; rings = 0; snd.ring(); ringIv = setInterval(() => { if (++rings >= 6) ringStop(); else snd.ring(); }, 2400); }
-  function ringStop() { clearInterval(ringIv); ringIv = null; }
   
   function setupRub() {
     const base = $('#rubBase'), top = $('#rubTop'); if (!base) return;
@@ -888,7 +878,7 @@ export function startLine(root) {
     const i = st.cur, s = STATIONS[i];
     const hasVideo = !!s.video;
     const nowHtml = nowMod.html(i, cardApi());
-    const tabs = [['story', 'Story'], ['analysis', "4 I's"], ...(nowHtml ? [['now', 'Then & Now']] : []), ...(hasVideo ? [['scene', 'Scene']] : [])];
+    const tabs = [['story', 'Story'], ['analysis', "4 I's"], ...(nowHtml ? [['now', 'Then & Now']] : []), ...(hasVideo ? [['scene', 'Our film']] : [])];
     if (!tabs.some(([k]) => k === st.tab)) st.tab = 'story';
     const a = s.analysis;
     let panel = '';
@@ -903,7 +893,8 @@ export function startLine(root) {
       panel = `<div class="analysis"><div class="tagrow"><span class="tag ${a.tag}">${TAG_NAMES[a.tag]}</span></div>
         <h4>In the book</h4><p>${esc(a.text)}</p><h4>Real world</h4><p>${esc(a.world)}</p></div>` + specialHTML(i, s);
     } else {
-      panel = `<div class="scene-box" id="sceneBox">
+      panel = `<div class="mk-head">${filmBadge()}<span class="mk-credit">${esc(GROUP_CREDIT)}</span></div>
+        <div class="scene-box mk-filmframe" id="sceneBox">
           <video id="vid" controls playsinline preload="metadata" src="${esc(s.video)}"></video>
           <div class="clapper" id="clap"><div class="bars"></div><b>Scene: ${esc(s.title)}</b><small>Our acted scene goes here · add ${esc(s.video)}</small></div>
         </div>
@@ -937,7 +928,6 @@ export function startLine(root) {
     mountCardMods(i);
     changed();
     setupRub();
-    if (s.try === 'phone' && !st.done.phone && st.tab === 'story') ringStart(); else ringStop();
     const vid = $('#vid');
     if (vid) {
       const clap = $('#clap');
@@ -959,7 +949,7 @@ export function startLine(root) {
   }
 
   function showCard(fresh) { renderCard(fresh); requestAnimationFrame(() => ticket.classList.remove('away')); }
-  function hideCard() { ringStop(); ticket.classList.add('away'); const v = $('#vid'); if (v) v.pause(); }
+  function hideCard() { ticket.classList.add('away'); const v = $('#vid'); if (v) v.pause(); }
   
   function vote(k) {
     const i = st.cur, s = STATIONS[i]; if (!s.poll || st.moving || !(k >= 0 && k < s.poll.options.length)) return;
@@ -1000,7 +990,7 @@ export function startLine(root) {
      ========================================================= */
   const rail = $('#rail');
   rail.innerHTML = STATIONS.map((s, i) => `<button class="stop" data-i="${i}" style="--c:${NAME_COLORS[s.name]}" title="${esc(s.title)}">
-    ${s.video ? '<span class="film">SCENE</span>' : ''}<i class="tagdot" style="background:${TAG_COLORS[s.analysis.tag]}"></i>${esc(s.year.replace('Late 1990s', "late '90s"))}</button>`).join('');
+    ${railMarks(i)}<i class="tagdot" style="background:${TAG_COLORS[s.analysis.tag]}"></i>${esc(s.year.replace('Late 1990s', "late '90s"))}</button>`).join('');
   on(rail, 'click', (e) => { const b = e.target.closest('.stop'); if (b) travelTo(+b.dataset.i); });
   function markRail(target) {
     rail.querySelectorAll('.stop').forEach((b, i) => { b.classList.toggle('current', i === target); b.classList.toggle('visited', st.visited.has(i)); });
@@ -1292,7 +1282,7 @@ export function startLine(root) {
   function fpHTML(i, s) {
     if (!s.fp) return '';
     const info = FP_INFO[s.fp], done = st.done['fp-' + s.fp];
-    return `<button class="fp-tile" data-act="fp"><span class="fp-eye" aria-hidden="true"></span><span class="fp-txt"><b>Step inside · ${esc(info.title)}</b><span>${esc(info.blurb)}</span></span>${done ? '<i class="fp-done" aria-label="explored">✓</i>' : '<kbd class="fp-key">E</kbd>'}</button>`;
+    return `<button class="fp-tile" data-act="fp"><span class="fp-eye" aria-hidden="true"></span><span class="fp-txt">${animBadge('3D · computer-generated', 'xs')}<b>Step inside · ${esc(info.title)}</b><span>${esc(info.blurb)}</span></span>${done ? '<i class="fp-done" aria-label="explored">✓</i>' : '<kbd class="fp-key">E</kbd>'}</button>`;
   }
   async function openFP(kind) {
     if (fpCtl || !kind || st.moving) return;
@@ -1343,11 +1333,12 @@ export function startLine(root) {
      SCENE POP-UP: when the train reaches a station with a filmed scene, the video opens and plays by itself
      ========================================================= */
   const scenePop = document.createElement('div');
-  scenePop.className = 'overlay scene-pop'; scenePop.hidden = true;
+  scenePop.className = 'overlay scene-pop mk-cinema'; scenePop.hidden = true;
   scenePop.innerHTML = `<div class="sp-frame" role="dialog" aria-labelledby="spTitle">
-      <div class="sp-head"><span class="sp-kicker">Our scene</span><h2 id="spTitle"></h2><button class="sp-close" aria-label="Close the scene">Skip ✕</button></div>
-      <video class="sp-video" playsinline controls preload="auto"></video>
+      <div class="sp-head">${filmBadge('Filmed by our group', 'md')}<h2 id="spTitle"></h2><button class="sp-close" aria-label="Close the scene">Skip ✕</button></div>
+      <div class="mk-filmframe sp-reel"><video class="sp-video" playsinline controls preload="auto"></video></div>
       <div class="sp-bar"><i></i></div>
+      <p class="sp-credit">${esc(GROUP_CREDIT)} · live action, not animation</p>
     </div>`;
   root.appendChild(scenePop);
   const spVideo = scenePop.querySelector('.sp-video'), spBar = scenePop.querySelector('.sp-bar i');
@@ -1398,7 +1389,7 @@ export function startLine(root) {
     disposed = true;
     cancelAnimationFrame(rafId);
     offs.forEach((off) => off());
-    ringStop(); clearInterval(typeIv);
+    clearInterval(typeIv);
     if (snd.ctx) snd.ctx.close().catch(() => {});
     if (bc) bc.close();
     if (music) music.dispose();

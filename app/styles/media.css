@@ -1,0 +1,99 @@
+/* FILMED vs GENERATED: one visual language (lib/media.ts). Every class starts with mk- (plus the few
+   places that host the badges: rail stops, scene pop-up, crash mark, presenter).
+   FILMED  = warm amber on film base, sprocket holes along the edges, a film-frame icon.
+   ANIMATED = cool blue gradient, a crisp cyan rim, a wireframe-cube icon. */
+
+:root {
+  --mk-film-base: #17110b;
+  --mk-film-ink: #ffd690;
+  --mk-film-edge: rgba(242, 163, 58, .6);
+  --mk-film-hole: rgba(255, 226, 180, .62);
+  --mk-anim-a: #10305c;
+  --mk-anim-b: #1d5a92;
+  --mk-anim-ink: #d4f0ff;
+  --mk-anim-edge: rgba(127, 211, 255, .7);
+}
+
+.mk {
+  display: inline-flex; align-items: center; gap: .4em; vertical-align: middle; flex: none; width: max-content;
+  font-family: var(--mono); font-weight: 700; text-transform: uppercase; letter-spacing: .1em; line-height: 1; white-space: nowrap;
+  border-radius: 4px; box-sizing: border-box;
+}
+.mk span { font: inherit; color: inherit; letter-spacing: inherit; }
+.mk-ico { width: 1.25em; height: 1.25em; flex: none; display: block; }
+.mk-xs { font-size: .5625rem; padding: 3px 4px; gap: .3em; border-radius: 3px; }
+.mk-sm { font-size: .6875rem; padding: 5px 8px; }
+.mk-md { font-size: .8125rem; padding: 7px 11px; }
+
+/* FILMED: a strip of film. Two rows of sprocket holes are painted on the top and bottom edges. */
+.mk-film {
+  color: var(--mk-film-ink); border: 1px solid var(--mk-film-edge);
+  background:
+    radial-gradient(circle, var(--mk-film-hole) 0 .9px, transparent 1.3px) 2px 1px / 6px 3px repeat-x,
+    radial-gradient(circle, var(--mk-film-hole) 0 .9px, transparent 1.3px) 2px calc(100% - 1px) / 6px 3px repeat-x,
+    var(--mk-film-base);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .4), inset 0 0 0 1px rgba(0, 0, 0, .35);
+}
+.mk-film.mk-sm, .mk-film.mk-md { padding-top: 7px; padding-bottom: 7px; }
+/* too small for round holes: dashed top and bottom edges read as sprockets */
+.mk-film.mk-xs { background: var(--mk-film-base); border-top: 2px dashed var(--mk-film-hole); border-bottom: 2px dashed var(--mk-film-hole); }
+.mk-film.mk-md { padding-top: 9px; padding-bottom: 9px; }
+
+/* GENERATED: cool, digital */
+.mk-anim {
+  color: var(--mk-anim-ink); border: 1px solid var(--mk-anim-edge);
+  background: linear-gradient(135deg, var(--mk-anim-a), var(--mk-anim-b));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .35), 0 0 10px -2px rgba(127, 211, 255, .45), inset 0 1px 0 rgba(255, 255, 255, .14);
+}
+
+/* ---------- timeline rail: tiny marks above each stop ---------- */
+.mk-rail { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); display: flex; gap: 2px; pointer-events: none; z-index: 1; }
+.mk-rail .mk-xs { font-size: .5rem; padding: 3px 3px; letter-spacing: .08em; }
+.mk-rail .mk-ico { width: 1.15em; height: 1.15em; }
+.stop.current .mk-rail .mk { box-shadow: 0 0 0 1px rgba(255, 255, 255, .35), 0 3px 10px rgba(0, 0, 0, .5); }
+
+/* ---------- the ticket's "Our film" tab ---------- */
+.mk-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 2px 0 10px; }
+.mk-credit { font-family: var(--mono); font-size: var(--t-2xs); letter-spacing: .04em; color: var(--ink-soft); }
+
+/* a frame of film around live action: sprocket holes down both sides */
+.mk-filmframe { position: relative; padding: 0 16px; background: #0e0b08; border-radius: 10px; }
+.mk-filmframe::before, .mk-filmframe::after {
+  content: ""; position: absolute; top: 6px; bottom: 6px; width: 6px; border-radius: 2px; pointer-events: none;
+  background: repeating-linear-gradient(180deg, var(--mk-film-hole) 0 6px, transparent 6px 14px);
+}
+.mk-filmframe::before { left: 5px; }
+.mk-filmframe::after { right: 5px; }
+.scene-box.mk-filmframe { background: #0e0b08; }
+.scene-box.mk-filmframe video, .scene-box.mk-filmframe .clapper { left: 16px; right: 16px; width: auto; }
+.scene-box.mk-filmframe video { position: absolute; top: 0; bottom: 0; height: 100%; }
+
+/* ---------- the scene pop-up: a warm little cinema ---------- */
+.scene-pop.mk-cinema { background: radial-gradient(ellipse 80% 70% at 50% 45%, rgba(40, 24, 8, .9), rgba(8, 5, 2, .96) 75%); }
+.mk-cinema .sp-head { align-items: center; }
+.mk-cinema .sp-reel { padding: 0 20px; border-radius: 12px; box-shadow: 0 30px 80px rgba(0, 0, 0, .7), 0 0 0 1px rgba(242, 163, 58, .25); }
+.mk-cinema .sp-reel::before, .mk-cinema .sp-reel::after { width: 8px; top: 8px; bottom: 8px; background: repeating-linear-gradient(180deg, var(--mk-film-hole) 0 8px, transparent 8px 18px); }
+.mk-cinema .sp-reel::before { left: 6px; } .mk-cinema .sp-reel::after { right: 6px; }
+.mk-cinema .sp-video { display: block; border-radius: 0; box-shadow: none; }
+.sp-credit { margin: 0; font-family: var(--mono); font-size: var(--t-xs); letter-spacing: .06em; color: rgba(255, 214, 144, .8); text-align: center; }
+
+/* ---------- 3D crash: a corner mark while the generated part plays ---------- */
+.crash-mark {
+  position: absolute; z-index: 33; left: 16px; top: calc(env(safe-area-inset-top, 0px) + 72px);
+  display: flex; flex-direction: column; align-items: flex-start; gap: 5px; pointer-events: none;
+  opacity: 0; transform: translateY(-6px); transition: opacity .6s, transform .6s var(--ease-out);
+}
+.crash-mark.on { opacity: 1; transform: none; }
+.crash-mark > span { font-family: var(--mono); font-size: var(--t-2xs); letter-spacing: .06em; color: var(--mk-anim-ink); text-shadow: 0 1px 6px #000; }
+
+/* ---------- first-person tile + room badge ---------- */
+.fp-txt .mk { margin-bottom: 3px; }
+.fp-txt .mk span { font-size: inherit; color: inherit; line-height: 1; }
+.fp-badge .mk { margin-left: 8px; }
+
+/* ---------- presenter remote ---------- */
+.pr-media { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 2px; }
+.pr-st .mk-rail { position: static; transform: none; margin-top: 3px; justify-content: flex-start; }
+.pr-st .mk span { font-size: inherit; color: inherit; line-height: 1; }
+
+@media (prefers-reduced-motion: reduce) { .crash-mark { transition: none; } }
