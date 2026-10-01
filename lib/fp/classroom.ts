@@ -198,7 +198,7 @@ export function buildClassroom(ctx: Ctx): Room {
   const skins = [0xf1c9a5, 0xe0ac86, 0xc68a62, 0x8d5a3b, 0x5e3a28, 0xf5d3b8, 0xd29a74];
   const tops = [0x1f8a8a, 0xc23d7a, 0xd9a431, 0x3b5fa8, 0x8a2e3b, 0x2f6b43, 0xe86a3a, 0x6a4c9c, 0x4d8fc4, 0xa0a4ad, 0xf0e6d2, 0x2b2f3a];
   const hairs = [0x2b1a10, 0x5a3a1e, 0xc9a25a, 0x14100d, 0x8a4a22, 0x3a2616, 0xe0c080];
-  const styles: ('short' | 'long' | 'bob' | 'curly')[] = ['short', 'long', 'bob', 'short', 'curly', 'long', 'short', 'bob'];
+  const styles: ('short' | 'long' | 'bob' | 'curly' | 'part')[] = ['short', 'long', 'bob', 'part', 'curly', 'long', 'short', 'bob'];
   type Kid = { f: Figure; x: number; z: number; delay: number; ty: number; hy: number; hp: number; idle: number; writer: boolean };
   const kids: Kid[] = [];
   seats.forEach((s, i) => {
@@ -207,6 +207,8 @@ export function buildClassroom(ctx: Ctx): Room {
       skin: skins[Math.floor(R() * skins.length)], top: tops[i % tops.length], bottom: 0x2d3e5e,
       hair: hairs[Math.floor(R() * hairs.length)], hairStyle: styles[Math.floor(R() * styles.length)],
       seated: true, legs: false, shoulders: 0.9 + R() * 0.2, scale: 0.94 + R() * 0.08,
+      garment: R() < 0.6 ? 'sweater' : 'shirt', collar: R() < 0.5 ? 0xece6d8 : undefined,
+      eyes: R() < 0.7 ? 0x3a2414 : (R() < 0.5 ? 0x3d5a78 : 0x4a5a32),
     });
     f.root.position.set(s.x + (R() - 0.5) * 0.06, 0, s.z + 0.02);
     f.root.rotation.y = Math.PI;
@@ -230,7 +232,7 @@ export function buildClassroom(ctx: Ctx): Room {
   pack.rotation.y = 0.3;
 
   /* ---------- the teacher ---------- */
-  const teacher = figure(kit, { skin: 0xe8b894, top: 0x6b4a2e, bottom: 0x4a4b52, hair: 0x5a4632, hairStyle: 'short', collar: 0xe8e4da, glasses: true, shoulders: 1.08 });
+  const teacher = figure(kit, { skin: 0xe8b894, top: 0x6b4a2e, bottom: 0x4a4b52, hair: 0x5a4632, hairStyle: 'part', collar: 0xe8e4da, glasses: true, shoulders: 1.08, garment: 'shirt' });
   teacher.root.position.set(-0.6, 0, -3.7); room.add(teacher.root);
   const tieM = kit.std(0x7a1f2a, 0.6);
   kit.box(0.05, 0.3, 0.02, tieM, teacher.torso, 0, 0.4, 0.13, false);

@@ -198,7 +198,7 @@ export function buildCar(ctx: Ctx): Room {
   kit.cyl(0.03, 0.03, 0.3, trimM, car, -0.38, 0.93, -0.58, 8, false).rotation.x = 1.1;
 
   /* ---------- Ashoke ---------- */
-  const ash = figure(kit, { skin: 0x7a4e34, top: 0x4b3c33, bottom: 0x2a2a30, hair: 0x2e2c2e, hairStyle: 'short', seated: true, collar: 0xd8d2c4, shoulders: 1.05 });
+  const ash = figure(kit, { skin: 0x7a4e34, top: 0x4b3c33, bottom: 0x2a2a30, hair: 0x4a4644, hairStyle: 'part', seated: true, collar: 0xd8d2c4, shoulders: 1.05, glasses: true, garment: 'shirt' });
   ash.root.position.set(-0.38, 0.02, 0.2); ash.root.rotation.y = Math.PI; car.add(ash.root);
   ash.torso.rotation.x = -0.14;
   ash.armL.rotation.set(-0.95, 0, -0.22); ash.foreL.rotation.x = -0.75;
