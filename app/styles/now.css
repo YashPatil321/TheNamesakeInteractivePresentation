@@ -1,0 +1,59 @@
+/* "Then & Now" tab: book event beside a real news clipping. */
+.now { container-type: inline-size; }
+.panel .now-intro { margin: 0 0 12px; font-size: var(--t-sm); color: var(--ink-soft); font-style: italic; }
+
+.now-grid { display: grid; grid-template-columns: 1fr 30px 1fr; align-items: stretch; gap: 0; }
+@container (min-width: 380px) and (max-width: 560px) {
+  .panel .now-grid p { font-size: .9rem; line-height: 1.45; }
+  .now-then, .now-clip { padding: 10px 10px 12px; }
+  .now .now-head { font-size: 1rem; }
+  .now h4 { font-size: 1.02rem; }
+  .now-mast { font-size: var(--t-2xs); }
+}
+@container (max-width: 379px) {
+  .now-grid { grid-template-columns: 1fr; }
+  .now-link { flex-direction: row !important; padding: 8px 0 !important; }
+  .now-type { writing-mode: horizontal-tb !important; transform: none !important; }
+  .now-arrow { transform: rotate(90deg); }
+}
+
+.now-kicker { font-family: var(--mono); font-size: var(--t-2xs); letter-spacing: .14em; text-transform: uppercase; color: var(--stamp); font-weight: 700; margin-bottom: 4px; }
+.now h4 { margin: 0 0 6px; font-family: var(--display); font-weight: 400; font-size: 1.15rem; line-height: 1.2; color: var(--ink); }
+.panel .now p { font-size: .98rem; line-height: 1.5; margin: 0 0 10px; max-width: none; }
+
+/* left: the book, on ticket paper */
+.now-then { padding: 12px 14px; border: 1.5px dashed rgba(29, 27, 38, .35); border-radius: 6px; background: rgba(246, 240, 225, .55); }
+.now-src { font-family: var(--mono); font-size: var(--t-xs); color: var(--ink-soft); border-top: 1px solid var(--rule); padding-top: 6px; }
+
+/* middle: connection strip */
+.now-link { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 0 4px; }
+.now-type { font-family: var(--mono); font-size: var(--t-2xs); letter-spacing: .12em; text-transform: uppercase; font-weight: 700; color: var(--paper-hi); background: var(--stamp); padding: 4px 6px; border-radius: 3px; writing-mode: vertical-rl; transform: rotate(180deg); }
+.now-arrow { width: 16px; height: 2px; background: var(--ink-soft); position: relative; }
+.now-arrow::after { content: ''; position: absolute; right: -6px; top: -5px; border-style: solid; border-width: 6px 0 6px 8px; border-color: transparent transparent transparent var(--ink-soft); }
+
+/* right: a newspaper clipping */
+.now-clip {
+  position: relative; padding: 12px 14px 14px; color: #1a1712;
+  background: #f4efe3 repeating-linear-gradient(0deg, transparent 0 23px, rgba(60, 50, 30, .035) 23px 24px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, .05), 0 6px 14px -8px rgba(20, 16, 8, .45);
+  transform: rotate(.6deg);
+  clip-path: polygon(0 2%, 4% 0, 12% 1.5%, 22% 0, 33% 1%, 45% 0, 58% 1.5%, 70% 0, 82% 1%, 93% 0, 100% 1.5%, 100% 98%, 95% 100%, 84% 98.5%, 72% 100%, 60% 98.8%, 47% 100%, 35% 98.5%, 22% 100%, 10% 98.6%, 0 100%);
+}
+.now-mast { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; border-top: 3px double #1a1712; border-bottom: 1px solid #1a1712; padding: 4px 0; margin-bottom: 8px; font-family: var(--mono); font-size: var(--t-xs); text-transform: uppercase; letter-spacing: .06em; font-weight: 700; }
+.now-mast time { font-weight: 400; }
+.now-kind { font-family: var(--mono); font-size: var(--t-2xs); text-transform: uppercase; letter-spacing: .1em; color: #5a5242; margin: -2px 0 6px; }
+.now .now-head { font-family: Georgia, "Times New Roman", serif; font-weight: 700; font-size: 1.12rem; line-height: 1.22; color: #111; }
+.now-read { display: inline-block; font-family: var(--mono); font-size: var(--t-sm); font-weight: 700; color: var(--stamp); text-decoration: underline; text-underline-offset: 3px; }
+.now-read:hover, .now-read:focus-visible { color: #8a2519; }
+.now-read:focus-visible { outline: 2px solid var(--stamp); outline-offset: 3px; }
+.now-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.panel .now-conn { margin: 14px 0 0; padding: 10px 12px; border-left: 4px solid var(--stamp); background: rgba(184, 56, 42, .07); font-size: .98rem; }
+.now-conn b { display: block; font-family: var(--mono); font-size: var(--t-xs); text-transform: uppercase; letter-spacing: .1em; color: var(--stamp); margin-bottom: 2px; }
+
+.now-stat { display: flex; align-items: center; gap: 12px; margin-top: 12px; padding: 10px 12px; border: 1.5px solid var(--ink); border-radius: 6px; }
+.now-stat b { font-family: var(--display); font-weight: 400; font-size: 2rem; color: var(--stamp); line-height: 1; }
+.now-stat span { font-size: .95rem; line-height: 1.4; color: var(--ink); }
+.now-stat em { font-style: normal; font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) { .now-clip { transform: none; } }
