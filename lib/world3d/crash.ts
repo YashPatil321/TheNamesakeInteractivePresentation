@@ -5,9 +5,12 @@
 // right after this sequence ends (autoScene(0)), so none of that is animated here.
 //   A 0.00  low tracking shot beside the racing locomotive (clacks accelerate)
 //   B 1.30  high, wide exterior: the whole train racing across the dark plain
-//   C 2.25  screech; low static shot ahead of the train; impact at 2.55 drops into slow motion
-//   D 3.50  hard cut to a wide shot at full speed: loco ploughs off, coach jackknifes, van rolls; lights flicker and die
-//   E 5.30  wide aftermath in the dark: smoke, embers, distant rescuers' lanterns; slow push-in, fade (8.8)
+//   C 2.25  screech: wheels lock in a fountain of sparks; low shot ahead of the train past a buckled rail;
+//           impact at 2.55: white flash, the rail is torn out, dust/ballast/steam burst, deep slow motion
+//   D 3.50  hard cut to a wide shot at full speed: loco ploughs off, coach jackknifes, van rolls;
+//           the windows flicker and go dark one by one; each landing kicks the camera
+//   E 5.30  wide aftermath under the moon: smoke drifting over the wreck lit from below by the firebox,
+//           steam venting, embers, distant rescuers' lanterns; slow push-in, fade (END)
 // The train's own update() poses the cars on the rails; this module overrides loco/car transforms afterwards
 // (and carries the instanced wheels along), so it keeps working when the train model is replaced.
 import * as THREE from 'three';
@@ -16,8 +19,8 @@ import { clamp, lerp, smooth, paint, place, merge } from './kit';
 import { Puffs, Glows, Sparks, Debris } from './fx';
 
 /** Crash clock marks (seconds of WorldFrame.crashT). lib/engine.ts keeps its sound/caption cues in step with these. */
-export const CRASH = { RUN2: 1.3, SCREECH: 2.25, IMPACT: 2.55, SLOW0: 2.6, SLOW1: 3.5, WIDE: 3.5, AFTER: 5.3, FADE: 7.9, END: 8.8 } as const;
-const SLOW_RATE = 0.3; // time dilation during the impact
+export const CRASH = { RUN2: 1.3, SCREECH: 2.25, IMPACT: 2.55, SLOW0: 2.6, SLOW1: 3.5, WIDE: 3.5, AFTER: 5.3, FADE: 8.6, END: 9.6 } as const;
+const SLOW_RATE = 0.24; // time dilation during the impact
 const V = 24; // train speed before the derail, world units / s
 const LOCO_REST = { x: 2.5, z: 3.0 }, COACH_REST = { x: -5.9, z: 1.0 }, VAN_REST = { x: -14.5, z: 1.9 };
 
@@ -64,14 +67,41 @@ export function createCrash(scene: THREE.Scene, train: TrainParts, opts: CrashOp
   const keep = <T extends { dispose(): void }>(d: T) => { disposables.push(d); return d; };
 
   /* ---------- particles ---------- */
-  const sparks = keep(new Sparks(scene, opts.uScale, 900));
-  const dust = keep(new Puffs(scene, 300));
+  const sparks = keep(new Sparks(scene, opts.uScale, 1400));
+  const dust = keep(new Puffs(scene, 380));
   dust.mat.uniforms.uScale = opts.uScale;
   dust.mat.uniforms.uLit = opts.puffs.mat.uniforms.uLit;
   dust.mat.uniforms.uAmb = opts.puffs.mat.uniforms.uAmb;
-  const debris = keep(new Debris(scene, 64));
-  const glows = keep(new Glows(scene, 8)); // 0..2 lanterns, 3 fire, 5 lead lantern halo
+  const debris = keep(new Debris(scene, 120));
+  const glows = keep(new Glows(scene, 8)); // 0..2 lanterns, 3 fire, 4 impact flash, 5 lead lantern halo
   glows.mat.uniforms.uScale = opts.uScale;
+  // the aftermath smoke has its own lighting: moonlit from above, firebox-orange from below
+  const smoke = keep(new Puffs(scene, 140));
+  smoke.mat.uniforms.uScale = opts.uScale;
+  const MOON_TOP = new THREE.Color(0.45, 0.52, 0.72), FIRE_BOT = new THREE.Color(0.55, 0.22, 0.08);
+  // halos on the lit windows, so they can go dark one at a time (the glass material is shared by every car)
+  const WIN: [number, number, number, number][] = [ // unit, local x, y, z
+    [0, -2.9, 3.45, 1.15], [0, 4.6, 2.9, 0], // loco cab, headlamp
+    ...[-3.45, -2.07, -0.69, 0.69, 2.07, 3.45].map((x) => [1, x, 2.86, 1.12] as [number, number, number, number]),
+    [2, -3.4, 2.95, 1.2], [2, 3.4, 2.95, 1.2],
+  ];
+  const WIN_DIE = [0.04, 0.32, 0.55, 0.9, 0.42, 1.25, 0.72, 1.55, 1.3, 1.9]; // sim seconds after impact
+  const winGlow = keep(new Glows(scene, WIN.length));
+  winGlow.mat.uniforms.uScale = opts.uScale;
+
+  /* ---------- the buckled rail: a kinked length of rail ahead of the train, torn out at the impact ---------- */
+  const bentPts: THREE.Vector3[] = [];
+  for (let i = 0; i <= 12; i++) { const u = i / 12, b = Math.sin(u * Math.PI); bentPts.push(new THREE.Vector3(-2 + 4 * u, 0.28 * b * b, 0.45 * b * (1 + 0.4 * Math.sin(u * 9)))); }
+  const bentGeo = keep(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(bentPts), 40, 0.07, 6, false));
+  const bentMat = keep(new THREE.MeshStandardMaterial({ color: '#8a8580', roughness: 0.35, metalness: 0.9, emissive: '#ff5a10', emissiveIntensity: 0 }));
+  const bent = new THREE.Mesh(bentGeo, bentMat);
+  bent.visible = false; bent.castShadow = true; scene.add(bent);
+  const BENT_X = 7.1; // root-local x of the kink, relative to the loco's impact position (its nose is at +4.8)
+
+  /* ---------- moonlight: a cool key that comes up on the aftermath so the smoke and the wreck read ---------- */
+  const moon = new THREE.DirectionalLight(0x8ea4d8, 0);
+  moon.castShadow = false; moon.position.set(-30, 40, 30);
+  scene.add(moon, moon.target);
 
   /* ---------- the rescuers' lantern (the only real light added) ---------- */
   const lantern = new THREE.SpotLight(0xffd08a, 0, 40, 0.42, 0.65, 1.3);
@@ -98,12 +128,12 @@ export function createCrash(scene: THREE.Scene, train: TrainParts, opts: CrashOp
   const units: THREE.Object3D[] = [train.loco, ...train.cars.slice(0, 2)];
   const rest = units.map(() => new THREE.Matrix4()), delta = units.map(() => new THREE.Matrix4());
   const mA = new THREE.Matrix4(), mB = new THREE.Matrix4(), mInv = new THREE.Matrix4(), vS = new THREE.Vector3();
-  const v1 = new THREE.Vector3(), camP = new THREE.Vector3(), camL = new THREE.Vector3();
+  const v1 = new THREE.Vector3(), v2 = new THREE.Vector3(), camP = new THREE.Vector3(), camL = new THREE.Vector3();
   const lastP = new THREE.Vector3(), lastQ = new THREE.Quaternion(), qTmp = new THREE.Quaternion();
   const lampCol0 = lampLight.color.clone(), FIRE = new THREE.Color(1, 0.5, 0.2);
   let wheelUnit: Int8Array | null = null, wheelMapped = false;
   const S = { prevTau: -1, prevCt: -1, tx: 0, ct: -1, tau: -1, s: -1, on: false, wasOn: false, endAt: -1, lastFov: 34,
-    fire: 0, dustAcc: 0, emitSp: 0, emitDust: 0, emitEmber: 0, emitHiss: 0, restored: true };
+    fire: 0, dustAcc: 0, emitSp: 0, emitDust: 0, emitEmber: 0, emitHiss: 0, emitSmoke: 0, kick: 0, restored: true };
 
   function slideTime(finalX: number, restX: number) { // time to decelerate uniformly from V to 0 so the unit ends at finalX
     return (2 * (finalX - (restX + (LOCO_REST.x - (V * 1.7) / 2)))) / V;
@@ -212,10 +242,12 @@ export function createCrash(scene: THREE.Scene, train: TrainParts, opts: CrashOp
     const R = Math.random;
     if (i === 0) { // impact: sleepers and rail torn up under the front, a spray of sparks, a wall of dust
       const f = unitPoint(0, 4.2, 0.3, 0, v1);
-      for (let k = 0; k < 9; k++) debris.spawn(f.x + R() * 2, 0.3, f.z + (R() - 0.5) * 2, 6 + R() * 10, 3 + R() * 6, 1 + R() * 6, 2.4, 0.16, 0.26, k % 3 ? '#4a3a2c' : '#5a4838');
-      for (let k = 0; k < 3; k++) debris.spawn(f.x + R(), 0.6, f.z + (R() - 0.5), 8 + R() * 6, 4 + R() * 4, 2 + R() * 4, 3.2, 0.12, 0.1, '#8a8e96');
-      for (let k = 0; k < 160; k++) sparks.spawn(f.x + (R() - 0.5) * 2, 0.4 + R() * 0.8, f.z + (R() - 0.5) * 2, 8 + R() * 16, 1 + R() * 7, (R() - 0.3) * 12, 0.5 + R() * 0.9, 9.8, 0.14, 1.2);
-      for (let k = 0; k < 26; k++) dust.spawn(f.x - R() * 8, 0.5 + R(), f.z + (R() - 0.3) * 4, 3 + R() * 6, 1 + R() * 2, R() * 4, 2.2, 7, 3 + R() * 2.5, 0.55, 0.7);
+      for (let k = 0; k < 12; k++) debris.spawn(f.x + R() * 3, 0.3, f.z + (R() - 0.5) * 2.4, 4 + R() * 9, 3 + R() * 8, (R() - 0.65) * 8, 2.4, 0.16, 0.26, k % 3 ? '#4a3a2c' : '#5a4838');
+      for (let k = 0; k < 5; k++) debris.spawn(f.x + R(), 0.6, f.z + (R() - 0.5), 8 + R() * 6, 4 + R() * 5, 2 + R() * 5, 1.6 + R() * 2, 0.12, 0.1, '#8a8e96');
+      for (let k = 0; k < 24; k++) debris.spawn(f.x + R() * 3, 0.35, f.z + (R() - 0.5) * 2, (R() - 0.2) * 12, 4 + R() * 7, (R() - 0.4) * 10, 0.14, 0.12, 0.14, R() < 0.5 ? '#6e675e' : '#8b8378'); // ballast stones
+      for (let k = 0; k < 260; k++) sparks.spawn(f.x + (R() - 0.5) * 2, 0.4 + R() * 0.8, f.z + (R() - 0.5) * 2, 6 + R() * 18, 1 + R() * 9, (R() - 0.3) * 14, 0.5 + R() * 1.1, 9.8, 0.15, 1.3);
+      for (let k = 0; k < 36; k++) { const a = R() * Math.PI * 2, sp = 3 + R() * 6; dust.spawn(f.x - R() * 6, 0.4 + R(), f.z + (R() - 0.3) * 3, Math.cos(a) * sp + 3, 0.8 + R() * 2.5, Math.sin(a) * sp, 2.2, 7.5, 3.5 + R() * 3, 0.6, 0.62); } // a ring of dust
+      for (let k = 0; k < 14; k++) { const p = unitPoint(0, -1 + R() * 4, 2.6, (R() - 0.5) * 1.6, v2); dust.spawn(p.x, p.y, p.z, (R() - 0.5) * 3, 3 + R() * 4, 1 + R() * 3, 1.6, 6, 2.6 + R() * 1.5, 0.55, 1.05); } // the boiler bursts: white steam
     } else if (i === 1) { // coach windows burst
       for (let k = 0; k < 10; k++) { const p = unitPoint(1, (R() - 0.5) * 7, 2.9, 1.2, v1); debris.spawn(p.x, p.y, p.z, (R() - 0.3) * 4, 2 + R() * 3, 2 + R() * 4, 0.3, 0.02, 0.22, '#c8ccd2'); }
     } else if (i === 2 || i === 3) { // loco / van hit the ground on their sides
@@ -235,14 +267,17 @@ export function createCrash(scene: THREE.Scene, train: TrainParts, opts: CrashOp
     if (ds <= 0) return;
     // screeching wheels just before the impact, then the loco scraping along on its side
     if (s > -0.32 && s < T_SLIDE[0]) {
-      const rate = s < 0 ? 260 : 420 * (1 - s / T_SLIDE[0]);
+      const rate = s < 0 ? 420 * (1 + 2 * smooth(-0.32, 0, s)) : 520 * (1 - s / T_SLIDE[0]);
       S.emitSp += rate * ds;
       while (S.emitSp >= 1) {
         S.emitSp -= 1;
         if (s < 0) {
           const wx = [-3.35, -1.75, -0.15, 2.15, 3.35][(R() * 5) | 0], sd = R() < 0.5 ? 1 : -1;
           const p = unitPoint(0, wx, 0.6, sd * 0.74, v1);
-          sparks.spawn(p.x, p.y, p.z, -4 - R() * 10, 1 + R() * 4, sd * (R() * 3), 0.25 + R() * 0.5, 9.8, 0.09, 1);
+          sparks.spawn(p.x, p.y, p.z, -4 - R() * 12, 1 + R() * 5, sd * (R() * 3.5), 0.25 + R() * 0.6, 9.8, 0.1, 1.1);
+          if (R() < 0.45) { // the carriages' locked wheels too
+            const k = 1 + ((R() * 2) | 0); if (units[k]) { const q = unitPoint(k, R() < 0.5 ? -3.2 : 3.2, 0.6, sd * 0.74, v2); sparks.spawn(q.x, q.y, q.z, -3 - R() * 9, 0.8 + R() * 3, sd * R() * 2.5, 0.2 + R() * 0.45, 9.8, 0.08, 0.95); }
+          }
         } else {
           const p = unitPoint(0, -4.5 + R() * 9, 0.2, 1.1, v1);
           sparks.spawn(p.x, Math.max(0.1, p.y), p.z, -6 - R() * 12 + V * (1 - s / T_SLIDE[0]) * 0.4, 1.5 + R() * 6, (R() - 0.2) * 7, 0.35 + R() * 0.8, 9.8, 0.12, 1.15);
@@ -271,11 +306,20 @@ export function createCrash(scene: THREE.Scene, train: TrainParts, opts: CrashOp
         const p = unitPoint(0, -3.2 + R() * 1.4, 1.4, 0, v1);
         sparks.spawn(p.x + (R() - 0.5), Math.max(0.3, p.y), p.z + (R() - 0.5), (R() - 0.5) * 0.8, 0.8 + R() * 1.4, (R() - 0.5) * 0.8, 2.5 + R() * 3, -0.25, 0.1, 0.55, 1.8);
       }
-      S.emitHiss += 5 * ds;
-      while (S.emitHiss >= 1) {
+      S.emitHiss += (s < 2.5 ? 14 : 7) * ds;
+      while (S.emitHiss >= 1) { // a ruptured steam pipe venting sideways out of the boiler, then rising
         S.emitHiss -= 1;
         const p = unitPoint(0, 0.5 + R() * 2.5, 2.4, 0, v1);
-        dust.spawn(p.x, p.y, p.z, (R() - 0.5) * 0.8, 1.1 + R() * 0.8, 0.3 + R() * 0.6, 1.2, 6, 4.5 + R() * 2, 0.32, 0.85);
+        dust.spawn(p.x, p.y, p.z, (R() - 0.5) * 2.5, 1.4 + R() * 1.2, 1.5 + R() * 2.5, 0.9, 5.5, 3.2 + R() * 2, 0.42, 1.05);
+      }
+    }
+    // the wreck burning: heavy smoke rolling off the firebox, drifting over the wreck on the night breeze
+    if (s > 1.0) {
+      S.emitSmoke += (s < 3 ? 12 : 8) * ds;
+      while (S.emitSmoke >= 1) {
+        S.emitSmoke -= 1;
+        const p = unitPoint(0, -3.4 + R() * 2, 1.2, 0, v1);
+        smoke.spawn(p.x + (R() - 0.5), Math.max(0.8, p.y + 0.3), p.z + (R() - 0.5), -1.1 - R() * 0.8, 0.8 + R() * 0.7, 0.4 + R() * 0.5, 2.8, 4, 6 + R() * 3, 0.62, 1.25);
       }
     }
   }
@@ -306,12 +350,14 @@ export function createCrash(scene: THREE.Scene, train: TrainParts, opts: CrashOp
   function hideAll() {
     sparks.lines.visible = sparks.heads.visible = false;
     dust.points.visible = false; debris.visible = false; glows.points.visible = false;
+    smoke.points.visible = false; winGlow.points.visible = false; bent.visible = false; moon.intensity = 0;
     for (const f of figs) { f.body.visible = false; f.lamp.visible = false; }
     lantern.intensity = 0;
   }
   function showAll() {
     sparks.lines.visible = sparks.heads.visible = true;
     dust.points.visible = true; debris.visible = true; glows.points.visible = true;
+    smoke.points.visible = true; winGlow.points.visible = true; bent.visible = true;
   }
   hideAll();
 
@@ -338,7 +384,7 @@ export function createCrash(scene: THREE.Scene, train: TrainParts, opts: CrashOp
       }
       if (!S.on || (ct >= 0 && ct < S.prevCt - 0.001)) { // (re)start
         showAll(); sparks.clear(); debris.clear(); S.prevTau = -1;
-        S.emitSp = S.emitDust = S.emitEmber = S.emitHiss = 0;
+        S.emitSp = S.emitDust = S.emitEmber = S.emitHiss = S.emitSmoke = 0;
       }
       S.on = true;
       const cte = ct >= 0 ? ct : CRASH.END + 5; // after the sequence the wreck stays in its final pose
@@ -347,7 +393,7 @@ export function createCrash(scene: THREE.Scene, train: TrainParts, opts: CrashOp
       S.tau = tau; S.s = s;
       let ds = S.prevTau < 0 ? 0 : tau - S.prevTau;
       if (ds > 0.5 && ds < 30) { // skipped ahead: age what is already in the air through the gap so the impact dust has settled
-        for (let a = ds; a > 0.1; a -= 0.1) { sparks.update(0.1); dust.update(0.1); debris.update(0.1); }
+        for (let a = ds; a > 0.1; a -= 0.1) { sparks.update(0.1); dust.update(0.1); smoke.update(0.1); debris.update(0.1); }
       }
       if (ds < 0 || ds > 0.5) ds = Math.min(Math.max(ds, 0), 0.1);
       S.prevCt = ct;
@@ -371,23 +417,59 @@ export function createCrash(scene: THREE.Scene, train: TrainParts, opts: CrashOp
       }
       S.prevTau = tau;
       const simDt = ct >= 0 ? ds : dt;
-      sparks.update(simDt); dust.update(simDt); debris.update(simDt);
+      sparks.update(simDt); dust.update(simDt); smoke.update(simDt); debris.update(simDt);
 
-      // lamps and windows: steady, then flicker and die after the impact
-      let L = 1;
-      if (s >= 0) {
-        const fl = hash(Math.floor(s * 22)) > 0.45 + 0.4 * s / 2.2 ? 1 : 0.08;
-        L = s < 2.2 ? fl * (1 - s / 2.2) : 0;
-        if (s < 0.06) L = 1.6; // the jolt
+      // lamps and windows: steady, a surge at the jolt, then each window flickers and goes dark on its own
+      let L = 1, sum = 0;
+      for (let i = 0; i < WIN.length; i++) {
+        const die = WIN_DIE[i];
+        let w = 1;
+        if (s >= 0) {
+          if (s < 0.05) w = 1.8;
+          else if (s < die) w = hash(Math.floor(s * 26) + i * 17.3) > 0.25 + 0.6 * (s / die) ? 1 : 0.12;
+          else w = s < die + 0.12 && hash(Math.floor(s * 40) + i) > 0.6 ? 0.5 : 0; // a last sputter
+        }
+        sum += w;
+        const [k, x, y, z] = WIN[i];
+        if (!units[k] || w <= 0) { winGlow.set(i, 0, -50, 0, 0, 0, 0, 0); continue; }
+        const p = unitPoint(k, x, y, z, v1), head = i === 1;
+        winGlow.set(i, p.x, p.y, p.z, (head ? 0.7 : 1.1) * w, (head ? 0.6 : 0.68) * w, (head ? 0.4 : 0.3) * w, head ? 1.0 : 1.25);
       }
+      winGlow.commit();
+      if (s >= 0) L = Math.min(1.6, (sum / WIN.length) * 1.1);
       this.lights = L;
+
+      // the buckled rail: lying in wait ahead of the loco, torn out and flung at the impact
+      {
+        const bx = S.tx + IMP + BENT_X, hot = s > -0.3 ? smooth(-0.3, 0, s) : 0;
+        if (s < 0) { bent.position.set(bx, 0.55, 0.72); bent.rotation.set(0, 0, 0); }
+        else { // a ballistic arc over ~0.95 s, two full tumbles, landing flat in the field
+          const u = Math.min(s, 0.95) / 0.95;
+          bent.position.set(bx + 5 * u - 1.2 * u * u, 0.55 + 5.2 * u - 5.25 * u * u, 0.72 - 4.5 * u);
+          bent.rotation.set(-Math.PI * 2 * u, 0.9 * u, Math.PI * 2 * u);
+        }
+        bentMat.emissiveIntensity = (s < 0 ? hot * 0.15 : 0.6 * Math.exp(-2.5 * s)) * (reduced ? 0 : 1);
+      }
+
+      // impact flash
+      if (s >= 0 && s < 0.4 && ct >= 0) {
+        const p = unitPoint(0, 4.6, 1.2, 0.2, v1), a = Math.exp(-9 * s);
+        glows.set(4, p.x + 0.8, p.y, p.z, 4 * a, 2.9 * a, 1.9 * a, 3.5 + 5 * s);
+      } else glows.set(4, 0, -50, 0, 0, 0, 0, 0);
+
+      // smoke lighting + moonlight on the aftermath
+      const fireK = S.fire * (0.85 + 0.15 * Math.sin(now / 80));
+      smoke.mat.uniforms.uLit.value.copy(MOON_TOP);
+      smoke.mat.uniforms.uAmb.value.copy(FIRE_BOT).multiplyScalar(0.25 + 0.9 * fireK);
+      const moonK = smooth(CRASH.WIDE, CRASH.AFTER + 0.8, cte) * (ct >= 0 ? 1 - 0.6 * smooth(CRASH.FADE, CRASH.END, ct) : 0.4);
+      moon.intensity = 1.1 * moonK;
+      moon.position.set(S.tx - 40, 45, 35); moon.target.position.set(S.tx - 6, 0, 0); moon.target.updateMatrixWorld();
 
       // fire in the spilled firebox
       S.fire = s < 0.8 ? 0 : smooth(0.8, 2.2, s);
 
       // rescuers + lanterns
       glows.set(3, 0, -50, 0, 0, 0, 0, 0);
-      glows.set(4, 0, -50, 0, 0, 0, 0, 0); // unused slot (no close-up of the page: that is on film)
       if (s > 0.8) {
         const p = unitPoint(0, -3.0, 1.2, 0.2, v1), fk = 0.8 + 0.2 * Math.sin(now / 70) * Math.sin(now / 130 + 1);
         glows.set(3, p.x, Math.max(0.4, p.y), p.z + 0.6, 1.6 * S.fire * fk, 0.62 * S.fire * fk, 0.2 * S.fire * fk, 3.2);
@@ -438,7 +520,7 @@ export function createCrash(scene: THREE.Scene, train: TrainParts, opts: CrashOp
       const ct = S.ct;
       if (S.on && ct >= 0) {
         const tx = S.tx, tau = S.tau;
-        let fov = 34, shk = 0;
+        let fov = 34, shk = 0, roll = 0;
         if (ct < CRASH.RUN2) { // A: low beside the driving wheels, racing
           const L = unitPoint(0, 0, 0, 0, v1);
           camP.set(L.x + 9.5 - ct * 3.2, 0.95, 6.2); camL.set(L.x - 3.5 - ct * 2, 1.9, 0);
@@ -455,27 +537,34 @@ export function createCrash(scene: THREE.Scene, train: TrainParts, opts: CrashOp
           W(camP, IMP + 11.5, 0.75, 7.6);
           const L = unitPoint(0, 2.5, 1.9, 0, v1);
           camL.copy(L);
-          fov = 40 - 4 * smooth(CRASH.IMPACT, CRASH.WIDE, ct);
-          shk = ct > CRASH.SCREECH + 0.1 ? 0.35 + (ct > CRASH.IMPACT ? 0.9 : 0) : 0.1;
+          // a creeping push as the brakes scream, then a hard punch-in on the impact
+          fov = 40 - 3 * smooth(CRASH.SCREECH, CRASH.IMPACT, ct) - 9 * smooth(CRASH.IMPACT, CRASH.IMPACT + 0.25, ct);
+          shk = ct > CRASH.SCREECH + 0.05 ? 0.3 + 0.35 * smooth(CRASH.SCREECH, CRASH.IMPACT, ct) : 0.1;
+          if (!reduced) roll = 0.06 * smooth(CRASH.IMPACT, CRASH.IMPACT + 0.3, ct);
         } else if (ct < CRASH.AFTER) { // D: wide, the wreck tumbles at full speed
           const u = (ct - CRASH.WIDE) / (CRASH.AFTER - CRASH.WIDE);
           W(camP, -13 + u * 1.5, 7.5 - u * 0.6, 44 - u * 3); W(camL, -13, 1.6, 0);
-          fov = 36; shk = 0.55 * (1 - u);
+          fov = 36; shk = 0.25 * (1 - u);
+          if (!reduced) roll = -0.025 * (1 - u);
         } else { // E: the wide aftermath, a slow push-in on the wreck (no close-ups: the rescue is on film)
           const u = ease(clamp((ct - CRASH.AFTER - 0.2) / (CRASH.END - CRASH.AFTER - 0.2), 0, 1));
           W(camP, lerp(-4.5, -6.5, u), lerp(5.8, 4.4, u), lerp(29, 21, u));
           W(camL, lerp(-8, -8.6, u), lerp(1.4, 1.0, u), lerp(0, 0.8, u));
           fov = lerp(36, 33, u);
         }
-        if (!reduced && shake > 0) {
+        // kicks tuned to the hits (simulation clock): the impact, then the loco and the van landing
+        const ss = S.s;
+        const kick = ss < 0 ? 0 : 1.6 * Math.exp(-7 * ss) + (ss > 1.2 ? 0.9 * Math.exp(-8 * (ss - 1.2)) : 0) + (ss > 1.25 ? 0.7 * Math.exp(-8 * (ss - 1.25)) : 0) + (ss > 0.5 ? 0.35 * Math.exp(-9 * (ss - 0.5)) : 0);
+        if (!reduced && (shake > 0 || kick > 0.01)) {
           // heavy and slow in slow motion: phase runs on the simulation clock
-          const a = (shk || 0.15) * shake * 0.22, p = tau * 1000;
+          const a = ((shk || 0.15) * shake + kick * 0.6) * 0.22, p = tau * 1000;
           camP.x += (Math.sin(p * 0.047) + Math.sin(p * 0.083) * 0.5) * a;
           camP.y += (Math.sin(p * 0.061 + 1) + Math.sin(p * 0.101) * 0.5) * a * 0.7;
           camL.x += Math.sin(p * 0.053 + 2) * a * 0.4; camL.y += Math.sin(p * 0.071) * a * 0.3;
         }
         camera.position.copy(camP);
-        camera.up.set(0, 1, 0);
+        if (!reduced) roll += kick * 0.02 * Math.sin(tau * 37);
+        camera.up.set(Math.sin(roll), Math.cos(roll), 0);
         camera.lookAt(camL);
         camera.fov = fov;
         lastP.copy(camera.position); lastQ.copy(camera.quaternion); S.lastFov = fov;
@@ -494,7 +583,7 @@ export function createCrash(scene: THREE.Scene, train: TrainParts, opts: CrashOp
     },
     dispose() {
       disposables.forEach((d) => d.dispose());
-      scene.remove(lantern, lantern.target);
+      scene.remove(lantern, lantern.target, bent, moon, moon.target);
       for (const f of figs) scene.remove(f.body, f.lamp);
     },
   };
