@@ -2,6 +2,10 @@
 // Story content and types live in lib/stations.ts; this file animates and wires the UI.
 import { STATIONS, NAME_COLORS, TAG_COLORS, TAG_NAMES, QUIZ, START, NIKHIL_AT, FP_INFO } from './stations';
 import { createWorld } from './world3d';
+import choicesMod from './cards/choices';
+import nowMod from './cards/now';
+import archiveMod from './cards/archive';
+import { createMusic } from './music';
 
 export const CHANNEL = 'namesake-line';
 
@@ -647,6 +651,8 @@ export function startLine(root) {
     st.shake = Math.max(0, st.shake - dt / 900);
     par.x = lerp(par.x, par.tx, .06); par.y = lerp(par.y, par.ty, .06);
     snd.tick(now, st.speed);
+    if (!music && snd.ctx && snd.ctx.state === 'running') { music = createMusic(snd.ctx, snd.ctx.destination); music.setEnabled(snd.on); }
+    if (music && !disposed) music.setStation(clamp(Math.round(stationPos()), 0, STATIONS.length - 1), st.moving);
     if (world) {
       world.render({ now, p: stationPos(), cur: st.cur, target: st.target, moving: st.moving, speed: st.speed, derail: st.derail, crashT: st.crashT,
         shake: reduced ? 0 : st.shake, lens: st.lens, visited: st.visited, parX: par.x, parY: par.y,
@@ -879,15 +885,18 @@ export function startLine(root) {
   function renderCard(fresh) {
     const i = st.cur, s = STATIONS[i];
     const hasVideo = !!s.video;
-    const tabs = [['story', 'Story'], ['analysis', "4 I's"], ...(hasVideo ? [['scene', 'Scene']] : [])];
+    const nowHtml = nowMod.html(i, cardApi());
+    const tabs = [['story', 'Story'], ['analysis', "4 I's"], ...(nowHtml ? [['now', 'Then & Now']] : []), ...(hasVideo ? [['scene', 'Scene']] : [])];
     if (!tabs.some(([k]) => k === st.tab)) st.tab = 'story';
     const a = s.analysis;
     let panel = '';
     if (st.tab === 'story') {
-      panel = fpHTML(i, s) + s.story.map((p) => `<p>${esc(p)}</p>`).join('') +
+      panel = archiveMod.html(i, cardApi()) + fpHTML(i, s) + s.story.map((p) => `<p>${esc(p)}</p>`).join('') + choicesMod.html(i, cardApi()) +
         (s.quote ? `<blockquote class="quote">${esc(s.quote.text)}<cite>${esc(s.quote.cite)}</cite></blockquote>` : '') +
         (s.detail ? `<p style="font-size:.95rem;color:var(--ink-soft)">${esc(s.detail)}</p>` : '') +
         tryHTML(i, s) + voiceHTML(s) + pollHTML(i, s) + specialHTML(i, s);
+    } else if (st.tab === 'now') {
+      panel = nowHtml;
     } else if (st.tab === 'analysis') {
       panel = `<div class="analysis"><div class="tagrow"><span class="tag ${a.tag}">${TAG_NAMES[a.tag]}</span></div>
         <h4>In the book</h4><p>${esc(a.text)}</p><h4>Real world</h4><p>${esc(a.world)}</p></div>` + specialHTML(i, s);
@@ -923,6 +932,7 @@ export function startLine(root) {
       </div>`;
     ticket.classList.toggle('fresh', !!fresh);
     ticket.querySelector('.t-body').scrollTop = keepScroll;
+    mountCardMods(i);
     changed();
     setupRub();
     if (s.try === 'phone' && !st.done.phone && st.tab === 'story') ringStart(); else ringStop();
@@ -934,6 +944,18 @@ export function startLine(root) {
       clap.hidden = false;
     }
   }
+  /* ---------- card add-on modules (lib/cards/*): choices, then & now, archive ---------- */
+  let cardCleanups = [];
+  function cardApi() {
+    st.cards = st.cards || {};
+    return { cur: st.cur, stations: STATIONS, state: st.cards, save: () => save(), rerender: () => renderCard(false), travelTo: (k) => travelTo(k),
+      toast: (m) => toast(m), sfx: { chime: () => snd.chime(), thump: () => snd.thump(), noise: (f, q, pk, d) => snd.noiseBurst(f, q, pk, d) }, esc };
+  }
+  function mountCardMods(i) {
+    cardCleanups.forEach((c) => { try { c(); } catch (_) {} }); cardCleanups = [];
+    for (const m of [archiveMod, choicesMod, nowMod]) if (m.mount) { const c = m.mount(ticket, i, cardApi()); if (typeof c === 'function') cardCleanups.push(c); }
+  }
+
   function showCard(fresh) { renderCard(fresh); requestAnimationFrame(() => ticket.classList.remove('away')); }
   function hideCard() { ringStop(); ticket.classList.add('away'); const v = $('#vid'); if (v) v.pause(); }
   
@@ -1048,7 +1070,8 @@ export function startLine(root) {
   on($('#letter'), 'click', () => { toast(LETTER_LINES[st.letterClicks++ % LETTER_LINES.length]); snd.noiseBurst(5000, 1, .05, .2); });
   
   /* toggles */
-  function setSound(on) { snd.on = on; store.set('sound', on); $('#soundBtn').setAttribute('aria-pressed', on); $('#soundBtn').textContent = on ? 'Sound' : 'Muted'; if (on) { snd.init(); snd.ctx && snd.ctx.resume(); } }
+  let music = null;
+  function setSound(on) { if (music) music.setEnabled(on); snd.on = on; store.set('sound', on); $('#soundBtn').setAttribute('aria-pressed', on); $('#soundBtn').textContent = on ? 'Sound' : 'Muted'; if (on) { snd.init(); snd.ctx && snd.ctx.resume(); } }
   on($('#soundBtn'), 'click', () => setSound(!snd.on));
   function toggleAnalysis() { st.analysis = !st.analysis; root.classList.toggle('show-analysis', st.analysis); $('#analysisBtn').setAttribute('aria-pressed', st.analysis);
     if (st.analysis) { st.tab = 'analysis'; if (!st.moving) renderCard(false); toast('4 I\'s mode: colored dots on the timeline show each kind of oppression.'); } }
@@ -1108,7 +1131,7 @@ export function startLine(root) {
     else if (k === '?' || k === 'h' || k === 'H') help.hidden = false;
     else if (k === 'Home') travelTo(0);
     else if (k === 'End') travelTo(STATIONS.length - 1);
-    else if ('123'.includes(k) && !st.moving) { const tabs = ['story', 'analysis', 'scene']; const tt = tabs[+k - 1]; if (tt !== 'scene' || STATIONS[st.cur].video) { st.tab = tt; renderCard(false); } }
+    else if ('1234'.includes(k) && !st.moving) { const tabs = [...ticket.querySelectorAll('.tab')].map((t) => t.dataset.tab); const tt = tabs[+k - 1]; if (tt) { st.tab = tt; renderCard(false); } }
   });
   
   /* =========================================================
@@ -1219,11 +1242,11 @@ export function startLine(root) {
   /* =========================================================
      SAVED PROGRESS + PRESENTER REMOTE (same browser, any window)
      ========================================================= */
-  function save() { store.set('progress', { visited: [...st.visited], done: st.done, certWaits: st.certWaits, quizBest: st.quizBest }); }
+  function save() { store.set('progress', { visited: [...st.visited], done: st.done, certWaits: st.certWaits, quizBest: st.quizBest, cards: st.cards || {} }); }
   const saved = store.get('progress', null);
   if (saved) {
     (Array.isArray(saved.visited) ? saved.visited : []).forEach((i) => { if (i >= 0 && i < STATIONS.length) st.visited.add(i); });
-    if (saved.done && typeof saved.done === 'object') Object.assign(st.done, saved.done); st.certWaits = saved.certWaits || 0; st.quizBest = saved.quizBest ?? null;
+    if (saved.done && typeof saved.done === 'object') Object.assign(st.done, saved.done); if (saved.cards && typeof saved.cards === 'object') st.cards = saved.cards; st.certWaits = saved.certWaits || 0; st.quizBest = saved.quizBest ?? null;
   }
   const bc = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(CHANNEL) : null;
   function publish() {
@@ -1330,6 +1353,7 @@ export function startLine(root) {
     ringStop(); clearInterval(typeIv);
     if (snd.ctx) snd.ctx.close().catch(() => {});
     if (bc) bc.close();
+    if (music) music.dispose();
     if (fpCtl) fpCtl.dispose();
     if (world) world.dispose();
   };
