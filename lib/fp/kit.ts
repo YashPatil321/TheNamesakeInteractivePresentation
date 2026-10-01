@@ -348,11 +348,13 @@ function sculpted(k: Kit, f: Figure, o: FigureOpts, lo: THREE.Mesh[], P: Record<
   if (o.legs !== false) for (const s of [-1, 1]) put(o.seated ? 'leg_seated' : 'leg_standing', f.root, s * 0.1);
   const tName = `torso_${garment}_${fem ? 'f' : 'm'}`;
   const tp = P[tName] ? tName : (fem ? 'torso_top_f' : 'torso_shirt_m');
-  const tg = new THREE.Group(); tg.scale.x = sw * (fem ? 1.05 : 1); f.torso.add(tg);
+  const tg = new THREE.Group(); tg.scale.x = sw; f.torso.add(tg);
   put(tp, tg);
   if (garment === 'shirt' && !fem) put('collar', tg, 0, 0, 0, false);
-  put('neck', f.neck);
-  f.head.position.y = 0.07;
+  put(P[fem ? 'neck_f' : 'neck_m'] ? (fem ? 'neck_f' : 'neck_m') : 'neck', f.neck);
+  // realistic proportions: a short, full neck and shoulders at the acromion (~0.40 m biacromial, narrower for women)
+  f.head.position.y = 0.035;
+  for (const [arm, s] of [[f.armL, -1], [f.armR, 1]] as const) arm.position.set(s * (fem ? 0.165 : 0.185) * sw, 0.505, 0);
   put(fem ? 'head_f' : 'head_m', f.head);
   put(fem ? 'face_f' : 'face_m', f.head, 0, 0, 0, false);
   const hairPart: Record<string, string> = { short: 'hair_short', part: 'hair_part', long: 'hair_long', bob: 'hair_bob', curly: 'hair_curly', fringe: 'hair_fringe' };
