@@ -884,3 +884,19 @@ a.btn { display: inline-flex; }
 .shoot-box td.blank { color: rgba(154,163,194,.5); text-align: right; }
 .shoot-box .dim { color: var(--mist); }
 .shoot-foot { margin-top: 20px; color: var(--mist); font-size: var(--t-sm); font-style: italic; }
+
+/* ---------- Scene pop-up: plays automatically when the train reaches a filmed scene ---------- */
+.scene-pop { z-index: 45; display: grid; place-items: center; padding: 16px; background: rgba(3,5,12,.86); opacity: 0; transition: opacity .35s ease; }
+.scene-pop.on { opacity: 1; }
+.sp-frame { width: min(1100px, 100%); display: grid; gap: 12px; transform: translateY(18px) scale(.97); transition: transform .5s var(--spring, cubic-bezier(.2,.9,.3,1.2)); }
+.scene-pop.on .sp-frame { transform: none; }
+.sp-head { display: flex; align-items: baseline; gap: 14px; color: var(--paper); }
+.sp-kicker { font-family: var(--mono); font-size: var(--t-xs); letter-spacing: .16em; text-transform: uppercase; color: var(--gogol); }
+.sp-head h2 { margin: 0; flex: 1; font-family: var(--display); font-weight: 400; font-size: clamp(1.3rem, 3vw, 2rem); line-height: 1.1; }
+.sp-close { background: rgba(236,228,207,.1); border: 1px solid rgba(236,228,207,.35); color: var(--paper); border-radius: 999px; padding: 8px 16px;
+  font-family: var(--mono); font-size: var(--t-sm); letter-spacing: .08em; }
+.sp-close:hover { background: rgba(236,228,207,.2); }
+.sp-video { width: 100%; max-height: calc(100vh - 160px); aspect-ratio: 16 / 9; background: #000; border-radius: 10px; box-shadow: 0 30px 80px rgba(0,0,0,.7), 0 0 0 1px rgba(236,228,207,.12); }
+.sp-bar { height: 3px; border-radius: 3px; background: rgba(236,228,207,.15); overflow: hidden; }
+.sp-bar i { display: block; height: 100%; background: var(--gogol); transform-origin: left; transform: scaleX(0); transition: transform .25s linear; }
+@media (prefers-reduced-motion: reduce) { .sp-frame { transition: none; transform: none; } }

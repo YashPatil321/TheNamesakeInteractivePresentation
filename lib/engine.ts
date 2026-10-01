@@ -669,6 +669,7 @@ export function startLine(root) {
     st.from = st.trainX; st.to = i * SP; st.t0 = performance.now(); st.target = i; st.moving = true;
     st.dur = reduced ? 300 : clamp(900 + dist * 520, 1300, 4200) * (opts.rewind ? .55 : 1);
     st.derail = 0;
+    if (!scenePop.hidden) closeScenePop();
     hideCard();
     const back = i < st.cur;
     if (opts.rewind || (back && st.cur - i > 1)) { $('#rwYear').textContent = STATIONS[i].year; $('#vhs').classList.add('on'); }
@@ -692,6 +693,7 @@ export function startLine(root) {
     else if (st.lens === 'both') setLens(st.lensUnlocked ? 'nikhil' : 'gogol', true);
     st.tab = 'story';
     showCard(true);
+    autoScene(i);
   }
   
   /* crash sequence — cue times match lib/world3d/crash.ts CRASH (the 3D side stages the shots on the same clock) */
@@ -721,7 +723,7 @@ export function startLine(root) {
     if (x(CR.CAP1)) { cap.textContent = 'October 1961. The train derails in the dark.'; cap.classList.add('on'); }
     if (x(CR.CAP2)) { cap.textContent = 'A rescuer\'s lantern catches a page from "The Overcoat."'; }
     if (x(CR.CAPOFF)) cap.classList.remove('on');
-    if (t > CR.END) { st.crashT = -1; st.derail = 1; showCard(true); }
+    if (t > CR.END) { st.crashT = -1; st.derail = 1; showCard(true); autoScene(0); }
   }
   /** Esc / Enter / Space / → (a presenter's clicker) jumps to the held shot of the page. */
   function skipCrash() {
@@ -1106,6 +1108,7 @@ export function startLine(root) {
     if (e.target.tagName === 'INPUT') { if (e.key === 'Enter') { if (e.target.id === 'certName') doTry('sign'); else board(); } return; }
     if (!st.started) { if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); board(); } return; }
     if (fpCtl || !fpBox.hidden) return; // the first-person view handles its own keys
+    if (!scenePop.hidden) { if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowRight') { e.preventDefault(); closeScenePop(); } return; }
     if (!scenesOv.hidden) { if (e.key === 'Escape') closeScenes(); return; } // the scenes section handles its own keys
     if (!help.hidden) { if (e.key === 'Escape' || e.key === '?') help.hidden = true; return; }
     if (!passport.hidden) { if (e.key === 'Escape' || e.key === 'v' || e.key === 'V') passport.hidden = true; return; }
@@ -1335,6 +1338,51 @@ export function startLine(root) {
   on($('#scenesBtn'), 'click', () => openScenes());
   on(window, 'namesake:scenes-close', () => closeScenes());
   on(window, 'namesake:go', (e) => { closeScenes(false); const i = +e.detail; if (!st.started) { board(); setTimeout(() => travelTo(i), 900); } else travelTo(i); });
+
+  /* =========================================================
+     SCENE POP-UP: when the train reaches a station with a filmed scene, the video opens and plays by itself
+     ========================================================= */
+  const scenePop = document.createElement('div');
+  scenePop.className = 'overlay scene-pop'; scenePop.hidden = true;
+  scenePop.innerHTML = `<div class="sp-frame" role="dialog" aria-labelledby="spTitle">
+      <div class="sp-head"><span class="sp-kicker">Our scene</span><h2 id="spTitle"></h2><button class="sp-close" aria-label="Close the scene">Skip ✕</button></div>
+      <video class="sp-video" playsinline controls preload="auto"></video>
+      <div class="sp-bar"><i></i></div>
+    </div>`;
+  root.appendChild(scenePop);
+  const spVideo = scenePop.querySelector('.sp-video'), spBar = scenePop.querySelector('.sp-bar i');
+  const videoOk = new Map(); // file -> Promise<boolean>
+  function hasVideo(src) {
+    if (!videoOk.has(src)) videoOk.set(src, fetch(src, { method: 'HEAD' }).then((r) => r.ok && !(r.headers.get('content-type') || '').includes('text/html')).catch(() => false));
+    return videoOk.get(src);
+  }
+  let spFor = -1;
+  function autoScene(i) {
+    const s = STATIONS[i]; if (!s.video) return;
+    hasVideo(s.video).then((ok) => {
+      // still parked here, nothing else open
+      if (!ok || disposed || st.cur !== i || st.moving || st.crashT >= 0 || !$('#finale').hidden || !quiz.hidden || !fpBox.hidden || !scenesOv.hidden) return;
+      spFor = i;
+      scenePop.querySelector('#spTitle').textContent = `${s.year} · ${s.title}`;
+      spVideo.src = s.video; spVideo.currentTime = 0;
+      scenePop.hidden = false; requestAnimationFrame(() => scenePop.classList.add('on'));
+      hideCard();
+      if (music) music.setEnabled(false);
+      const p = spVideo.play(); if (p && p.catch) p.catch(() => { spVideo.muted = true; spVideo.play().catch(() => {}); });
+      publish();
+    });
+  }
+  function closeScenePop() {
+    if (scenePop.hidden) return;
+    spVideo.pause(); scenePop.classList.remove('on'); spFor = -1;
+    if (music) music.setEnabled(snd.on);
+    setTimeout(() => { scenePop.hidden = true; spVideo.removeAttribute('src'); spVideo.load(); if (!st.moving) showCard(false); }, 350);
+    publish();
+  }
+  on(scenePop.querySelector('.sp-close'), 'click', closeScenePop);
+  on(spVideo, 'ended', closeScenePop);
+  on(spVideo, 'timeupdate', () => { spBar.style.transform = `scaleX(${spVideo.duration ? spVideo.currentTime / spVideo.duration : 0})`; });
+  on(scenePop, 'click', (e) => { if (e.target === scenePop) closeScenePop(); });
 
   /* boot */
   on(window, 'resize', () => { resize(); });
