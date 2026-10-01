@@ -1,5 +1,5 @@
 // All story text lives here. Edit freely; the app re-renders from this file.
-// video: put the file in public/videos (e.g. public/videos/crash.mp4) and reference it as 'videos/crash.mp4'.
+// video: put the file in public/videos (e.g. public/videos/nikhil.mp4) and reference it as 'videos/nikhil.mp4'.
 
 export type Tag = 'IDEOLOGICAL' | 'INSTITUTIONAL' | 'INTERPERSONAL' | 'INTERNALIZED' | 'BREAKING' | 'RESISTANCE' | 'MIRROR' | 'TURNING';
 export type NameLens = 'none' | 'gogol' | 'nikhil' | 'both';
@@ -41,8 +41,7 @@ export const STATIONS: Station[] = [
       'A friendly stranger named Ghosh tells him to see the world while he still can. Hours later the train derails in the dark. Rescuers nearly pass him by, until they notice a crumpled page from "The Overcoat" in his hand.'
     ],
     detail: 'He spends a year in bed recovering. He decides he will go abroad, just as Ghosh said.',
-    analysis: { tag: 'MIRROR', text: 'Four years after the crash, the Immigration and Nationality Act of 1965 ends the U.S. quotas that had kept most Asian immigrants out. It opens the door for educated professionals like Ashoke.', world: 'Historical connection: the Hart-Celler Act (1965). Look up History.com or the Migration Policy Institute for a citation.' },
-    video: 'videos/crash.mp4', shots: ['Two rows of chairs as the train compartment', 'Flashlight swinging past the window for passing lights', 'Blackout, then a flashlight finds the page in his hand'] },
+    analysis: { tag: 'MIRROR', text: 'Four years after the crash, the Immigration and Nationality Act of 1965 ends the U.S. quotas that had kept most Asian immigrants out. It opens the door for educated professionals like Ashoke.', world: 'Historical connection: the Hart-Celler Act (1965). Look up History.com or the Migration Policy Institute for a citation.' } },
 
   { year: '1967', title: 'The Shoes', place: 'Calcutta, India', code: 'CAL', region: 'india', name: 'none', flashback: true, try: 'shoes',
     sky: ['#2a1640', '#c86b4a'],
@@ -133,8 +132,7 @@ export const STATIONS: Station[] = [
     ],
     quote: { text: '"Do I remind you of that night?" … "Not at all. You remind me of everything that followed."', cite: 'Ashoke to Gogol, Chapter 5' },
     voice: { gogol: 'My name was a rescue, not a joke.', nikhil: 'I threw away the one thing he gave me that meant everything.' },
-    analysis: { tag: 'TURNING', text: 'The meaning of his name flips. What he treated as an embarrassment is his father\'s survival story.', world: 'Lots of family names and naming traditions carry histories that younger generations only learn later.' },
-    video: 'videos/truth.mp4', shots: ['Two front seats in a parked car, headlights off', 'Ashoke looks straight ahead as he talks', 'Close-up: Gogol\'s face, the word "Gogol" landing'] },
+    analysis: { tag: 'TURNING', text: 'The meaning of his name flips. What he treated as an embarrassment is his father\'s survival story.', world: 'Lots of family names and naming traditions carry histories that younger generations only learn later.' } },
 
   { year: '1990s', title: 'The Ratliffs', place: 'New York City → New Hampshire', code: 'NYC', region: 'lake', name: 'nikhil',
     sky: ['#0e2a4a', '#f0c27a'],
@@ -165,7 +163,8 @@ export const STATIONS: Station[] = [
     ],
     voice: { gogol: 'We both know what it\'s like to live between two worlds.', nikhil: 'She\'s the one person who knows both of my names.' },
     poll: { predict: true, q: 'Two people who understand both worlds, and a big Bengali wedding. Will the marriage last?', options: ['Yes, they found each other', 'No, it will fall apart'], actual: 'It falls apart. Moushumi begins an affair with Dimitri Desjardins, a man from her past, and the marriage ends.' },
-    analysis: { tag: 'INTERNALIZED', text: 'Both of them carry the same inner conflict. Part of the attraction is that neither has to explain.', world: 'Family and community expectations around marriage are still a major pressure for many second-generation kids.' } },
+    analysis: { tag: 'INTERNALIZED', text: 'Both of them carry the same inner conflict. Part of the attraction is that neither has to explain.', world: 'Family and community expectations around marriage are still a major pressure for many second-generation kids.' },
+    video: 'videos/moushumi.mp4', shots: ['Two chairs at a small table, evening', '"My mother made me come tonight." "Mine too."', '"I remember you as Gogol." "I\'ll remember both."'] },
 
   { year: '~2000', title: 'Coming Apart', place: 'New York City', code: 'NYC', region: 'nyc', name: 'nikhil',
     sky: ['#0b0d16', '#2c2238'],
@@ -175,7 +174,8 @@ export const STATIONS: Station[] = [
     ],
     voice: { gogol: 'Maybe we married the idea of each other.', nikhil: 'Maybe Nikhil was never the answer.' },
     poll: { predict: true, q: 'Last stop: Christmas Eve, 2000, at his mother\'s final party on Pemberton Road. What will Gogol do?', options: ['Change his name back to Gogol', 'Move to Calcutta with his mother', 'Open the book his father gave him'], actual: 'He slips upstairs, finds the book, reads his father\'s inscription for the first time, and begins to read.' },
-    analysis: { tag: 'TURNING', text: 'Assimilating didn\'t fix him, and neither did returning to the "right" Bengali life. He has to find himself without a script.', world: 'Identity isn\'t something someone else can hand you, whether it\'s your parents or society.' } },
+    analysis: { tag: 'TURNING', text: 'Assimilating didn\'t fix him, and neither did returning to the "right" Bengali life. He has to find himself without a script.', world: 'Identity isn\'t something someone else can hand you, whether it\'s your parents or society.' },
+    video: 'videos/apart.mp4', shots: ['She hangs up fast when he walks in', '"Who was that?" … "Dimitri."', 'Close-up: his wedding ring left on the table'] },
 
   { year: '2000', title: 'The Man Who Gave You His Name', place: 'Pemberton Road, Christmas Eve', code: 'PEM', region: 'suburb', name: 'both', snow: true,
     sky: ['#0a1430', '#2d3d6b'],
@@ -187,7 +187,7 @@ export const STATIONS: Station[] = [
     voice: { gogol: 'The man who gave me his name. I\'m finally ready to read him.', nikhil: 'Nikhil and Gogol were always the same person.' },
     special: 'finale',
     analysis: { tag: 'RESISTANCE', text: 'Healing is personal. Gogol stops choosing between his names and accepts both, and Ashima chooses a life in two countries.', world: 'Hope: you don\'t have to choose between two cultures to belong.' },
-    video: 'videos/finale.mp4', shots: ['Party noise drifting up the stairs', 'Dust off the book, open the cover', 'Close-up of the inscription, then he starts to read'] },
+    video: 'videos/finale.mp4', shots: ['Christmas lights and party noise', 'Ashima tells the room the house is sold', 'Gogol looks at his father\'s photo, then climbs the stairs'] },
 ];
 
 export const NAME_COLORS: Record<NameLens, string> = { none: '#8a90a8', gogol: '#f2a33a', nikhil: '#5eaaff', both: '#c9a3ff' };
@@ -196,7 +196,7 @@ export const TAG_NAMES: Record<Tag, string> = { IDEOLOGICAL: 'Ideological', INST
 
 /** Speaker notes shown only on the presenter remote (/presenter), one list per station. */
 export const NOTES: string[][] = [
-  ['This is a flashback: Gogol has not been born yet.', 'The crash plays out from outside the train; our filmed scene follows inside the carriage, with the page from "The Overcoat".', 'Mirror to society: the 1965 Hart-Celler Act opens the door for Ashoke.'],
+  ['This is a flashback: Gogol has not been born yet.', 'Watch the crash, then press E to sit inside the compartment with Ashoke and Ghosh.', 'Mirror to society: the 1965 Hart-Celler Act opens the door for Ashoke.'],
   ['Still a flashback. Ashima is 19 and has not met her husband.', 'Hands-on: have someone click "Slip your feet in".', 'Talking point: isolation is the first cost of immigrating.'],
   ['The first stop where Gogol is on the train. Track turns orange.', 'Hands-on: let a classmate try to fill the birth certificate, then wait for the letter three times.', 'Institutional: a hospital form overrides a Bengali naming tradition.', 'Optional: press "Why Gogol?" to rewind to the crash.'],
   ['The rice ceremony: the Bengali community acts as family.', 'Hands-on: ask the class which item baby Gogol will pick, then tap it.', 'Read the "lifelong pregnancy" quote aloud.'],
@@ -205,12 +205,12 @@ export const NOTES: string[][] = [
   ['Hands-on: try to open the book, and it goes on the shelf.', 'Step inside (press E): his bedroom on his 14th birthday, Ashoke in the doorway.', 'Internalized: he rejects the gift before he knows what it means.', 'Plant the seed: this book comes back at the very end.'],
   ['English class turns into public humiliation.', 'Real world: Kohli & Solórzano (2012) on students\' names.'],
   ['PETITION GRANTED stamp plays on first visit. The Gogol/Nikhil switch unlocks.', 'Class vote: would you change your name?', 'Press N to flip the inner voice between names.', 'Scene video station (the party).'],
-  ['Turning point: the truth in the car.', 'Read the quote slowly: "You remind me of everything that followed."', 'Scene video station.'],
+  ['Turning point: the truth in the car.', 'Press E for the passenger seat: Ashoke tells the story.', 'Read the quote slowly: "You remind me of everything that followed."'],
   ['The Ratliffs: the easy America he wanted.', 'Class vote, then reveal.', 'Ideological: the "perpetual foreigner" belief.', 'Scene video station (dinner with the Ratliffs).'],
   ['The climax. Our filmed scene carries the phone call.', 'Breaking point: he shaves his head, the first tradition he chooses.', 'Scene video station (the phone call).'],
-  ['Moushumi: two people who both know both of his names.', 'Internalized: expectations around marriage.'],
-  ['The marriage ends. Neither path came with a script.', 'Turning point: identity cannot be handed to you.'],
-  ['The track braids orange and blue. He is both now.', 'If every station is visited, open the book for the finale.', 'After the finale, run the ticket inspector quiz with the class.'],
+  ['Moushumi: two people who both know both of his names.', 'Internalized: expectations around marriage.', 'Scene video station (the first date).'],
+  ['The marriage ends. Neither path came with a script.', 'Turning point: identity cannot be handed to you.', 'Scene video station (Dimitri).'],
+  ['The track braids orange and blue. He is both now.', 'Scene video station (the last party), then he goes upstairs to the book.', 'If every station is visited, open the book for the finale.', 'After the finale, run the ticket inspector quiz with the class.'],
 ];
 
 export interface QuizQuestion { q: string; options: string[]; answer: number; why: string }

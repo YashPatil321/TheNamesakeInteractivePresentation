@@ -380,7 +380,7 @@ function Detail({ scene, status, mode, onPrev, onNext }: {
             <ul className="sc-props">{scene.props.map((p) => <li key={p}>{p}</li>)}</ul>
           </section>
         </div>
-        <p className="sc-shoot"><span className="sc-label">Shoot</span> Block {scene.shoot.block} of 4 · {scene.shoot.place}</p>
+        <p className="sc-shoot"><span className="sc-label">Shoot</span> Block {scene.shoot.block} of 3 · {scene.shoot.place}</p>
       </div>
 
       <div className="sc-d-board">

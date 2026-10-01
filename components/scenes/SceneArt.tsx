@@ -6,30 +6,6 @@ import type { Scene } from '@/lib/scenes';
 const mono = { fontFamily: 'var(--mono)', fontWeight: 700 } as const;
 const hand = { fontFamily: 'var(--hand)' } as const;
 
-function Train({ u }: { u: string }) {
-  return (
-    <>
-      <defs>
-        <linearGradient id={`${u}sa1bg`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#0c0f18" /><stop offset="1" stopColor="#262a33" /></linearGradient>
-        <linearGradient id={`${u}sa1beam`} x1="1" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#fff" stopOpacity=".85" /><stop offset=".7" stopColor="#fff" stopOpacity="0" /></linearGradient>
-      </defs>
-      <rect width="160" height="100" fill={`url(#${u}sa1bg)`} />
-      <rect x="54" y="12" width="52" height="30" rx="5" fill="#3a4250" />
-      <rect x="57" y="15" width="46" height="24" rx="3" fill="#6f7a8c" />
-      <path d="M57 32 L103 26 L103 39 L57 39Z" fill="#4a5363" />
-      <rect x="18" y="44" width="30" height="46" rx="4" fill="#1b1e25" />
-      <rect x="112" y="44" width="30" height="46" rx="4" fill="#1b1e25" />
-      <circle cx="120" cy="50" r="8" fill="#0e1015" />
-      <path d="M106 90 C106 66 134 64 134 90Z" fill="#0e1015" />
-      <circle cx="40" cy="52" r="8.5" fill="#2c313b" />
-      <path d="M26 90 C26 66 54 64 56 90Z" fill="#2c313b" />
-      <rect x="43" y="62" width="16" height="11" rx="1" fill="#efe9d8" transform="rotate(-12 51 67)" />
-      <line x1="51" y1="62" x2="52" y2="73" stroke="#9c9686" strokeWidth=".8" transform="rotate(-12 51 67)" />
-      <polygon points="160,0 160,18 30,100 0,100 0,86" fill={`url(#${u}sa1beam)`} opacity=".5" />
-    </>
-  );
-}
-
 function School({ u }: { u: string }) {
   return (
     <>
@@ -70,28 +46,6 @@ function Party({ u }: { u: string }) {
         <line x1="54" y1="62" x2="106" y2="61" stroke="#1d1b26" strokeWidth="2.4" strokeLinecap="round" />
         <text x="80" y="83" fontSize="15" textAnchor="middle" fill="#1f4fbf" style={hand}>Nikhil</text>
       </g>
-    </>
-  );
-}
-
-function Car({ u }: { u: string }) {
-  return (
-    <>
-      <defs>
-        <linearGradient id={`${u}sa4sky`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#131a33" /><stop offset=".62" stopColor="#3a3450" /><stop offset="1" stopColor="#d77b43" /></linearGradient>
-        <radialGradient id={`${u}sa4glow`} cx=".5" cy="1" r=".7"><stop offset="0" stopColor="#ffd08a" stopOpacity=".9" /><stop offset="1" stopColor="#ffd08a" stopOpacity="0" /></radialGradient>
-      </defs>
-      <rect width="160" height="100" fill="#07080d" />
-      <path d="M14 10 Q80 2 146 10 L154 64 L6 64Z" fill={`url(#${u}sa4sky)`} />
-      <circle cx="40" cy="52" r="1.4" fill="#ffe6a8" /><circle cx="118" cy="50" r="1.1" fill="#ffe6a8" /><circle cx="96" cy="55" r="1" fill="#ff9c6b" />
-      <rect x="0" y="62" width="160" height="38" fill="#0d0e14" />
-      <ellipse cx="80" cy="70" rx="60" ry="26" fill={`url(#${u}sa4glow)`} opacity=".75" />
-      <rect x="72" y="63" width="16" height="5" rx="1.5" fill="#fff4d6" />
-      <circle cx="48" cy="54" r="12" fill="#050608" />
-      <path d="M28 100 C28 70 68 70 68 100Z" fill="#050608" />
-      <circle cx="113" cy="56" r="10" fill="#050608" />
-      <path d="M96 100 C96 74 130 74 130 100Z" fill="#050608" />
-      <path d="M0 0 H160 V10 Q80 0 0 10Z" fill="#050608" />
     </>
   );
 }
@@ -140,29 +94,75 @@ function Phone({ u }: { u: string }) {
   );
 }
 
-function Book({ u }: { u: string }) {
+function DateNight({ u }: { u: string }) {
   return (
     <>
       <defs>
-        <radialGradient id={`${u}sa7l`} cx=".85" cy=".2" r=".8"><stop offset="0" stopColor="#ffcf7a" stopOpacity=".85" /><stop offset="1" stopColor="#ffcf7a" stopOpacity="0" /></radialGradient>
+        <linearGradient id={`${u}d1`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#1a1f36" /><stop offset="1" stopColor="#3a2a35" /></linearGradient>
+        <radialGradient id={`${u}d2`} cx=".5" cy=".62" r=".45"><stop offset="0" stopColor="#ffcf7a" stopOpacity=".55" /><stop offset="1" stopColor="#ffcf7a" stopOpacity="0" /></radialGradient>
       </defs>
-      <rect width="160" height="100" fill="#3b2418" />
-      <rect x="12" y="8" width="40" height="34" rx="2" fill="#1d2b4c" />
-      {[[18, 14], [30, 20], [44, 13], [22, 30], [40, 34], [34, 26]].map(([x, y], k) => <circle key={k} cx={x} cy={y} r="1.3" fill="#fff" />)}
-      <rect x="12" y="8" width="40" height="34" rx="2" fill="none" stroke="#6b4a33" strokeWidth="2.5" />
-      <rect width="160" height="100" fill={`url(#${u}sa7l)`} />
-      {[70, 84, 98, 112, 126, 140].map((x, k) => <circle key={k} cx={x} cy={10 + (k % 2) * 4} r="1.6" fill={k % 2 ? '#ffd36b' : '#ff8a6b'} />)}
-      <path d="M30 94 L78 84 L78 44 L30 52Z" fill="#fbf5e6" />
-      <path d="M130 94 L82 84 L82 44 L130 52Z" fill="#f4ecd8" />
-      <rect x="78" y="44" width="4" height="40" fill="#b8382a" />
-      <text x="34" y="64" fontSize="7" fill="#35306a" style={hand} transform="rotate(-10 34 64)">The man who</text>
-      <text x="36" y="73" fontSize="7" fill="#35306a" style={hand} transform="rotate(-10 36 73)">gave you his name</text>
-      {[60, 67, 74].map((y, k) => <line key={k} x1="88" y1={y - 6} x2="124" y2={y + 1} stroke="#b9ab8c" strokeWidth="1" />)}
+      <rect width="160" height="100" fill={`url(#${u}d1)`} />
+      {[14, 30, 46, 112, 128, 144].map((x, k) => <rect key={k} x={x} y={10 + (k % 3) * 6} width="8" height="12" fill={k % 2 ? '#e8c27a' : '#6d7aa8'} opacity=".55" />)}
+      <rect width="160" height="100" fill={`url(#${u}d2)`} />
+      <circle cx="46" cy="44" r="9" fill="#2a1d19" />
+      <path d="M30 86 C30 60 62 58 64 86Z" fill="#2c3e63" />
+      <circle cx="114" cy="44" r="9" fill="#2a1d19" />
+      <path d="M100 52 C96 40 132 38 128 54 L124 60 L104 60Z" fill="#1a1210" />
+      <path d="M96 86 C98 60 130 58 132 86Z" fill="#7a2c3e" />
+      <rect x="40" y="74" width="80" height="6" rx="2" fill="#5a3a28" />
+      <rect x="66" y="62" width="5" height="12" rx="1" fill="#cfe3ee" opacity=".8" />
+      <rect x="89" y="62" width="5" height="12" rx="1" fill="#cfe3ee" opacity=".8" />
+      <rect x="78" y="66" width="4" height="8" fill="#f3ead2" />
+      <ellipse cx="80" cy="63" rx="1.6" ry="3" fill="#ffcf5a" />
     </>
   );
 }
 
-const ART: Record<number, (p: { u: string }) => React.JSX.Element> = { 1: Train, 2: School, 3: Party, 4: Car, 5: Dinner, 6: Phone, 7: Book };
+function Apart({ u }: { u: string }) {
+  return (
+    <>
+      <defs>
+        <radialGradient id={`${u}a1`} cx=".3" cy=".2" r=".7"><stop offset="0" stopColor="#5d636e" /><stop offset="1" stopColor="#15171c" /></radialGradient>
+      </defs>
+      <rect width="160" height="100" fill={`url(#${u}a1)`} />
+      <rect x="112" y="16" width="30" height="70" fill="#0c0d10" />
+      <rect x="114" y="18" width="26" height="68" fill="#2a2d33" />
+      <circle cx="126" cy="38" r="6" fill="#0c0d10" />
+      <path d="M116 86 C116 58 138 56 138 86Z" fill="#0c0d10" />
+      <circle cx="40" cy="40" r="8.5" fill="#1d1513" />
+      <path d="M34 34 C30 52 34 62 38 64 L46 50Z" fill="#120d0c" />
+      <path d="M24 82 C24 58 54 56 56 82Z" fill="#4a4f5c" />
+      <rect x="44" y="44" width="5" height="9" rx="1" fill="#b9c2cf" />
+      <rect x="10" y="80" width="98" height="8" rx="2" fill="#3a3530" />
+      <ellipse cx="80" cy="79" rx="5" ry="2" fill="none" stroke="#e4c46a" strokeWidth="1.6" />
+      <path d="M20 10 L20 24 M14 24 L26 24 L22 18 L18 18Z" stroke="#c9b48a" strokeWidth="1" fill="#e8d6a8" opacity=".7" />
+    </>
+  );
+}
+
+function LastParty({ u }: { u: string }) {
+  return (
+    <>
+      <defs>
+        <linearGradient id={`${u}l1`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#3a2418" /><stop offset="1" stopColor="#1a100c" /></linearGradient>
+      </defs>
+      <rect width="160" height="100" fill={`url(#${u}l1)`} />
+      <path d="M0 12 Q40 22 80 12 T160 12" stroke="#4a3426" strokeWidth=".8" fill="none" />
+      {[8, 22, 36, 50, 64, 78, 92, 106, 120, 134, 148].map((x, k) => <circle key={k} cx={x} cy={14 + Math.sin(k) * 3} r="1.8" fill={['#ffd36b', '#ff7a6b', '#8fe0a0', '#7ab8ff'][k % 4]} />)}
+      {[0, 1, 2, 3, 4, 5].map((k) => <rect key={k} x={110 + k * 8} y={84 - k * 10} width="50" height="10" fill={k % 2 ? '#4a3020' : '#56382a'} />)}
+      <circle cx="130" cy="34" r="6" fill="#140c08" />
+      <path d="M122 54 C122 38 140 38 140 54 L138 64 L124 64Z" fill="#140c08" />
+      <circle cx="28" cy="46" r="7" fill="#2a1a12" />
+      <path d="M18 88 C18 60 40 58 40 88Z" fill="#8a2c3a" />
+      <circle cx="52" cy="48" r="6.5" fill="#2a1a12" />
+      <path d="M43 88 C43 62 62 60 62 88Z" fill="#c2803a" />
+      <circle cx="80" cy="50" r="6" fill="#2a1a12" opacity=".7" />
+      <path d="M72 88 C72 64 90 62 90 88Z" fill="#3a4a6a" opacity=".7" />
+    </>
+  );
+}
+
+const ART: Record<number, (p: { u: string }) => React.JSX.Element> = { 1: School, 2: Party, 3: Dinner, 4: Phone, 5: DateNight, 6: Apart, 7: LastParty };
 
 export default function SceneArt({ scene, className = '' }: { scene: Scene; className?: string }) {
   const Art = ART[scene.n];

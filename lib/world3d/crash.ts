@@ -1,8 +1,6 @@
 // Station 1 (October 1961): Ashoke's night train derails near Jamshedpur.
 // A ~9 s directed sequence driven by the engine's crash clock (lib/engine.ts crashTick, WorldFrame.crashT).
-// Only what the group can't film: everything is seen from OUTSIDE the train. The compartment, Ghosh, the
-// flashlight and the page in Ashoke's hand are in our filmed scene (videos/crash.mp4), which the engine opens
-// right after this sequence ends (autoScene(0)), so none of that is animated here.
+// Seen from outside the train; the compartment itself is the first-person room (press E at this station).
 //   A 0.00  low tracking shot beside the racing locomotive (clacks accelerate)
 //   B 1.30  high, wide exterior: the whole train racing across the dark plain
 //   C 2.25  screech: wheels lock in a fountain of sparks; low shot ahead of the train past a buckled rail;
