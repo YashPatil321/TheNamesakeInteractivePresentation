@@ -15,6 +15,8 @@ import { Puffs, Glows, Weather, Birds } from './world3d/fx';
 import { makeSky, makeRidges, SkyEnv } from './world3d/sky';
 import { makeGradePass } from './world3d/post';
 import { createCrash } from './world3d/crash';
+import { createDirector } from './world3d/camera';
+import { Motes } from './world3d/life';
 
 export interface WorldFrame {
   now: number; // performance.now()
@@ -112,6 +114,8 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
   const glows = new Glows(scene, scenery.lampCount + 2);
   const weather = new Weather(scene);
   const birds = new Birds(scene, shared.uTime);
+  const motes = new Motes(scene);
+  const director = createDirector(reduced);
 
   // the 1961 crash sequence (lib/world3d/crash.ts): wreck choreography, sparks, debris, rescuers, the page
   const crash = createCrash(scene, train, { reduced, uScale: glows.mat.uniforms.uScale, puffs, lampLight });
@@ -148,12 +152,13 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
     snow: 0, rain: 0, prevCur: -1, prevMoving: false, flareT0: -1e9, flareStation: -1,
     signT0: new Float64Array(N).fill(-1e9), highlightOn: -1,
     lens: '', lensCol: new THREE.Color(NAME_COLORS.gogol), visitedMask: -1, curMask: -1,
-    emit: 0, stackEmit: 0,
+    emit: 0, stackEmit: 0, camD: 40,
     // adaptive quality
     q: qParam === 'low' ? 4 : /^[0-5]$/.test(qParam) ? +qParam : 0, qLocked: qParam === 'high' || qParam === 'low' || /^[0-5]$/.test(qParam), slow: 0, frames: 0, ema: 16,
     measureT: 0, layout: { cardRight: 0, cardTop: 0, hud: 64, rail: 90 },
   };
 
+  const v3 = new THREE.Vector3(), vC = new THREE.Vector3(), vS = new THREE.Vector3();
   const v1 = new THREE.Vector3(), v2 = new THREE.Vector3(), back = new THREE.Vector3(), right = new THREE.Vector3(), up = new THREE.Vector3(), camUp = new THREE.Vector3(0, 1, 0);
   const pts: THREE.Vector3[] = Array.from({ length: 16 }, () => new THREE.Vector3());
   const raycaster = new THREE.Raycaster();
@@ -286,8 +291,9 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
     (scene.fog as THREE.Fog).color.copy(cBot).multiplyScalar(ls);
     {
       const fog = scene.fog as THREE.Fog, wet = Math.max(S.rain, S.snow * 0.7);
-      fog.near = S.d * lerp(0.95, 0.55, wet) + 12;
-      fog.far = S.d + lerp(lerp(430, 340, dark), 170, wet);
+      const cd = Math.max(S.d, S.camD); // a travel shot can sit farther out than the framing distance
+      fog.near = cd * lerp(0.95, 0.55, wet) + 12;
+      fog.far = cd + lerp(lerp(430, 340, dark), 170, wet);
     }
 
     hemi.color.copy(cTop).lerp(WHITE, 0.55);
@@ -491,8 +497,16 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
     else S.d += (need - S.d) * damp(need > S.d ? 7 : 1.6, dt);
     const fovT = fovBase + (reduced ? 0 : 7 * spd);
     S.fov += (fovT - S.fov) * (S.init ? damp(3, dt) : 1);
-    camera.position.copy(S.T).addScaledVector(back, S.d);
+    // the director's shot for this trip (crane / low / drone / dolly / boarding flyover), blended over the framing camera
+    vC.set(tx + (TRAIN_BACK + TRAIN_FRONT) / 2, 2.6, 0);
+    const shot = director.update({ now, dt, p: f.p, target: f.target, moving: f.moving, speed: f.speed, crash: derail > 0 || inCrash, cardOpen: f.cardSide !== 'none', center: vC, gap: GAP });
+    camera.position.copy(S.T).addScaledVector(back, S.d * shot.push);
     v2.copy(S.T);
+    if (shot.w > 0.001) {
+      const w = shot.w;
+      camera.position.lerp(shot.pos, w);
+      v2.lerp(shot.look, w);
+    }
     if (f.shake > 0) {
       const sh = f.shake * 0.32;
       camera.position.x += (Math.sin(now * 0.047) + Math.sin(now * 0.083) * 0.5) * sh;
@@ -501,10 +515,11 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
     }
     camera.up.set(0, 1, 0);
     camera.lookAt(v2);
-    camera.fov = S.fov; camera.aspect = aspect; camera.near = 0.3; camera.far = 1400;
+    camera.fov = shot.w > 0.001 ? lerp(S.fov, shot.fov + 4 * spd, shot.w) : S.fov; camera.aspect = aspect; camera.near = 0.3; camera.far = 1400;
     crash.late(camera, f.shake, now);
     camera.setViewOffset(W, H, W / 2 - ppx, H / 2 - ppy, W, H);
     camera.updateMatrixWorld();
+    S.camD = camera.position.distanceTo(S.T);
     sky.position.copy(camera.position);
 
     // sun/moon sits in the upper part of the free area
@@ -530,6 +545,15 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
     if (weather.rain.visible) { const u = weather.rainMat.uniforms; u.uTime.value = reduced ? time * 0.3 : time; u.uCenter.value.copy(S.T).addScaledVector(back, 38); u.uAmt.value = S.rain * ls; }
     puffs.mat.uniforms.uScale.value = pxScale;
     glows.mat.uniforms.uScale.value = pxScale;
+    {
+      // dust motes in the sun by day, fireflies on clear warm-region nights
+      const mu = motes.mat.uniforms, reg = stations[ns].region;
+      motes.points.visible = S.q <= 3;
+      mu.uTime.value = reduced ? time * 0.3 : time; mu.uCenter.value.copy(vC); mu.uScale.value = pxScale;
+      mu.uDust.value.copy(sun.color).multiplyScalar(0.05 * day * (0.5 + warm) * (1 - wetSky) * ls);
+      const fly = (reg === 'india' || reg === 'suburb' || reg === 'lake' || reg === 'town') ? smooth(0.4, 0.75, dark) * (1 - wetSky) * ls : 0;
+      mu.uFly.value.setRGB(0.75, 1.0, 0.35).multiplyScalar(0.9 * fly);
+    }
     birds.update(now, S.T.x, S.T.z, reduced ? 0 : 0.8 * (1 - smooth(0.3, 0.55, dark)) * (1 - S.rain) * ls);
 
     /* draw */
@@ -540,6 +564,27 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
       bloom.threshold = lerp(1.1, 0.85, dark); // by day only real highlights bloom, so signs stay readable
       const gu = grade.uniforms;
       gu.uRes.value.set(S.W * S.pr, S.H * S.pr); gu.uTime.value = reduced ? 0 : time; gu.uExposure.value = renderer.toneMappingExposure;
+      gu.uAspect.value = aspect;
+      // focus on the train; tilt-shift depth of field + background motion blur (q0-2 only)
+      v3.copy(vC).project(camera);
+      gu.uFocus.value.set(clamp(v3.x * 0.5 + 0.5, 0, 1), clamp(v3.y * 0.5 + 0.5, 0, 1));
+      const blurOk = S.q <= 2 && !inCrash;
+      gu.uTilt.value = blurOk ? shot.tilt * (S.q === 2 ? 0.7 : 1) : 0;
+      vS.copy(vC).setX(vC.x + 1).project(camera);
+      const mdx = (vS.x - v3.x) * W, mdy = (vS.y - v3.y) * H, ml = Math.hypot(mdx, mdy) || 1;
+      const msp = f.moving ? clamp(f.speed, 0, 1.5) : 0;
+      const tdir = f.target >= f.p ? 1 : -1;
+      gu.uMotion.value.set((-mdx / ml) * tdir * 18 * S.pr, (-mdy / ml) * tdir * 18 * S.pr);
+      gu.uMotAmt.value = blurOk && !reduced ? msp * (0.5 + 0.5 * shot.w) * (aspect < 1 ? 0.6 : 1) * (shot.kind === 'low' ? 0.5 : 1) : 0;
+      // letterbox while a travel shot is on screen (landscape only)
+      gu.uBars.value = shot.w * (aspect > 1.1 ? 0.075 : 0);
+      // sun / moon lens flare
+      vS.copy(camera.position).addScaledVector(S.sunDir, 600).project(camera);
+      const vis = vS.z < 1 ? 1 - smooth(0.85, 1.2, Math.max(Math.abs(vS.x), Math.abs(vS.y))) : 0;
+      gu.uFlarePos.value.set(vS.x * 0.5 + 0.5, vS.y * 0.5 + 0.5);
+      const fl = S.q <= 3 && !inCrash ? vis * (1 - wetSky) * ls : 0;
+      if (isMoon) gu.uFlare.value.copy(MOON).multiplyScalar(0.3 * dark * fl);
+      else gu.uFlare.value.copy(SUNC).lerp(WARM, warm * 0.6).multiplyScalar((0.35 + 0.5 * warm) * day * fl);
       composer.render(dt);
     } else renderer.render(scene, camera);
     S.init = true;
@@ -577,7 +622,7 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
     });
     train.geos.forEach((g) => g.dispose());
     landmarks.dispose(); disposeLoaders();
-    scenery.dispose(); puffs.dispose(); glows.dispose(); weather.dispose(); birds.dispose();
+    scenery.dispose(); motes.dispose(); puffs.dispose(); glows.dispose(); weather.dispose(); birds.dispose();
     crash.dispose(); skyEnv.dispose();
     bloom.dispose(); grade.dispose(); composer.dispose(); rt.dispose();
     renderer.dispose();
