@@ -699,7 +699,7 @@ export function startLine(root) {
   
   /* crash sequence — cue times match lib/world3d/crash.ts CRASH (the 3D side stages the shots on the same clock) */
   // Exterior only: the compartment, the flashlight and the page are our filmed scene, which autoScene(0) opens at END.
-  const CR = { SCREECH: 2.25, IMPACT: 2.55, SLOW1: 3.5, WIDE: 3.5, GLASS: 3.9, AFTER: 5.3, CAP1: 5.6, CAP2: 7.1, CAPOFF: 8.5, SKIP: 7.4, END: 8.8 };
+  const CR = { SCREECH: 2.25, IMPACT: 2.55, SLOW1: 3.5, WIDE: 3.5, GLASS: 3.9, AFTER: 5.3, CAP1: 5.6, CAP2: 7.1, CAPOFF: 9.3, SKIP: 7.4, END: 9.6 };
   const CRASH_CAP2 = 'Rescuers search the wreck by lantern light.';
   // corner mark while the 3D crash plays: this part is computer-generated (our filmed scene follows)
   const crashMark = document.createElement('div');
