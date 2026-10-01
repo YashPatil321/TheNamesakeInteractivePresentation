@@ -5,6 +5,7 @@ import './styles/fp.css';
 import './styles/scenes.css';
 import './styles/choices.css';
 import './styles/now.css';
+import './styles/archive.css';
 
 const rozha = Rozha_One({ weight: '400', subsets: ['latin'], variable: '--font-rozha', display: 'swap' });
 const spectral = Spectral({ weight: ['400', '600'], style: ['normal', 'italic'], subsets: ['latin'], variable: '--font-spectral', display: 'swap' });
