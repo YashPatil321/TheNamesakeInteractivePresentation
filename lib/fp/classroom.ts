@@ -202,7 +202,8 @@ export function buildClassroom(ctx: Ctx): Room {
   type Kid = { f: Figure; x: number; z: number; delay: number; ty: number; hy: number; hp: number; idle: number; writer: boolean };
   const kids: Kid[] = [];
   seats.forEach((s, i) => {
-    if (s.me || (s.x === 0.8 && s.z === 1.05)) return;
+    // empty: the desk ahead of Gogol (backpack), and the one at the near-left frame edge, where a classmate would crowd the shot
+    if (s.me || (s.x === 0.8 && s.z === 1.05) || (s.x === -0.98 && s.z === 1.05)) return;
     const f = figure(kit, {
       skin: skins[Math.floor(R() * skins.length)], top: tops[i % tops.length], bottom: 0x2d3e5e,
       hair: hairs[Math.floor(R() * hairs.length)], hairStyle: styles[Math.floor(R() * styles.length)],
@@ -212,8 +213,9 @@ export function buildClassroom(ctx: Ctx): Room {
     });
     f.root.position.set(s.x + (R() - 0.5) * 0.06, 0, s.z + 0.02);
     f.root.rotation.y = Math.PI;
-    f.armL.rotation.x = -0.75; f.foreL.rotation.x = -0.9; f.armL.rotation.z = -0.25;
-    f.armR.rotation.x = -0.75; f.foreR.rotation.x = -0.9; f.armR.rotation.z = 0.25;
+    // forearms rest on the desk top (0.74 m), hands drawn in toward the middle
+    f.armL.rotation.set(-0.92, 0.18, -0.05); f.foreL.rotation.x = -0.66;
+    f.armR.rotation.set(-0.92, -0.18, 0.05); f.foreR.rotation.x = -0.66;
     f.torso.rotation.x = 0.1;
     room.add(f.root);
     // target: face the camera, split between a torso twist and a head turn
@@ -341,6 +343,8 @@ export function buildClassroom(ctx: Ctx): Room {
       f.head.rotation.y = lerp(idleY, k.hy, a);
       f.head.rotation.x = lerp(idleX, k.hp, a);
       f.neck.rotation.x = lerp(0, -0.05, a);
+      // twisting round in the seat, the arms swing back against the twist so the hands stay on the desk
+      f.armL.rotation.y = 0.18 - f.torso.rotation.y * 0.8; f.armR.rotation.y = -0.18 - f.torso.rotation.y * 0.8;
       if (k.writer && a < 0.5) f.foreR.rotation.z = Math.sin(t * 9 + k.idle) * 0.06;
     }
 
