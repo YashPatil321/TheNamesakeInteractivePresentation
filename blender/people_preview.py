@@ -19,15 +19,15 @@ def place(name, pos, rot=(0, 0, 0), tint=None, ox=0.0):
 def person(ox, fem, hair, torso_, t, armz=0.08, extra=()):
     hip = 0.92
     for n in [f'head_{"f" if fem else "m"}', f'face_{"f" if fem else "m"}', hair, *extra]:
-        place(n, (0, hip + 0.67, 0), tint=t, ox=ox)
-    place('neck', (0, hip + 0.6, 0), tint=t, ox=ox)
+        place(n, (0, hip + 0.635, 0), tint=t, ox=ox)
+    place('neck_f' if fem else 'neck_m', (0, hip + 0.6, 0), tint=t, ox=ox)
     place(torso_, (0, hip, 0), tint=t, ox=ox)
     if 'shirt' in torso_ and not fem:
         place('collar', (0, hip, 0), tint=t, ox=ox)
-    sw = 0.9 if fem else 1.0
+    sw = 0.165 / 0.185 if fem else 1.0
     for s in (-1, 1):
-        place('arm_upper', (s * 0.22 * sw, hip + 0.55, 0), (0, 0, s * armz), tint=t, ox=ox)
-        ex, ey = s * 0.22 * sw + math.sin(s * armz) * 0.28, hip + 0.55 - math.cos(armz) * 0.28
+        place('arm_upper', (s * 0.185 * sw, hip + 0.505, 0), (0, 0, s * armz), tint=t, ox=ox)
+        ex, ey = s * 0.185 * sw + math.sin(s * armz) * 0.28, hip + 0.505 - math.cos(armz) * 0.28
         place('arm_fore', (ex, ey, 0), (-0.2, 0, s * armz), tint=t, ox=ox)
         place('hand_' + ('R' if s > 0 else 'L'), (ex, ey, 0), (-0.2, 0, s * armz), tint=t, ox=ox)
         place('leg_standing', (s * 0.1, 0, 0), tint=t, ox=ox)
@@ -65,3 +65,4 @@ def shoot(out, tgt, dist, lens, w, h):
 
 shoot(PREVIEW, (0.55, 0, 1.0), 4.2, 40, 900, 600)
 shoot(PREVIEW.replace('.png', '_faces.png'), (0.27, 0, 1.63), 1.1, 60, 900, 450)
+shoot(PREVIEW.replace('.png', '_chest.png'), (1.1, 0, 1.45), 1.3, 50, 700, 600)
