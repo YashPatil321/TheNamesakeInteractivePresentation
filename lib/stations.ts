@@ -80,8 +80,7 @@ export const STATIONS: Station[] = [
     ],
     voice: { gogol: 'Gogol is the name I know. Why would I answer to a stranger\'s name?', nikhil: 'Nikhil? That\'s someone else. I don\'t know him yet.' },
     poll: { predict: true, q: 'He stays "Gogol" at school. By the time he is 14, how will he feel about his name?', options: ['Proud of it', 'Embarrassed by it', 'He won\'t think about it'], actual: 'Embarrassed. At 14 he shelves a book with his name on the cover, unread, and before college he changes his name in court.' },
-    analysis: { tag: 'INSTITUTIONAL', text: 'A school official, not the family, ends up deciding what the child is called.', world: 'Students with non-English names are still renamed or given nicknames by teachers who find their names "hard."' },
-    video: 'videos/kindergarten.mp4', shots: ['Small backpack, parents crouched to his height', 'He shakes his head: "I\'m Gogol."', 'The principal shrugs and writes GOGOL'] },
+    analysis: { tag: 'INSTITUTIONAL', text: 'A school official, not the family, ends up deciding what the child is called.', world: 'Students with non-English names are still renamed or given nicknames by teachers who find their names "hard."' } },
 
   { year: '1970s', title: 'Pemberton Road', place: 'Suburban Massachusetts', code: 'PEM', region: 'suburb', name: 'gogol', try: 'rub',
     sky: ['#27447a', '#9cc3e0'],
@@ -163,8 +162,7 @@ export const STATIONS: Station[] = [
     ],
     voice: { gogol: 'We both know what it\'s like to live between two worlds.', nikhil: 'She\'s the one person who knows both of my names.' },
     poll: { predict: true, q: 'Two people who understand both worlds, and a big Bengali wedding. Will the marriage last?', options: ['Yes, they found each other', 'No, it will fall apart'], actual: 'It falls apart. Moushumi begins an affair with Dimitri Desjardins, a man from her past, and the marriage ends.' },
-    analysis: { tag: 'INTERNALIZED', text: 'Both of them carry the same inner conflict. Part of the attraction is that neither has to explain.', world: 'Family and community expectations around marriage are still a major pressure for many second-generation kids.' },
-    video: 'videos/moushumi.mp4', shots: ['Two chairs at a small table, evening', '"My mother made me come tonight." "Mine too."', '"I remember you as Gogol." "I\'ll remember both."'] },
+    analysis: { tag: 'INTERNALIZED', text: 'Both of them carry the same inner conflict. Part of the attraction is that neither has to explain.', world: 'Family and community expectations around marriage are still a major pressure for many second-generation kids.' } },
 
   { year: '~2000', title: 'Coming Apart', place: 'New York City', code: 'NYC', region: 'nyc', name: 'nikhil',
     sky: ['#0b0d16', '#2c2238'],
@@ -186,8 +184,7 @@ export const STATIONS: Station[] = [
     quote: { text: 'The man who gave you his name, from the man who gave you your name.', cite: 'Ashoke\'s inscription' },
     voice: { gogol: 'The man who gave me his name. I\'m finally ready to read him.', nikhil: 'Nikhil and Gogol were always the same person.' },
     special: 'finale',
-    analysis: { tag: 'RESISTANCE', text: 'Healing is personal. Gogol stops choosing between his names and accepts both, and Ashima chooses a life in two countries.', world: 'Hope: you don\'t have to choose between two cultures to belong.' },
-    video: 'videos/finale.mp4', shots: ['Christmas lights and party noise', 'Ashima tells the room the house is sold', 'Gogol looks at his father\'s photo, then climbs the stairs'] },
+    analysis: { tag: 'RESISTANCE', text: 'Healing is personal. Gogol stops choosing between his names and accepts both, and Ashima chooses a life in two countries.', world: 'Hope: you don\'t have to choose between two cultures to belong.' } },
 ];
 
 export const NAME_COLORS: Record<NameLens, string> = { none: '#8a90a8', gogol: '#f2a33a', nikhil: '#5eaaff', both: '#c9a3ff' };
@@ -200,7 +197,7 @@ export const NOTES: string[][] = [
   ['Still a flashback. Ashima is 19 and has not met her husband.', 'Hands-on: have someone click "Slip your feet in".', 'Talking point: isolation is the first cost of immigrating.'],
   ['The first stop where Gogol is on the train. Track turns orange.', 'Hands-on: let a classmate try to fill the birth certificate, then wait for the letter three times.', 'Institutional: a hospital form overrides a Bengali naming tradition.', 'Optional: press "Why Gogol?" to rewind to the crash.'],
   ['The rice ceremony: the Bengali community acts as family.', 'Hands-on: ask the class which item baby Gogol will pick, then tap it.', 'Read the "lifelong pregnancy" quote aloud.'],
-  ['Class vote: tap once per raised hand, then reveal.', 'Institutional: the principal, not the parents, decides his name.', 'Scene video station (kindergarten).'],
+  ['Class vote: tap once per raised hand, then reveal.', 'Institutional: the principal, not the parents, decides his name.', 'Talking point: a school official, not his parents, decides what he is called.'],
   ['Hands-on: rub the gravestone.', 'Interpersonal: the mailbox vandalism.', 'Real world: the 1987 "Dotbusters" in Jersey City.'],
   ['Hands-on: try to open the book, and it goes on the shelf.', 'Step inside (press E): his bedroom on his 14th birthday, Ashoke in the doorway.', 'Internalized: he rejects the gift before he knows what it means.', 'Plant the seed: this book comes back at the very end.'],
   ['English class turns into public humiliation.', 'Real world: Kohli & Solórzano (2012) on students\' names.'],
@@ -208,9 +205,9 @@ export const NOTES: string[][] = [
   ['Turning point: the truth in the car.', 'Press E for the passenger seat: Ashoke tells the story.', 'Read the quote slowly: "You remind me of everything that followed."'],
   ['The Ratliffs: the easy America he wanted.', 'Class vote, then reveal.', 'Ideological: the "perpetual foreigner" belief.', 'Scene video station (dinner with the Ratliffs).'],
   ['The climax. Our filmed scene carries the phone call.', 'Breaking point: he shaves his head, the first tradition he chooses.', 'Scene video station (the phone call).'],
-  ['Moushumi: two people who both know both of his names.', 'Internalized: expectations around marriage.', 'Scene video station (the first date).'],
+  ['Moushumi: two people who both know both of his names.', 'Internalized: expectations around marriage.'],
   ['The marriage ends. Neither path came with a script.', 'Turning point: identity cannot be handed to you.', 'Scene video station (Dimitri).'],
-  ['The track braids orange and blue. He is both now.', 'Scene video station (the last party), then he goes upstairs to the book.', 'If every station is visited, open the book for the finale.', 'After the finale, run the ticket inspector quiz with the class.'],
+  ['The track braids orange and blue. He is both now.', 'If every station is visited, open the book for the finale.', 'After the finale, run the ticket inspector quiz with the class.'],
 ];
 
 export interface QuizQuestion { q: string; options: string[]; answer: number; why: string }

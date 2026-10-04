@@ -17,7 +17,7 @@ export default function VideoPage() {
         <p className="shoot-eyebrow">Shoot sheet</p>
         <h1>The scenes we film</h1>
         <p className="shoot-sum">
-          7 scenes · 25–30 sec each · about 1½ hours at one house ·{' '}
+          4 scenes · filmed at one place ·{' '}
           <b>{done} of {SCENES.length} filmed</b>
         </p>
       </header>

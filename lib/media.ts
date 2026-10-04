@@ -1,7 +1,7 @@
 // One visual language for "what kind of picture is this?", shared by the line, the card, the scene pop-up,
 // the first-person rooms, Our Scenes and the presenter remote. Styles: app/styles/media.css (classes mk-*).
 //
-//   FILMED    warm film-strip badge with sprocket holes: the seven scenes our group acts and films.
+//   FILMED    warm film-strip badge with sprocket holes: the scenes our group acts and films.
 //   GENERATED cool blue badge with a wireframe cube: anything the computer draws (3D crash, 3D rooms,
 //             Then & Now animations).
 //
