@@ -887,10 +887,9 @@ export function startLine(root) {
     const a = s.analysis;
     let panel = '';
     if (st.tab === 'story') {
-      panel = archiveMod.html(i, cardApi()) + fpHTML(i, s) + s.story.map((p) => `<p>${esc(p)}</p>`).join('') + choicesMod.html(i, cardApi()) +
-        (s.quote ? `<blockquote class="quote">${esc(s.quote.text)}<cite>${esc(s.quote.cite)}</cite></blockquote>` : '') +
-        (s.detail ? `<p style="font-size:.95rem;color:var(--ink-soft)">${esc(s.detail)}</p>` : '') +
-        tryHTML(i, s) + voiceHTML(s) + pollHTML(i, s) + specialHTML(i, s);
+      // kept short on purpose: the story in two plain sentences, then one thing to do
+      panel = `<div class="story-simple">${s.story.map((p) => `<p>${esc(p)}</p>`).join('')}</div>` + choicesMod.html(i, cardApi()) +
+        tryHTML(i, s) + pollHTML(i, s) + fpHTML(i, s) + specialHTML(i, s) + voiceHTML(s);
     } else if (st.tab === 'now') {
       panel = nowHtml;
     } else if (st.tab === 'analysis') {

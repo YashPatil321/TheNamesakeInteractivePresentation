@@ -961,3 +961,7 @@ a.btn { display: inline-flex; }
 .sp-bar { height: 3px; border-radius: 3px; background: rgba(236,228,207,.15); overflow: hidden; }
 .sp-bar i { display: block; height: 100%; background: var(--gogol); transform-origin: left; transform: scaleX(0); transition: transform .25s linear; }
 @media (prefers-reduced-motion: reduce) { .sp-frame { transition: none; transform: none; } }
+
+/* simpler story tab: two short, larger sentences */
+.panel .story-simple p { font-size: 1.22rem; line-height: 1.55; margin: 0 0 .7em; }
+.panel .story-simple p:first-child { margin-top: .2em; }

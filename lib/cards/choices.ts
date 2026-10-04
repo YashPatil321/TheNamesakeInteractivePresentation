@@ -19,60 +19,60 @@ interface Decision {
 
 const DECISIONS: Record<number, Decision> = {
   2: {
-    prompt: 'Your son is born. The letter from Ashima\'s grandmother with his good name hasn\'t come, and the hospital won\'t discharge a baby without a name on the birth certificate. What do you do?',
+    prompt: 'Your son is born, but his real name hasn\'t arrived from India. The hospital needs a name now. What do you do?',
     options: [
       { label: 'Wait for the letter', whatIf: 'The Gangulis refuse to fill the blank and wait. Days pass in a hospital ward far from family, and the form stays the same. The rule doesn\'t bend for Bengali custom, so either way an institution, not the family, sets the clock on their son\'s name.' },
       { label: 'Write his pet name, "Gogol," for now', book: true },
       { label: 'Let the hospital staff suggest an American name', whatIf: 'He gets a name that fits every form but carries nothing from Calcutta or from his father\'s train. Assimilation is decided for him on his first day of life. Institutional pressure doesn\'t always look like force. Sometimes it is a blank that must be filled now.' },
     ],
-    outcome: 'Ashoke writes "Gogol." The letter never arrives, so a pet name meant only for home becomes his legal name. A hospital rule overrode a Bengali tradition.',
+    outcome: 'Ashoke writes "Gogol." The letter never comes, so Gogol becomes his legal name.',
     lens: 'Institutional', hide: [1],
   },
   4: {
-    prompt: 'First day of kindergarten. Your parents tell you that at school you will be "Nikhil," your new good name. The principal asks what you want to be called.',
+    prompt: 'First day of school. Your parents want you to be "Nikhil" here. What do you tell the principal?',
     options: [
       { label: 'Answer to "Nikhil"', whatIf: 'He grows up as Gogol at home and Nikhil in the world, the split Bengali custom intended. He might be spared some teasing, but nobody at school would ever ask about the name his father chose, or the story behind it. Fitting in can quietly bury a history.' },
       { label: 'Keep "Gogol"', book: true },
     ],
-    outcome: 'He refuses: he doesn\'t know anyone called Nikhil. The principal, Mrs. Lapidus, overrules his parents and lets him keep "Gogol." A school official, not his family, decides his name for the next 13 years.',
+    outcome: 'He says "Gogol," and the principal lets him keep it, even though his parents wanted Nikhil.',
     lens: 'Institutional', hide: [1],
   },
   7: {
-    prompt: 'Your English teacher starts a lesson on Nikolai Gogol\'s strange, lonely life and miserable death. Every head turns toward you. Then the class is assigned his story.',
+    prompt: 'Your class is learning about Nikolai Gogol, and everyone is staring at you. What do you do?',
     options: [
       { label: 'Read the story', whatIf: 'He reads "The Overcoat" that week and finds a lonely clerk, an outsider, not a joke. He might even ask his father why that writer matters so much. The humiliation came from other people, but the refusal is internalized: rejecting the name before learning what it means.' },
       { label: 'Refuse to read it', book: true },
     ],
-    outcome: 'He sits through the lesson, humiliated, and refuses to read the story. A lesson meant as enrichment turns his name into a spotlight.',
+    outcome: 'He sits through it, embarrassed, and refuses to read the story.',
     lens: 'Interpersonal', hide: [1],
   },
   8: {
-    prompt: 'At a party you introduce yourself as "Nikhil" for the first time, and it works. Now you\'re leaving for Yale. Do you change your name in court?',
+    prompt: 'At a party you call yourself "Nikhil," and it works. Do you change your name for real?',
     options: [
       { label: 'Legally become Nikhil', book: true },
       { label: 'Use "Nikhil" as a nickname, keep Gogol on paper', whatIf: 'He tries out Nikhil without erasing Gogol, the way a daknam and a bhalonam were meant to live side by side. The pressure to fit in is still there, but he doesn\'t have to go to court to make himself acceptable.' },
       { label: 'Stay "Gogol" everywhere', whatIf: 'He walks into Yale as Gogol and answers the same jokes and questions every semester. It would take courage, and it would put the work of adjusting on everyone else instead of on him. That is exactly the work that ideological pressure tells immigrants is theirs alone.' },
     ],
-    outcome: 'Before leaving for Yale he goes to court and legally changes his name. His parents reluctantly agree. At college he is Nikhil to everyone, but he keeps feeling like he is pretending.',
+    outcome: 'He changes his name in court. At college, everyone knows him as Nikhil.',
     lens: 'Internalized', hide: [1],
   },
   11: {
-    prompt: 'The phone rings. Ashoke, working temporarily in Ohio, has died suddenly of a heart attack. Someone has to fly to Cleveland to identify him and empty his apartment.',
+    prompt: 'Your dad has died suddenly in Ohio. What do you do?',
     options: [
       { label: 'Go to Cleveland alone', book: true },
       { label: 'Bring Maxine with you', whatIf: 'Maxine sees his father\'s small, borrowed apartment and the part of Gogol her family\'s easy world never asked about. Maybe she understands. Or maybe the distance shows sooner, because grief pulls him toward rituals her table has no place for.' },
     ],
-    outcome: 'Gogol flies to Cleveland alone. Back home he shaves his head, following Bengali mourning custom, the first tradition he chooses for himself. He drifts away from Maxine.',
+    outcome: 'Gogol flies to Cleveland alone, then shaves his head to mourn, his first Bengali tradition by choice.',
     lens: 'Breaking point', hide: [0, 1],
   },
   13: {
-    prompt: 'Your marriage is over. Being Nikhil didn\'t fix you, and neither did the "right" Bengali marriage. Christmas is coming, and your mother is selling the house on Pemberton Road. What now?',
+    prompt: 'Your marriage is over, and your mom is selling the family house. What now?',
     options: [
       { label: 'Start over somewhere no one knows either name', whatIf: 'A new city, a new job, and nobody who can ask about Gogol or Nikhil. It might feel like freedom, but running from both names is still letting other people\'s judgments decide who he is.' },
       { label: 'Go home for the last Christmas Eve party', book: true },
       { label: 'Go all in on "Nikhil" and never look back', whatIf: 'He seals the name change for good and leaves Gogol in the house his mother is selling. Assimilation offers belonging at a price: the story his father gave him stays on a shelf, unread, forever.' },
     ],
-    outcome: 'Ashima is selling the house to split her year between Calcutta and America. Gogol goes back to Pemberton Road for her last Christmas Eve party, the house where the book is still waiting.',
+    outcome: 'On Christmas Eve he finds his dad\'s book and starts reading it.',
     lens: 'Turning point', hide: [],
   },
 };
@@ -161,7 +161,7 @@ const mod: CardModule = {
     // Veil the paragraphs that give the outcome away, and put the choice before them.
     if (d && box.classList.contains('ch-ask') && d.hide.length) {
       const story = api.stations[i].story;
-      const ps = Array.from(root.querySelectorAll<HTMLParagraphElement>('.panel > p'));
+      const ps = Array.from(root.querySelectorAll<HTMLParagraphElement>('.panel > p, .panel .story-simple > p'));
       const veiled = d.hide.map((k) => ps.find((p) => p.textContent === story[k])).filter((p): p is HTMLParagraphElement => !!p);
       if (veiled.length) {
         veiled[0].before(box);
