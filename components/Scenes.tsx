@@ -149,7 +149,7 @@ export default function Scenes({ mode }: { mode: 'page' | 'overlay' }) {
       if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'VIDEO' || t.isContentEditable)) return;
       let moved = false;
       if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); nudge(e.key === 'ArrowRight' ? 1 : -1); moved = true; }
-      else if (/^[1-4]$/.test(e.key)) { goTo(+e.key - 1); moved = true; }
+      else if (/^[1-7]$/.test(e.key)) { goTo(+e.key - 1); moved = true; }
       if (moved && t?.classList.contains('sc-card')) {
         requestAnimationFrame(() => cardRefs.current[mod(phys.current.target)]?.focus({ preventScroll: true }));
       }
@@ -210,9 +210,9 @@ export default function Scenes({ mode }: { mode: 'page' | 'overlay' }) {
             {mode === 'page' && (
               <Link href="/" className="sc-back"><span aria-hidden="true">←</span> Back to the line</Link>
             )}
-            <p className="sc-kicker">The Namesake Line · our reels</p>
+            <p className="sc-kicker">The Namesake Line · seven reels</p>
             <Title className="sc-title" id={`sc-title-${mode}`}>Our Scenes</Title>
-            <p className="sc-sub">The moments we act out, at the turning points of the story.</p>
+            <p className="sc-sub">Seven moments we act out, one for each turning point.</p>
             <p className="sc-made">
               <span dangerouslySetInnerHTML={{ __html: filmBadge('Filmed by our group', 'sm') }} />
               <span className="sc-made-t">{GROUP_CREDIT}.</span>
@@ -380,7 +380,7 @@ function Detail({ scene, status, mode, onPrev, onNext }: {
             <ul className="sc-props">{scene.props.map((p) => <li key={p}>{p}</li>)}</ul>
           </section>
         </div>
-        <p className="sc-shoot"><span className="sc-label">Shoot</span> {scene.shoot.place}</p>
+        <p className="sc-shoot"><span className="sc-label">Shoot</span> Block {scene.shoot.block} of 3 · {scene.shoot.place}</p>
       </div>
 
       <div className="sc-d-board">

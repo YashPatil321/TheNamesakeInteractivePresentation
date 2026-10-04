@@ -6,6 +6,29 @@ import type { Scene } from '@/lib/scenes';
 const mono = { fontFamily: 'var(--mono)', fontWeight: 700 } as const;
 const hand = { fontFamily: 'var(--hand)' } as const;
 
+function School({ u }: { u: string }) {
+  return (
+    <>
+      <rect width="160" height="100" fill="#e3b778" />
+      <rect x="14" y="8" width="132" height="40" rx="2" fill="#35523f" />
+      <rect x="14" y="8" width="132" height="40" rx="2" fill="none" stroke="#8a5a2e" strokeWidth="3" />
+      <text x="24" y="26" fontSize="9" fill="#dfe8dc" style={hand}>A B C  1 2 3</text>
+      <path d="M22 36 q10 -6 20 0 t20 0" stroke="#dfe8dc" strokeWidth="1" fill="none" opacity=".6" />
+      <rect x="0" y="66" width="160" height="34" fill="#8e5a31" />
+      <rect x="0" y="66" width="160" height="4" fill="#a86d3e" />
+      <g transform="rotate(-5 80 70)">
+        <rect x="46" y="54" width="68" height="34" rx="3" fill="#fbf7ec" />
+        <rect x="46" y="54" width="68" height="9" rx="3" fill="#b8382a" />
+        <text x="80" y="61" fontSize="5" textAnchor="middle" fill="#fff" style={mono}>HELLO my name is</text>
+        <text x="80" y="80" fontSize="14" textAnchor="middle" fill="#1d1b26" style={mono}>GOGOL</text>
+      </g>
+      <rect x="120" y="72" width="30" height="4" rx="2" fill="#f2c14a" transform="rotate(18 135 74)" />
+      <circle cx="24" cy="78" r="7" fill="#c7372b" />
+      <path d="M24 71 q2 -4 5 -4" stroke="#5a3a1a" strokeWidth="1.4" fill="none" />
+    </>
+  );
+}
+
 function Party({ u }: { u: string }) {
   const dots: [number, number, number, string][] = [
     [18, 18, 9, '#ff5fa2'], [48, 10, 6, '#ffd166'], [132, 16, 10, '#5ee1ff'], [104, 30, 5, '#ff8a5b'], [150, 44, 7, '#b388ff'],
@@ -71,6 +94,30 @@ function Phone({ u }: { u: string }) {
   );
 }
 
+function DateNight({ u }: { u: string }) {
+  return (
+    <>
+      <defs>
+        <linearGradient id={`${u}d1`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#1a1f36" /><stop offset="1" stopColor="#3a2a35" /></linearGradient>
+        <radialGradient id={`${u}d2`} cx=".5" cy=".62" r=".45"><stop offset="0" stopColor="#ffcf7a" stopOpacity=".55" /><stop offset="1" stopColor="#ffcf7a" stopOpacity="0" /></radialGradient>
+      </defs>
+      <rect width="160" height="100" fill={`url(#${u}d1)`} />
+      {[14, 30, 46, 112, 128, 144].map((x, k) => <rect key={k} x={x} y={10 + (k % 3) * 6} width="8" height="12" fill={k % 2 ? '#e8c27a' : '#6d7aa8'} opacity=".55" />)}
+      <rect width="160" height="100" fill={`url(#${u}d2)`} />
+      <circle cx="46" cy="44" r="9" fill="#2a1d19" />
+      <path d="M30 86 C30 60 62 58 64 86Z" fill="#2c3e63" />
+      <circle cx="114" cy="44" r="9" fill="#2a1d19" />
+      <path d="M100 52 C96 40 132 38 128 54 L124 60 L104 60Z" fill="#1a1210" />
+      <path d="M96 86 C98 60 130 58 132 86Z" fill="#7a2c3e" />
+      <rect x="40" y="74" width="80" height="6" rx="2" fill="#5a3a28" />
+      <rect x="66" y="62" width="5" height="12" rx="1" fill="#cfe3ee" opacity=".8" />
+      <rect x="89" y="62" width="5" height="12" rx="1" fill="#cfe3ee" opacity=".8" />
+      <rect x="78" y="66" width="4" height="8" fill="#f3ead2" />
+      <ellipse cx="80" cy="63" rx="1.6" ry="3" fill="#ffcf5a" />
+    </>
+  );
+}
+
 function Apart({ u }: { u: string }) {
   return (
     <>
@@ -93,7 +140,29 @@ function Apart({ u }: { u: string }) {
   );
 }
 
-const ART: Record<number, (p: { u: string }) => React.JSX.Element> = { 1: Party, 2: Dinner, 3: Phone, 4: Apart };
+function LastParty({ u }: { u: string }) {
+  return (
+    <>
+      <defs>
+        <linearGradient id={`${u}l1`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#3a2418" /><stop offset="1" stopColor="#1a100c" /></linearGradient>
+      </defs>
+      <rect width="160" height="100" fill={`url(#${u}l1)`} />
+      <path d="M0 12 Q40 22 80 12 T160 12" stroke="#4a3426" strokeWidth=".8" fill="none" />
+      {[8, 22, 36, 50, 64, 78, 92, 106, 120, 134, 148].map((x, k) => <circle key={k} cx={x} cy={14 + Math.sin(k) * 3} r="1.8" fill={['#ffd36b', '#ff7a6b', '#8fe0a0', '#7ab8ff'][k % 4]} />)}
+      {[0, 1, 2, 3, 4, 5].map((k) => <rect key={k} x={110 + k * 8} y={84 - k * 10} width="50" height="10" fill={k % 2 ? '#4a3020' : '#56382a'} />)}
+      <circle cx="130" cy="34" r="6" fill="#140c08" />
+      <path d="M122 54 C122 38 140 38 140 54 L138 64 L124 64Z" fill="#140c08" />
+      <circle cx="28" cy="46" r="7" fill="#2a1a12" />
+      <path d="M18 88 C18 60 40 58 40 88Z" fill="#8a2c3a" />
+      <circle cx="52" cy="48" r="6.5" fill="#2a1a12" />
+      <path d="M43 88 C43 62 62 60 62 88Z" fill="#c2803a" />
+      <circle cx="80" cy="50" r="6" fill="#2a1a12" opacity=".7" />
+      <path d="M72 88 C72 64 90 62 90 88Z" fill="#3a4a6a" opacity=".7" />
+    </>
+  );
+}
+
+const ART: Record<number, (p: { u: string }) => React.JSX.Element> = { 1: School, 2: Party, 3: Dinner, 4: Phone, 5: DateNight, 6: Apart, 7: LastParty };
 
 export default function SceneArt({ scene, className = '' }: { scene: Scene; className?: string }) {
   const Art = ART[scene.n];
