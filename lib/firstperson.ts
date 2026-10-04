@@ -102,7 +102,7 @@ export function startFirstPerson(container: HTMLElement, kind: FpKind, opts: FpO
     return fallback();
   }
   const hq = /[?&]fphq\b/.test(location.search);
-  let pixelRatio = Math.min(window.devicePixelRatio || 1, 1.75);
+  let pixelRatio = Math.min(window.devicePixelRatio || 1, 1.25);
   renderer.setPixelRatio(pixelRatio);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -417,7 +417,7 @@ export function startFirstPerson(container: HTMLElement, kind: FpKind, opts: FpO
     // adaptive resolution for weak GPUs
     if (!hq && rawDt > 0 && rawDt < 0.5) {
       if (rawDt > 0.034) { slow++; fast = 0; } else if (rawDt < 0.019) { fast++; slow = Math.max(0, slow - 1); }
-      if (slow > 45 && pixelRatio > 0.75) { pixelRatio = Math.max(0.75, pixelRatio - 0.25); renderer.setPixelRatio(pixelRatio); resize(); slow = 0; }
+      if (slow > 25 && pixelRatio > 0.75) { pixelRatio = Math.max(0.75, pixelRatio - 0.25); renderer.setPixelRatio(pixelRatio); resize(); slow = 0; }
     }
 
     for (let i = anims.length - 1; i >= 0; i--) {

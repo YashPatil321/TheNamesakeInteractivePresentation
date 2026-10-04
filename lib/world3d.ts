@@ -57,6 +57,16 @@ export interface WorldOptions {
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 /** Returns null when WebGL is unavailable; the engine then keeps the 2D canvas. */
+/** Starting quality: start light and only the strongest machines get the heavy extras. Drops further on its own if frames run slow. */
+function startQuality() {
+  try {
+    const cores = navigator.hardwareConcurrency || 4;
+    const small = Math.min(screen.width, screen.height) < 700;
+    if (small || cores <= 4) return 3;
+    return 2;
+  } catch { return 2; }
+}
+
 export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): World | null {
   let renderer: THREE.WebGLRenderer;
   try {
@@ -155,7 +165,7 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
     lens: '', lensCol: new THREE.Color(NAME_COLORS.gogol), visitedMask: -1, curMask: -1,
     emit: 0, stackEmit: 0, camD: 40,
     // adaptive quality
-    q: qParam === 'low' ? 4 : /^[0-5]$/.test(qParam) ? +qParam : 0, qLocked: qParam === 'high' || qParam === 'low' || /^[0-5]$/.test(qParam), slow: 0, frames: 0, ema: 16,
+    q: qParam === 'low' ? 4 : qParam === 'high' ? 0 : /^[0-5]$/.test(qParam) ? +qParam : startQuality(), qLocked: qParam === 'high' || qParam === 'low' || /^[0-5]$/.test(qParam), slow: 0, frames: 0, ema: 16,
     measureT: 0, layout: { cardRight: 0, cardTop: 0, hud: 64, rail: 90 },
     introK: 0, // 1 while the title screen composes the shot (train right of the type on wide screens), eases to 0 after boarding
   };
@@ -217,10 +227,10 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
   function adapt(dtMs: number) {
     if (S.qLocked || document.hidden) return;
     S.frames++;
-    if (S.frames < 90 || dtMs > 250) return;
-    S.ema = lerp(S.ema, dtMs, 0.05);
-    if (S.ema > 24) S.slow++; else S.slow = Math.max(0, S.slow - 2);
-    if (S.slow > 90 && S.q < 5) { S.q++; S.slow = 0; S.ema = 16; S.frames = 30; applyQuality(); }
+    if (S.frames < 60 || dtMs > 250) return;
+    S.ema = lerp(S.ema, dtMs, 0.08);
+    if (S.ema > 20) S.slow++; else S.slow = Math.max(0, S.slow - 2);
+    if (S.slow > 40 && S.q < 5) { S.q++; S.slow = 0; S.ema = 16; S.frames = 30; applyQuality(); }
   }
 
   /* ---------- text ---------- */

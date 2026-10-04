@@ -646,7 +646,8 @@ export function startLine(root) {
     // grayscale for flashbacks
     const p = stationPos(), i = clamp(Math.round(p), 0, STATIONS.length - 1);
     st.gray = lerp(st.gray, STATIONS[i].flashback && st.started && !st.opening ? 1 : 0, .04); // the title shot and the opening ride stay in colour
-    view.style.filter = st.gray > .01 ? `grayscale(${st.gray}) contrast(${1 + st.gray * .15}) sepia(${st.gray * .15})` : '';
+    const g2 = Math.round(st.gray * 50) / 50; // only touch the (expensive) canvas filter when it actually changes
+    if (g2 !== st.grayApplied) { st.grayApplied = g2; view.style.filter = g2 > .01 ? `grayscale(${g2}) contrast(${1 + g2 * .15}) sepia(${g2 * .15})` : ''; }
     // crash timeline
     if (st.crashT >= 0) crashTick(dt / 1000);
     st.shake = Math.max(0, st.shake - dt / 900);
@@ -654,7 +655,10 @@ export function startLine(root) {
     snd.tick(now, st.speed);
     if (!music && snd.ctx && snd.ctx.state === 'running') { music = createMusic(snd.ctx, snd.ctx.destination); music.setEnabled(snd.on); }
     if (music && !disposed) music.setStation(clamp(Math.round(stationPos()), 0, STATIONS.length - 1), st.moving);
-    if (world) {
+    // a full-screen layer (our filmed scene, a first-person room, Our Scenes, the finale) hides the world: don't draw it
+    const covered = (scenePop.classList.contains('on') && !scenePop.hidden) || !fpBox.hidden || !scenesOv.hidden || !$('#finale').hidden;
+    if (world && covered) { /* paused */ }
+    else if (world) {
       world.render({ now, p: stationPos(), cur: st.cur, target: st.target, moving: st.moving, speed: st.speed, derail: st.derail, crashT: st.crashT,
         shake: reduced ? 0 : st.shake, lens: st.lens, visited: st.visited, parX: par.x, parY: par.y,
         cardSide: ticket.classList.contains('away') ? 'none' : (window.innerWidth < 760 ? 'bottom' : 'left'), intro: !st.started });
@@ -668,7 +672,7 @@ export function startLine(root) {
     if (i === st.cur && !st.moving && st.trainX === i * SP) { showCard(); return; } // already parked here
     const dist = Math.abs(i * SP - st.trainX) / SP;
     st.from = st.trainX; st.to = i * SP; st.t0 = performance.now(); st.target = i; st.moving = true;
-    st.dur = reduced ? 300 : opts.dur || clamp(900 + dist * 520, 1300, 4200) * (opts.rewind ? .55 : 1);
+    st.dur = reduced ? 300 : opts.dur || clamp(1700 + dist * 1050, 2800, 8000) * (opts.rewind ? .55 : 1);
     st.derail = 0;
     if (!scenePop.hidden) closeScenePop();
     hideCard();
@@ -1157,7 +1161,7 @@ export function startLine(root) {
     const startAt = hashStation();
     st.trainX = startAt * SP - 900; st.camX = st.trainX - anchor; st.cur = Math.max(0, startAt - 1);
     st.opening = true; setTimeout(() => { st.opening = false; }, 3900);
-    setTimeout(() => travelTo(startAt, { dur: 3400 }), 450);
+    setTimeout(() => travelTo(startAt, { dur: 4600 }), 450);
     setTimeout(() => root.classList.remove('pre'), reduced ? 0 : 2600);
     publish();
   }
