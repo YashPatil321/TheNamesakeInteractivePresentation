@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, type CSSProperties } from 'react';
 import { startLine } from '@/lib/engine';
+import { PRAXIS } from '@/lib/praxis';
+import { NEWS } from '@/lib/news';
 import { STATIONS } from '@/lib/stations';
 import Scenes from '@/components/Scenes';
 
@@ -56,7 +58,7 @@ export default function NamesakeLine() {
           </button>
           <button className="chip-btn ico opt-hide" id="analysisBtn" aria-pressed="false" title="Highlight the 4 I's across the timeline (A)"><span className="chip-label">4 I&apos;s</span></button>
           <button className="chip-btn ico" id="soundBtn" aria-pressed="true" title="Sound (M)">Sound</button>
-          <button className="chip-btn ico opt-hide" id="presentBtn" aria-pressed="false" title="Presenter mode (P)"><span className="chip-label">Present</span></button>
+          <button className="chip-btn ico" id="praxisBtn" title="Our analysis (Y)"><span className="chip-label">Our analysis</span></button>
           <button className="chip-btn ico" id="scenesBtn" title="Our scenes (S)"><span className="chip-label">Scenes</span></button>
           <button className="chip-btn ico" id="passBtn" title="Your passport (V)">
             <span className="pp-word">Passport</span><span className="pp-count"><b id="passN">0</b>{`/${STATIONS.length}`}</span>
@@ -98,17 +100,44 @@ export default function NamesakeLine() {
             <dt><kbd>Q</kbd></dt><dd>Ticket inspector quiz</dd>
             <dt><kbd>E</kbd></dt><dd>Step inside a first-person view (4 stations)</dd>
             <dt><kbd>S</kbd></dt><dd>Our scenes</dd>
-            <dt><kbd>P</kbd></dt><dd>Presenter mode (hides extra buttons)</dd>
+            <dt><kbd>Y</kbd></dt><dd>Our analysis (the 5 parts of the Praxis Story framework)</dd>
             <dt><kbd>F</kbd></dt><dd>Fullscreen</dd>
             <dt><kbd>M</kbd></dt><dd>Sound on / off</dd>
           </dl>
           <p className="help-p">Click the stations on the track or the stops along the bottom to jump anywhere. Five stations have a hands-on &ldquo;Try it&rdquo; moment, and every stop stamps your passport. Keep an eye out for a letter drifting across the sky.</p>
-          <p className="help-p"><b>Presenting?</b> Open the remote on your laptop and put this window on the projector. The remote shows speaker notes, a timer and vote buttons, and it steers this screen.</p>
           <div className="help-actions">
-            <a className="btn hot" href="/presenter" target="_blank" rel="noopener">Open presenter remote ↗</a>
-            <a className="btn" href="/video">Scenes to film</a>
             <button className="btn" id="helpClose">Back to the train</button>
           </div>
+        </div>
+      </div>
+
+      <div className="overlay help praxis" id="praxis" hidden>
+        <div className="help-card praxis-card" role="dialog" aria-labelledby="praxisTitle">
+          <p className="praxis-kicker">Ethnic Studies Praxis Story Analysis</p>
+          <h2 id="praxisTitle">Our analysis of <i>The Namesake</i></h2>
+          {PRAXIS.map((p) => (
+            <section className="praxis-part" key={p.n}>
+              <h3><span className="praxis-n">{p.n}</span>{p.title}</h3>
+              <p className="praxis-q">{p.question}</p>
+              {p.answer.map((t) => <p key={t}>{t}</p>)}
+              {p.quote && <blockquote className="praxis-quote">{p.quote.text}<cite>{p.quote.cite}</cite></blockquote>}
+              <div className="praxis-see">
+                <span>See it on the line:</span>
+                {p.see.map(([i, label]) => <button key={label} className="btn ghost" data-praxis-go={i}>{label}</button>)}
+              </div>
+            </section>
+          ))}
+          <section className="praxis-part praxis-sources">
+            <h3><span className="praxis-n">✎</span>Sources</h3>
+            <ul>
+              <li>Jhumpa Lahiri, <i>The Namesake</i> (Houghton Mifflin, 2003).</li>
+              <li>Immigration and Nationality Act of 1965 (Hart-Celler Act).</li>
+              {Object.values(NEWS).map((n) => (
+                <li key={n.url}>{n.outlet}, &ldquo;{n.headline}&rdquo; ({n.date}). <a href={n.url} target="_blank" rel="noopener noreferrer">Link ↗</a></li>
+              ))}
+            </ul>
+          </section>
+          <div className="help-actions"><button className="btn" id="praxisClose">Back to the train</button></div>
         </div>
       </div>
 
@@ -160,7 +189,8 @@ export default function NamesakeLine() {
             <p id="finLine">The letter with his good name never arrived. His father&apos;s gift did. Gogol opens the book and starts to read &ldquo;The Overcoat.&rdquo;</p>
             <p className="credits">A project by <span className="nw">Shiven Swami</span> · <span className="nw">Yash Patil</span> · <span className="nw">Jonah Luo</span> · <span className="nw">Drew Dupart</span><br />Based on <i>The Namesake</i> by Jhumpa Lahiri</p>
             <div className="fin-actions">
-              <button className="btn hot" id="finQuiz">Take the ticket inspector&apos;s quiz</button>
+              <button className="btn hot" id="finPraxis">Read our analysis</button>
+              <button className="btn" id="finQuiz">Take the ticket inspector&apos;s quiz</button>
               <button className="btn ghost" id="finBack">Back to the timeline</button>
               <button className="btn ghost" id="finReplay">Ride again from 1961</button>
             </div>

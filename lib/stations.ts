@@ -69,7 +69,7 @@ export const STATIONS: Station[] = [
       'At his first rice ceremony, baby Gogol is offered dirt, a pen and money to predict his future.',
       'He refuses all three and cries.'
     ],
-    quote: { text: 'Being a foreigner, Ashima is beginning to realize, is a sort of lifelong pregnancy—a perpetual wait, a constant burden, a continuous feeling of out of sorts.', cite: 'Chapter 3' },
+    quote: { text: 'Being a foreigner, Ashima is beginning to realize, is a sort of lifelong pregnancy—a perpetual wait, a constant burden, a continuous feeling out of sorts.', cite: 'Chapter 3' },
     analysis: { tag: 'RESISTANCE', text: 'A community response: the Bengali families in Cambridge become each other\'s relatives and keep their traditions alive far from home.', world: 'Immigrant communities today still build cultural associations, festivals and language schools for the same reason.' } },
 
   { year: '1973', title: 'Two Names at School', place: 'Pemberton Road, Massachusetts', code: 'PEM', region: 'suburb', name: 'gogol',

@@ -965,3 +965,25 @@ a.btn { display: inline-flex; }
 /* simpler story tab: two short, larger sentences */
 .panel .story-simple p { font-size: 1.22rem; line-height: 1.55; margin: 0 0 .7em; }
 .panel .story-simple p:first-child { margin-top: .2em; }
+
+/* one reader's prediction */
+.opt.picked { border-color: var(--accent, #c8732a); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent, #c8732a) 55%, transparent); }
+.opt .n { font-size: .78rem; }
+
+/* Our analysis (Praxis Story framework) */
+.praxis { overflow-y: auto; }
+.praxis-card { max-width: 760px; margin: 40px auto; max-height: none; }
+.praxis-kicker { margin: 0 0 4px; font-family: var(--mono); font-size: var(--t-2xs); letter-spacing: .16em; text-transform: uppercase; color: var(--stamp, #b8382a); }
+.praxis-part { padding: 18px 0; border-top: 1px dashed rgba(29,27,38,.22); }
+.praxis-part h3 { display: flex; align-items: center; gap: 12px; margin: 0 0 4px; font-family: var(--display); font-weight: 400; font-size: 1.5rem; line-height: 1.1; }
+.praxis-n { display: inline-grid; place-items: center; width: 30px; height: 30px; flex: none; border-radius: 50%; background: #1d1b26; color: #f6efdb; font-family: var(--mono); font-size: .9rem; }
+.praxis-q { margin: 0 0 10px 42px; font-style: italic; color: var(--ink-soft); }
+.praxis-part > p:not(.praxis-q) { margin: 0 0 10px 42px; font-size: 1.05rem; line-height: 1.6; }
+.praxis-see { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-left: 42px; font-family: var(--mono); font-size: var(--t-2xs); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+.praxis-see .btn { padding: 4px 10px; font-size: .72rem; }
+@media (max-width: 600px) { .praxis-q, .praxis-part > p:not(.praxis-q), .praxis-see { margin-left: 0; } .praxis-card { margin: 16px auto; } }
+.praxis-quote { margin: 4px 0 12px 42px; padding: 10px 14px; border-left: 3px solid var(--stamp, #b8382a); background: rgba(29,27,38,.05); font-style: italic; font-size: 1.02rem; line-height: 1.55; }
+.praxis-quote cite { display: block; margin-top: 6px; font-style: normal; font-family: var(--mono); font-size: var(--t-2xs); letter-spacing: .06em; color: var(--ink-soft); }
+.praxis-sources ul { margin: 6px 0 0 42px; padding-left: 18px; font-size: .92rem; line-height: 1.5; }
+.praxis-sources li { margin-bottom: 4px; }
+@media (max-width: 600px) { .praxis-quote, .praxis-sources ul { margin-left: 0; } }

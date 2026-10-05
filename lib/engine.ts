@@ -656,7 +656,7 @@ export function startLine(root) {
     if (!music && snd.ctx && snd.ctx.state === 'running') { music = createMusic(snd.ctx, snd.ctx.destination); music.setEnabled(snd.on); }
     if (music && !disposed) music.setStation(clamp(Math.round(stationPos()), 0, STATIONS.length - 1), st.moving);
     // a full-screen layer (our filmed scene, a first-person room, Our Scenes, the finale) hides the world: don't draw it
-    const covered = (scenePop.classList.contains('on') && !scenePop.hidden) || !fpBox.hidden || !scenesOv.hidden || !$('#finale').hidden;
+    const covered = (scenePop.classList.contains('on') && !scenePop.hidden) || !fpBox.hidden || !scenesOv.hidden || !$('#finale').hidden || !$('#praxis').hidden;
     if (world && covered) { /* paused */ }
     else if (world) {
       world.render({ now, p: stationPos(), cur: st.cur, target: st.target, moving: st.moving, speed: st.speed, derail: st.derail, crashT: st.crashT,
@@ -758,10 +758,10 @@ export function startLine(root) {
   }
   function pollHTML(i, s) {
     if (!s.poll) return '';
-    const v = st.polls[i] || s.poll.options.map(() => 0), tot = v.reduce((a, b) => a + b, 0) || 1;
-    return `<div class="poll" id="poll"><div class="label">${s.poll.predict ? 'Predict · tap once per hand' : 'Class vote · tap once per hand'}</div><p class="q">${esc(s.poll.q)}</p>
-      ${s.poll.options.map((o, k) => `<button class="opt" data-vote="${k}"><i class="bar" style="width:${v[k] / tot * 100}%"></i><span>${esc(o)}</span><span class="n">${v[k]}</span></button>`).join('')}
-      ${st.revealed[i] ? `<div class="answer"><b>What happened:</b> ${esc(s.poll.actual)}</div>` : `<button class="btn ghost reveal" data-reveal>Reveal what Gogol did</button>`}
+    const v = st.polls[i] || [], pick = v.findIndex((n) => n > 0);
+    return `<div class="poll" id="poll"><div class="label">${s.poll.predict ? 'Your prediction' : 'What would you do?'}</div><p class="q">${esc(s.poll.q)}</p>
+      ${s.poll.options.map((o, k) => `<button class="opt${k === pick ? ' picked' : ''}" data-vote="${k}" aria-pressed="${k === pick}"><span>${esc(o)}</span><span class="n">${k === pick ? '✓ your pick' : ''}</span></button>`).join('')}
+      ${st.revealed[i] ? `<div class="answer"><b>What happened:</b> ${esc(s.poll.actual)}</div>` : `<button class="btn ghost reveal" data-reveal>Skip to what happened</button>`}
     </div>`;
   }
   function specialHTML(i, s) {
@@ -956,7 +956,7 @@ export function startLine(root) {
   
   function vote(k) {
     const i = st.cur, s = STATIONS[i]; if (!s.poll || st.moving || !(k >= 0 && k < s.poll.options.length)) return;
-    st.polls[i] = st.polls[i] || s.poll.options.map(() => 0); st.polls[i][k]++;
+    st.polls[i] = s.poll.options.map((_, j) => (j === k ? 1 : 0)); st.revealed[i] = true; // one reader's pick, then the answer
     snd.noiseBurst(2400, 6, .08, .04); if (st.tab !== 'story') st.tab = 'story'; renderCard(false);
   }
   function reveal() { if (!STATIONS[st.cur].poll || st.moving) return; st.revealed[st.cur] = true; snd.chime(); st.tab = 'story'; renderCard(false); }
@@ -1071,8 +1071,19 @@ export function startLine(root) {
   function toggleAnalysis() { st.analysis = !st.analysis; root.classList.toggle('show-analysis', st.analysis); $('#analysisBtn').setAttribute('aria-pressed', st.analysis);
     if (st.analysis) { st.tab = 'analysis'; if (!st.moving) renderCard(false); toast('4 I\'s mode: colored dots on the timeline show each kind of oppression.'); } }
   on($('#analysisBtn'), 'click', toggleAnalysis);
-  function togglePresent() { const on = root.classList.toggle('present'); $('#presentBtn').setAttribute('aria-pressed', on); publish(); }
-  on($('#presentBtn'), 'click', togglePresent);
+  function togglePresent() { root.classList.toggle('present'); publish(); }
+  // "Our analysis": the five parts of the Praxis Story framework, each linking to its stations
+  const praxis = $('#praxis');
+  const openPraxis = () => { help.hidden = true; passport.hidden = true; praxis.hidden = false; $('#praxisClose').focus({ preventScroll: true }); praxis.scrollTop = 0; };
+  const closePraxis = () => { praxis.hidden = true; };
+  on($('#praxisBtn'), 'click', openPraxis);
+  on($('#praxisClose'), 'click', closePraxis);
+  on($('#finPraxis'), 'click', () => { closeFinale(); openPraxis(); });
+  on(praxis, 'click', (e) => {
+    const b = e.target.closest('[data-praxis-go]');
+    if (b) { closePraxis(); const i = +b.dataset.praxisGo; if (!st.started) { board(); setTimeout(() => travelTo(i), 900); } else travelTo(i); }
+    else if (e.target === praxis) closePraxis();
+  });
   const help = $('#help');
   on($('#helpBtn'), 'click', () => { help.hidden = false; $('#helpClose').focus(); });
   on($('#helpClose'), 'click', () => { help.hidden = true; });
@@ -1104,6 +1115,7 @@ export function startLine(root) {
     if (!scenePop.hidden) { if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowRight') { e.preventDefault(); closeScenePop(); } return; }
     if (!scenesOv.hidden) { if (e.key === 'Escape') closeScenes(); return; } // the scenes section handles its own keys
     if (!help.hidden) { if (e.key === 'Escape' || e.key === '?') help.hidden = true; return; }
+    if (!praxis.hidden) { if (e.key === 'Escape') closePraxis(); return; }
     if (!passport.hidden) { if (e.key === 'Escape' || e.key === 'v' || e.key === 'V') passport.hidden = true; return; }
     if (!quiz.hidden) {
       if ('1234'.includes(e.key) && e.key !== '') answer(+e.key - 1);
@@ -1117,7 +1129,7 @@ export function startLine(root) {
     else if (k === 'ArrowLeft' || k === 'PageUp') { e.preventDefault(); travelTo((st.moving ? st.target : st.cur) - 1); }
     else if (k === 'n' || k === 'N') toggleLens();
     else if (k === 'm' || k === 'M') setSound(!snd.on);
-    else if (k === 'p' || k === 'P') togglePresent();
+    else if (k === 'y' || k === 'Y') openPraxis();
     else if (k === 'f' || k === 'F') fullscreen();
     else if (k === 'a' || k === 'A') toggleAnalysis();
     else if (k === 'v' || k === 'V') openPassport();
