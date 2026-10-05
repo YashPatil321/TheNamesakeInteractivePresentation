@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, type CSSProperties } from 'react';
 import { startLine } from '@/lib/engine';
-import { PRAXIS } from '@/lib/praxis';
+import { PRAXIS, PART_NAMES, PART_COLORS } from '@/lib/praxis';
 import { NEWS } from '@/lib/news';
 import { STATIONS } from '@/lib/stations';
 import Scenes from '@/components/Scenes';
@@ -117,7 +117,7 @@ export default function NamesakeLine() {
           <h2 id="praxisTitle">Our analysis of <i>The Namesake</i></h2>
           {PRAXIS.map((p) => (
             <section className="praxis-part" key={p.n}>
-              <h3><span className="praxis-n">{p.n}</span>{p.title}</h3>
+              <h3><span className="praxis-n" style={{ background: PART_COLORS[p.n] }}>{p.n}</span>{p.title}</h3>
               <p className="praxis-q">{p.question}</p>
               {p.answer.map((t) => <p key={t}>{t}</p>)}
               {p.quote && <blockquote className="praxis-quote">{p.quote.text}<cite>{p.quote.cite}</cite></blockquote>}
@@ -209,7 +209,11 @@ export default function NamesakeLine() {
             <li><b>Make choices.</b> Predict what happens, choose what you would do, and try the hands-on moments.</li>
             <li><b>Watch our scenes.</b> Seven stops play a scene our group filmed. They open on their own, so turn your sound on.</li>
             <li><b>Step inside.</b> At four stops you can look around in first person. Click <b>Step inside</b> or press <kbd>E</kbd>.</li>
-            <li><b>Read our analysis.</b> <b>Our analysis</b> (top right) answers all five parts of the Ethnic Studies Praxis Story framework.</li>
+            <li><b>Follow the framework.</b> Every stop shows which of the five parts of the Ethnic Studies Praxis Story framework it covers, in a colored box at the top of its ticket. The numbers under each year on the timeline match:
+              <span className="howto-parts">
+                {PART_NAMES.slice(1).map((name, k) => <span key={name}><i style={{ background: PART_COLORS[k + 1] }}>{k + 1}</i>{name}</span>)}
+              </span>
+              <b>Our analysis</b> (top right) explains all five in full.</li>
           </ol>
           <p className="howto-foot">Press <kbd>?</kbd> any time for controls.</p>
           <div className="help-actions"><button className="btn hot" id="howtoGo">Got it, let&apos;s go →</button></div>

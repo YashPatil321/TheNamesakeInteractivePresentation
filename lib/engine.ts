@@ -1,5 +1,6 @@
 // @ts-nocheck -- the canvas + DOM engine, ported from the original single-file page.
 // Story content and types live in lib/stations.ts; this file animates and wires the UI.
+import { FRAME, PART_NAMES, PART_COLORS } from './praxis';
 import { STATIONS, NAME_COLORS, TAG_COLORS, TAG_NAMES, QUIZ, START, NIKHIL_AT, FP_INFO } from './stations';
 import { createWorld } from './world3d';
 import { filmBadge, animBadge, railMarks, GROUP_CREDIT } from './media';
@@ -878,6 +879,13 @@ export function startLine(root) {
     top.addEventListener('pointercancel', () => { down = false; });
   }
   
+  // the Praxis Story framework, made obvious: which part(s) this stop shows, and why, in one line each
+  function frameHTML(i) {
+    const notes = FRAME[i] || []; if (!notes.length) return '';
+    return `<div class="frame-box"><div class="frame-head">Ethnic Studies framework at this stop</div>${notes.map((n) =>
+      `<div class="frame-row" style="--pc:${PART_COLORS[n.part]}"><span class="frame-num">${n.part}</span><div><b>${esc(PART_NAMES[n.part])}${n.label ? ' · ' + esc(n.label) : ''}</b><p>${esc(n.why)}</p></div></div>`).join('')}
+      <button class="frame-more" data-act="praxis">See our full analysis →</button></div>`;
+  }
   function renderCard(fresh) {
     const i = st.cur, s = STATIONS[i];
     const hasVideo = !!s.video;
@@ -888,12 +896,12 @@ export function startLine(root) {
     let panel = '';
     if (st.tab === 'story') {
       // kept short on purpose: the story in two plain sentences, then one thing to do
-      panel = `<div class="story-simple">${s.story.map((p) => `<p>${esc(p)}</p>`).join('')}</div>` + choicesMod.html(i, cardApi()) +
+      panel = frameHTML(i) + `<div class="story-simple">${s.story.map((p) => `<p>${esc(p)}</p>`).join('')}</div>` + choicesMod.html(i, cardApi()) +
         tryHTML(i, s) + pollHTML(i, s) + fpHTML(i, s) + specialHTML(i, s) + voiceHTML(s);
     } else if (st.tab === 'now') {
-      panel = nowHtml;
+      panel = `<div class="frame-tabhead" style="--pc:${PART_COLORS[5]}"><span class="frame-num">5</span>Mirror to Society: the book next to today's news</div>` + nowHtml;
     } else if (st.tab === 'analysis') {
-      panel = `<div class="analysis"><div class="tagrow"><span class="tag ${a.tag}">${TAG_NAMES[a.tag]}</span></div>
+      panel = frameHTML(i) + `<div class="analysis"><div class="tagrow"><span class="tag ${a.tag}">${TAG_NAMES[a.tag]}</span></div>
         <h4>In the book</h4><p>${esc(a.text)}</p><h4>Real world</h4><p>${esc(a.world)}</p></div>` + specialHTML(i, s);
     } else {
       panel = `<div class="mk-head">${filmBadge()}<span class="mk-credit">${esc(GROUP_CREDIT)}</span></div>
@@ -984,6 +992,7 @@ export function startLine(root) {
     const act = t.dataset.act;
     if (act === 'rewind') travelTo(0, { rewind: true });
     if (act === 'replay') replayCrash();
+    if (act === 'praxis') openPraxis();
     if (act === 'finale') openFinale();
     if (act === 'fp') openFP(STATIONS[st.cur].fp);
   });
@@ -993,7 +1002,7 @@ export function startLine(root) {
      ========================================================= */
   const rail = $('#rail');
   rail.innerHTML = STATIONS.map((s, i) => `<button class="stop" data-i="${i}" style="--c:${NAME_COLORS[s.name]}" title="${esc(s.title)}">
-    ${railMarks(i)}<i class="tagdot" style="background:${TAG_COLORS[s.analysis.tag]}"></i>${esc(s.year.replace('Late 1990s', "late '90s"))}</button>`).join('');
+    ${railMarks(i)}<i class="tagdot" style="background:${TAG_COLORS[s.analysis.tag]}"></i>${esc(s.year.replace('Late 1990s', "late '90s"))}<span class="rail-parts">${[...new Set((FRAME[i] || []).map((n) => n.part))].map((p) => `<i style="background:${PART_COLORS[p]}" title="${esc(PART_NAMES[p])}">${p}</i>`).join('')}</span></button>`).join('');
   on(rail, 'click', (e) => { const b = e.target.closest('.stop'); if (b) travelTo(+b.dataset.i); });
   function markRail(target) {
     rail.querySelectorAll('.stop').forEach((b, i) => { b.classList.toggle('current', i === target); b.classList.toggle('visited', st.visited.has(i)); });

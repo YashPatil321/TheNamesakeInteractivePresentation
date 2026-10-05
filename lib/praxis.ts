@@ -73,3 +73,28 @@ export const PRAXIS: PraxisPart[] = [
     see: [[0, '1961 · The 1965 immigration law'], [2, 'Then & Now · Names on forms'], [10, 'Then & Now · Forever foreigner']],
   },
 ];
+
+/** The five parts, short names and colors used everywhere on the line (cards, timeline, analysis page). */
+export const PART_NAMES = ['', 'The System Exposed', "The 4 I's in Action", 'Breaking Point', 'Resistance & Revolution', 'Mirror to Society'];
+export const PART_COLORS = ['', '#b8382a', '#2f7fb8', '#1d1b26', '#2e9a5e', '#7a5cc4'];
+
+export interface FrameNote { part: number; label?: string; why: string }
+
+/** Which framework part(s) each station shows, and why, in one line. Keyed by station index. */
+export const FRAME: Record<number, FrameNote[]> = {
+  0: [{ part: 5, why: 'Four years after this crash, the 1965 immigration law opens the U.S. to Indian families like Ashoke\'s. Laws decide who gets to belong.' }],
+  1: [{ part: 1, why: 'Ashima is sent to a country where she knows no one and is expected to adjust alone. The pressure to fit in starts here.' }],
+  2: [{ part: 1, why: 'A hospital form, not his family, decides his name. This is the root problem: American rules come before Bengali tradition.' }, { part: 2, label: 'Institutional', why: 'The rule that a baby can\'t leave without a name on the form.' }],
+  3: [{ part: 4, why: 'Far from home, the Bengali community becomes family and keeps its traditions alive.' }],
+  4: [{ part: 2, label: 'Institutional', why: 'The principal, not his parents, decides what he is called at school.' }, { part: 4, why: 'Five-year-old Gogol refuses to be renamed and keeps his own name.' }],
+  5: [{ part: 2, label: 'Interpersonal', why: 'Someone mocks the family\'s name on their mailbox.' }],
+  6: [{ part: 2, label: 'Internalized', why: 'Gogol shelves his father\'s gift. He already feels his name is something to be embarrassed about.' }],
+  7: [{ part: 2, label: 'Interpersonal', why: 'The whole class turns to stare when the teacher talks about Nikolai Gogol.' }],
+  8: [{ part: 2, label: 'Internalized', why: 'He legally changes his name to be accepted. The pressure to assimilate becomes his own choice.' }],
+  9: [{ part: 4, why: 'Learning the true story of his name starts to turn his shame into understanding.' }],
+  10: [{ part: 2, label: 'Ideological', why: 'The "perpetual foreigner" belief: a guest assumes he is from India though he grew up in Massachusetts.' }, { part: 1, why: 'Even the America he wanted still sees him as an outsider.' }],
+  11: [{ part: 3, why: 'His father dies suddenly. Everything he pushed away can no longer be fixed. This is where the tension peaks.' }, { part: 4, why: 'He shaves his head in Bengali mourning, the first tradition he chooses himself.' }],
+  12: [{ part: 2, label: 'Internalized', why: 'Both of them grew up trying to escape their parents\' expectations, and that is what draws them together.' }],
+  13: [{ part: 1, why: 'Neither assimilating nor the "right" Bengali marriage fixes him. Neither path the system offered works.' }],
+  14: [{ part: 4, why: 'He opens his father\'s book and stops choosing between his names. Ashima chooses a life in two countries.' }],
+};

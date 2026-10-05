@@ -107,7 +107,7 @@ kbd { display: inline-block; min-width: 1.5em; box-sizing: border-box; text-alig
 #analysisBtn { --ico: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='7' cy='7' r='3.3'/><circle cx='17' cy='7' r='3.3'/><circle cx='7' cy='17' r='3.3'/><circle cx='17' cy='17' r='3.3'/></svg>"); }
 #soundBtn { --ico: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><path d='M3.5 9.2h3.8L12.5 5v14l-5.2-4.2H3.5z' fill='black'/><path d='M16 8.7a4.6 4.6 0 0 1 0 6.6M19 5.8a8.6 8.6 0 0 1 0 12.4'/></svg>"); }
 #soundBtn[aria-pressed="false"] { --ico: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><path d='M3.5 9.2h3.8L12.5 5v14l-5.2-4.2H3.5z' fill='black'/><path d='M16.5 9.5l5 5M21.5 9.5l-5 5'/></svg>"); }
-#presentBtn { --ico: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='4' width='18' height='12' rx='2'/><path d='M12 16v4M8 20h8'/></svg>"); }
+#praxisBtn { --ico: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><path d='M5 3h10l4 4v14H5z'/><path d='M9 10h6M9 14h6M9 18h4'/></svg>"); }
 #scenesBtn { --ico: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linejoin='round'><rect x='3' y='5' width='18' height='14' rx='3'/><path d='M10 9.3v5.4l4.6-2.7z' fill='black'/></svg>"); }
 #passBtn { --ico: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'><rect x='5' y='3' width='14' height='18' rx='2.5'/><circle cx='12' cy='10.5' r='3.4'/><path d='M9 16.5h6'/></svg>"); }
 
@@ -995,3 +995,19 @@ a.btn { display: inline-flex; }
 .howto-steps { margin: 0 0 14px; padding-left: 22px; display: grid; gap: 10px; font-size: 1rem; line-height: 1.5; }
 .howto-steps li::marker { font-family: var(--mono); font-weight: 700; color: var(--stamp, #b8382a); }
 .howto-foot { margin: 0 0 14px; font-size: .9rem; color: var(--ink-soft); }
+
+/* Praxis framework, made obvious on every ticket */
+.frame-box { margin: 4px 0 16px; padding: 12px 14px; border-radius: 12px; background: #fffaf0; border: 2px solid #1d1b26; box-shadow: 3px 3px 0 #1d1b26; }
+.frame-head { font-family: var(--mono); font-size: var(--t-2xs); letter-spacing: .14em; text-transform: uppercase; color: #6a6478; margin-bottom: 8px; }
+.frame-row { display: grid; grid-template-columns: 30px 1fr; gap: 10px; align-items: start; padding: 6px 0; }
+.frame-row + .frame-row { border-top: 1px dashed rgba(29,27,38,.2); }
+.frame-row b { display: block; color: var(--pc); font-size: 1.02rem; line-height: 1.25; }
+.frame-row p { margin: 2px 0 0; font-size: .95rem; line-height: 1.45; color: #1d1b26; }
+.frame-num { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--pc); color: #fff; font-family: var(--mono); font-weight: 700; font-size: .9rem; }
+.frame-more { margin-top: 8px; background: none; border: 0; padding: 0; font-family: var(--mono); font-size: var(--t-2xs); letter-spacing: .1em; text-transform: uppercase; color: #1d1b26; text-decoration: underline; cursor: pointer; }
+.frame-tabhead { display: flex; align-items: center; gap: 10px; margin: 2px 0 12px; font-family: var(--display); font-size: 1.15rem; color: var(--pc); }
+.rail-parts { display: flex; justify-content: center; gap: 2px; margin-top: 3px; }
+.rail-parts i { display: inline-grid; place-items: center; width: 14px; height: 14px; border-radius: 50%; color: #fff; font-style: normal; font-family: var(--mono); font-size: 9px; font-weight: 700; line-height: 1; box-shadow: 0 0 0 1px rgba(255,255,255,.5); }
+.howto-parts { display: flex; flex-wrap: wrap; gap: 6px 12px; margin: 6px 0; font-size: .9rem; }
+.howto-parts span { display: inline-flex; align-items: center; gap: 5px; }
+.howto-parts i { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; color: #fff; font-style: normal; font-family: var(--mono); font-size: 11px; font-weight: 700; }
