@@ -198,6 +198,24 @@ export default function NamesakeLine() {
         </div>
       </div>
 
+      <div className="overlay help howto" id="howto">
+        <div className="help-card howto-card" role="dialog" aria-labelledby="howtoTitle">
+          <p className="praxis-kicker">Before you board</p>
+          <h2 id="howtoTitle">How this works</h2>
+          <p className="howto-lead">This is an interactive story of Jhumpa Lahiri&apos;s <i>The Namesake</i>. A train carries you through Gogol&apos;s life, from 1961 to 2000, in 15 stops.</p>
+          <ol className="howto-steps">
+            <li><b>Ride the train.</b> Click <b>Next stop</b> or press <kbd>→</kbd>. You can also click any year on the timeline at the bottom.</li>
+            <li><b>Read each ticket.</b> Every stop has a <b>Story</b>, the <b>4 I&apos;s</b> (the kind of oppression it shows) and <b>Then &amp; Now</b> (a real news story from today).</li>
+            <li><b>Make choices.</b> Predict what happens, choose what you would do, and try the hands-on moments.</li>
+            <li><b>Watch our scenes.</b> Seven stops play a scene our group filmed. They open on their own, so turn your sound on.</li>
+            <li><b>Step inside.</b> At four stops you can look around in first person. Click <b>Step inside</b> or press <kbd>E</kbd>.</li>
+            <li><b>Read our analysis.</b> <b>Our analysis</b> (top right) answers all five parts of the Ethnic Studies Praxis Story framework.</li>
+          </ol>
+          <p className="howto-foot">Press <kbd>?</kbd> any time for controls.</p>
+          <div className="help-actions"><button className="btn hot" id="howtoGo">Got it, let&apos;s go →</button></div>
+        </div>
+      </div>
+
       <div className="overlay intro" id="intro">
         {/* the live 3D world (an establishing shot of the waiting train) shows through; scrims keep the type legible */}
         <div className="intro-scrim" aria-hidden="true" />

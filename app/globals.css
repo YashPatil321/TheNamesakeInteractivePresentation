@@ -987,3 +987,11 @@ a.btn { display: inline-flex; }
 .praxis-sources ul { margin: 6px 0 0 42px; padding-left: 18px; font-size: .92rem; line-height: 1.5; }
 .praxis-sources li { margin-bottom: 4px; }
 @media (max-width: 600px) { .praxis-quote, .praxis-sources ul { margin-left: 0; } }
+
+/* "How this works": the first thing on screen */
+.howto { z-index: 70; }
+.howto-card { max-width: 620px; }
+.howto-lead { margin: 0 0 14px; font-size: 1.08rem; line-height: 1.55; }
+.howto-steps { margin: 0 0 14px; padding-left: 22px; display: grid; gap: 10px; font-size: 1rem; line-height: 1.5; }
+.howto-steps li::marker { font-family: var(--mono); font-weight: 700; color: var(--stamp, #b8382a); }
+.howto-foot { margin: 0 0 14px; font-size: .9rem; color: var(--ink-soft); }

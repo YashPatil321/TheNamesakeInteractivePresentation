@@ -1108,7 +1108,13 @@ export function startLine(root) {
   on(view, 'touchend', (e) => { if (tsx == null) return; const dx = e.changedTouches[0].clientX - tsx; if (Math.abs(dx) > 50) travelTo(st.target + (dx < 0 ? 1 : -1)); tsx = null; });
   
   /* keyboard */
+  // the "How this works" screen shows first; boarding waits until it's closed
+  const howto = $('#howto');
+  const closeHowto = () => { if (howto.hidden) return; howto.hidden = true; const n = $('#visitorName'); if (n && !coarse()) n.focus({ preventScroll: true }); };
+  on($('#howtoGo'), 'click', closeHowto);
+  function coarse() { try { return matchMedia('(pointer: coarse)').matches; } catch (_) { return false; } }
   on(document, 'keydown', (e) => {
+    if (!howto.hidden) { if (e.key === 'Enter' || e.key === 'Escape' || e.key === ' ' || e.key === 'ArrowRight') { e.preventDefault(); closeHowto(); } return; }
     if (e.target.tagName === 'INPUT') { if (e.key === 'Enter') { if (e.target.id === 'certName') doTry('sign'); else board(); } return; }
     if (!st.started) { if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); board(); } return; }
     if (fpCtl || !fpBox.hidden) return; // the first-person view handles its own keys
@@ -1162,6 +1168,7 @@ export function startLine(root) {
   const nameIn = $('#visitorName'); nameIn.value = store.get('visitor', '');
   
   function board() {
+    howto.hidden = true;
     if (st.started) return; st.started = true;
     st.visitor = nameIn.value.trim(); store.set('visitor', st.visitor);
     if (snd.on) { snd.init(); snd.ctx && snd.ctx.resume(); }
