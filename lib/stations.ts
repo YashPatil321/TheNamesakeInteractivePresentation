@@ -225,7 +225,7 @@ export const QUIZ: QuizQuestion[] = [
   { q: 'Finish the inscription: "The man who gave you his name, from…"', options: ['"…your loving father."', '"…the man who gave you your name."', '"…one Gogol to another."', '"…Calcutta, with love."'], answer: 1, why: 'Gogol reads it for the first time on Christmas Eve, 2000, and begins to read.' },
 ];
 
-export const START = 2; // the book opens in 1968
+export const START = 0; // the ride opens on the 1961 night train (the book opens in 1968, then flashes back)
 export const NIKHIL_AT = 8; // the name switch unlocks here
 
 /** Labels for the first-person views (lib/firstperson.ts builds the rooms). */
