@@ -41,7 +41,7 @@ export const STATIONS: Station[] = [
       'The train crashes. Rescuers find him because they see a page of the book in his hand.'
     ],
     detail: 'He spends a year in bed recovering. He decides he will go abroad, just as Ghosh said.',
-    analysis: { tag: 'MIRROR', text: 'Four years after the crash, the Immigration and Nationality Act of 1965 ends the U.S. quotas that had kept most Asian immigrants out. It opens the door for educated professionals like Ashoke.', world: 'Historical connection: the Hart-Celler Act (1965). Look up History.com or the Migration Policy Institute for a citation.' } },
+    analysis: { tag: 'MIRROR', text: 'Four years after the crash, the Immigration and Nationality Act of 1965 ends the U.S. quotas that had kept most Asian immigrants out. It opens the door for educated professionals like Ashoke.', world: 'The Hart-Celler Act of 1965 is why many Indian families, like the Gangulis, could come to the U.S.' } },
 
   { year: '1967', title: 'The Shoes', place: 'Calcutta, India', code: 'CAL', region: 'india', name: 'none', flashback: true, try: 'shoes',
     sky: ['#2a1640', '#c86b4a'],
@@ -91,7 +91,7 @@ export const STATIONS: Station[] = [
     ],
     voice: { gogol: 'Our street looks like every other street. Why doesn\'t our name?', nikhil: 'Someday I\'ll have a name that fits the mailbox.' },
     poll: { predict: true, q: 'Next stop, 1982: for his 14th birthday his father gives him The Short Stories of Nikolai Gogol. Will Gogol read the book?', options: ['Yes, right away', 'A few pages, then quits', 'No, it goes on a shelf'], actual: 'He thanks his father and puts it on a shelf, unread. He won\'t open it until Christmas Eve, 2000.' },
-    analysis: { tag: 'INTERPERSONAL', text: 'Neighbors target the family through their name, and a child learns that his difference is visible and unwelcome.', world: 'In 1987 a group calling itself the "Dotbusters" terrorized Indian Americans in Jersey City. Research it for a citation.' } },
+    analysis: { tag: 'INTERPERSONAL', text: 'Neighbors target the family through their name, and a child learns that his difference is visible and unwelcome.', world: 'In 1987 a group calling itself the "Dotbusters" terrorized Indian Americans in Jersey City.' } },
 
   { year: '1982', title: 'The Gift', place: 'Pemberton Road', code: 'PEM', region: 'suburb', name: 'gogol', try: 'gift', fp: 'bedroom',
     sky: ['#2a1d45', '#e08a6a'],
