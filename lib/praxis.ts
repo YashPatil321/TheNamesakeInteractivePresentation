@@ -52,12 +52,14 @@ export const PRAXIS: PraxisPart[] = [
     title: 'Resistance & Revolution',
     question: 'How do characters fight back or heal?',
     answer: [
+      'Fighting back starts early. On his first day of kindergarten, Gogol refuses to be renamed "Nikhil" and keeps his own name.',
       "The Bengali families in Cambridge become each other's relatives and keep their traditions alive far from home, like Gogol's rice ceremony.",
       'After his father dies, Gogol shaves his head in Bengali mourning, the first tradition he chooses for himself.',
       'In the end he stops choosing between his names. He opens the book from his father and starts to read, and Ashima chooses a life split between India and America.',
+      'Resistance is still working today: through a bill first introduced in 2021, New York made Diwali a public school holiday in New York City (see Then & Now at the rice ceremony stop).',
     ],
     quote: { text: 'The man who gave you his name, from the man who gave you your name.', cite: "Ashoke's inscription in the book, read at the end" },
-    see: [[3, '1968 · The rice ceremony'], [11, '1990s · Mourning'], [14, '2000 · The book']],
+    see: [[4, '1973 · He keeps his name'], [3, '1968 · The rice ceremony'], [11, '1990s · Mourning'], [14, '2000 · The book']],
   },
   {
     n: 5,
